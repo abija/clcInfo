@@ -1,0 +1,11 @@
+- show/hide all elements according to target/combat and all the other bullshit
+- easier positioning
+- better display customization for icons
+- more lbf support
+- copy some lbf skin as default
+
+
+-- watch for talent change events
+
+
+- bprint system is retarded, fix !!!

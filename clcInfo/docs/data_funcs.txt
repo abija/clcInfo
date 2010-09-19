@@ -1,0 +1,69 @@
+The text in the exec edit box must return something. So use return func(args).
+
+
+Aura(filter, unitTarget, spell, unitCaster)
+--------------------------------------------------------------------------------
+args:
+	filter
+		a list of filters to use separated by the pipe '|' character; e.g. "RAID|PLAYER" will query group buffs cast by the player (string) 
+			* HARMFUL 				- show debuffs only
+	    * HELPFUL 				- show buffs only
+			* CANCELABLE 			- show auras that can be cancelled
+	    * NOT_CANCELABLE 	- show auras that cannot be cancelled
+	    * PLAYER 					- show auras the player has cast
+	    * RAID 						- when used with a HELPFUL filter it will show auras the player can cast on party/raid members (as opposed to self buffs). If used with a HARMFUL filter it will return debuffs the player can cure
+	unitTarget
+		unit on witch to check the auras
+	spell
+		name or id of the aura
+	unitCaster
+		if specified, it will check caster of the buff against this argument
+--------------------------------------------------------------------------------
+
+
+Spell(spell, checkRange, showWhen)
+--------------------------------------------------------------------------------
+args:
+	spell
+		name or id of the spell to track
+	checkRange
+		* nil or false 		- do nothing
+		* true						- display range of spell specified in spellName
+		* string					- display range of spell specified in string
+	showWhen
+		*	nil or false		- do nothing
+		*	"ready"					- display spell only when ready
+		* "not ready"			- display spell only when not ready
+--------------------------------------------------------------------------------
+
+
+Item(item, equipped, showWhen)
+--------------------------------------------------------------------------------
+args:
+	item
+		name or id of the item
+	equipped
+		if true, the item must be equipped or it will be ignored
+	showWhen
+		*	nil or false		- do nothing
+		*	"ready"					- display spell only when ready
+		* "not ready"			- display spell only when not ready
+--------------------------------------------------------------------------------
+
+
+ICD(spell, icd, alpha1, alpha2, alpha3)
+--------------------------------------------------------------------------------
+looks only for self buffs atm, if needed can be expanded
+	states
+		1 - ready to proc
+		2 - proc active
+		3 - proc on cooldown
+--------------------------------------------------------------------------------
+args:
+	spell
+		name or id of the spell to track
+	icd
+		duration of the internal cooldown
+	alpha1, alpha2, alpha3,
+		alpha values of the 3 states
+--------------------------------------------------------------------------------

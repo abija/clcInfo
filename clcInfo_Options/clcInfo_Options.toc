@@ -1,0 +1,13 @@
+## Interface: 30300
+## Title: clcInfo_Options
+## Notes: Configuration Window for clcInfo
+## Author: Calcute
+## Dependencies: clcInfo
+## LoadOnDemand: 1
+
+core.lua
+display\templates.lua
+display\activeTemplate.lua
+display\grids.lua
+display\icons.lua
+

@@ -1,0 +1,17 @@
+## Interface: 30300
+## Title: clcInfo
+## Notes: clcInfo Notes
+## Author: clc
+## SavedVariables: clcInfoDB
+## SavedVariablesPerCharacter: clcInfoCharDB
+## OptionalDeps:  Ace3, LibSharedMedia-3.0
+
+default.lua
+core.lua
+
+display\templates.lua
+display\grids.lua
+display\icons.lua
+
+data\global.lua
+
