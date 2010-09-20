@@ -126,18 +126,16 @@ function prototype:Init()
 	
 	-- lock and edit textures on a separate frame
 	self.toolbox = CreateFrame("Frame", nil, self)
+	self.toolbox:Hide()
 	self.toolbox:SetFrameLevel(self.elements:GetFrameLevel() + 2)
+	
+	self.label = self.toolbox:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+	self.label:SetPoint("BOTTOMLEFT", self.elements.texMain, "TOPLEFT", -2, 2)
 	
 	-- lock
 	self.lockTex = self.toolbox:CreateTexture(nil, "BACKGROUND")
 	self.lockTex:SetAllPoints(self)
 	self.lockTex:SetTexture("Interface\\Icons\\ABILITY_SEAL")
-	self.lockTex:Hide()
-	-- edit
-	self.editTex = self.toolbox:CreateTexture(nil, "OVERLAY")
-	self.editTex:SetAllPoints(self)
-	self.editTex:SetTexture("Interface\\Icons\\trade_engineering")
-	self.editTex:Hide()
 	
 	
 	self:FakeHide()
@@ -178,7 +176,7 @@ Unlock()
 --]]
 function prototype:Unlock()
   self:EnableMouse(true)
-  self.lockTex:Show()
+  self.toolbox:Show()
 end
 
 --[[
@@ -187,7 +185,7 @@ Lock()
 --]]
 function prototype:Lock()
   self:EnableMouse(false)
-  self.lockTex:Hide()
+  self.toolbox:Hide()
 end
 
 
@@ -380,7 +378,7 @@ function mod:New(index)
 		icon:Show()
 	else
 		-- cache miss
-		icon = CreateFrame("Frame")
+		icon = CreateFrame("Frame", nil, clcInfo.mf)	-- parented by the mother frame
 		setmetatable(icon, { __index = prototype })
 		icon.index = index
 		icon.db = db[index]
@@ -388,9 +386,14 @@ function mod:New(index)
 		icon:Init()
 	end
 	
+	-- change the text of the label here since it's done only now
+	icon.label:SetText("Icon" .. icon.index)
+	
 	icon:UpdateLayout()
 	icon:UpdateExec()
-  --icon:Unlock()
+	if self.unlock then
+  	icon:Unlock()
+  end
 end
 
 -- read data from config and create the icons
@@ -450,12 +453,14 @@ function mod:LockAll()
 	for i = 1, getn(self.active) do
 		self.active[i]:Lock()
 	end
+	self.unlock = false
 end
 
 function mod:UnlockAll()
 	for i = 1, getn(self.active) do
 		self.active[i]:Unlock()
 	end
+	self.unlock = true
 end
 
 function mod:UpdateLayoutAll()

@@ -30,6 +30,27 @@ function mod:FindTemplate()
 	return false
 end
 
+-- add a template
+function mod:AddTemplate()
+	table.insert(clcInfo.cdb.templates, {
+		spec = { tree = 1, talent = 0, rank = 1 },
+		grids = {},
+		icons = {},
+		options = {
+			gridSize = 1,
+			showWhen = "always",
+		},
+		iconOptions = {
+			skinType = "Default",
+			bfSkin = "Blizzard",
+			bfGloss = 0,
+		},
+	})
+	if clcInfo_Options then
+		clcInfo_Options:UpdateTemplateList()
+	end
+end
+
 function mod:LockElements()
 	clcInfo.display.grids:LockAll()
 	clcInfo.display.icons:LockAll()

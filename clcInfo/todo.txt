@@ -1,11 +1,11 @@
 - show/hide all elements according to target/combat and all the other bullshit
-- easier positioning
 - better display customization for icons
 - more lbf support
-- copy some lbf skin as default
+-- better default skin?
 
+-- skin settings for elements inside a group?
 
--- watch for talent change events
+!!! remove the extra textures and just put a black one for icons? (last awake decision: no)
 
 
 - bprint system is retarded, fix !!!

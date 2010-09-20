@@ -58,6 +58,9 @@ function prototype:Init()
     clcInfo:UpdateOptions()
 	end)
 	
+	self.label = self:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+	self.label:SetPoint("BOTTOMLEFT", self, "TOPLEFT", -2, 2)
+	
 	self:Hide()
 	
 	self:Update()
@@ -127,7 +130,7 @@ function mod:New(index)
 		self.active[index] = grid
 	else
 		-- cache miss
-		grid = CreateFrame("Frame")
+		grid = CreateFrame("Frame", nil, clcInfo.mf)
 		setmetatable(grid, { __index = prototype })
 		grid.index = index
 		grid.db = db[index]
@@ -135,7 +138,13 @@ function mod:New(index)
 		grid:Init()
 	end
 	
+	-- change the text of the label here since it's done only now
+	grid.label:SetText("Grid" .. grid.index)
+	
 	grid:Update()
+	if self.unlock then
+		grid:Unlock()
+	end
 end
 
 -- read data from config and create the grids
@@ -192,12 +201,14 @@ function mod:LockAll()
 	for i = 1, getn(self.active) do
 		self.active[i]:Lock()
 	end
+	self.unlock = false
 end
 
 function mod:UnlockAll()
 	for i = 1, getn(self.active) do
 		self.active[i]:Unlock()
 	end
+	self.unlock = true
 end
 
 function mod:UpdateAll()

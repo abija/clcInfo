@@ -27,8 +27,6 @@ local function SpecToString(i)
 	return treeName .. " > " .. talentName .. ": " .. spec.rank
 end
 
-local UpdateTemplateList
-
 local selectedForDelete = 0
 StaticPopupDialogs["CLCINFO_CONFIRM_DELETE_TEMPLATE"] = {
 	text = "Are you sure you want to delete this template?",
@@ -38,7 +36,7 @@ StaticPopupDialogs["CLCINFO_CONFIRM_DELETE_TEMPLATE"] = {
 		local db = clcInfo.cdb.templates
 		if db[selectedForDelete] then 				
 			table.remove(db, selectedForDelete)
-			UpdateTemplateList()
+			mod:UpdateTemplateList()
 		end
 	end,
 	OnCancel = function (self) end,
@@ -59,7 +57,7 @@ local function SpecSet(info, val)
 	clcInfo:TalentCheck()
 end
 
-UpdateTemplateList = function()
+function mod:UpdateTemplateList()
 	local db = clcInfo.cdb.templates
 	local optionsTemplates = options.args.templates
 	for i = 1, #(db) do
@@ -157,18 +155,12 @@ function mod:LoadTemplates()
 			executeAdd = {
 				type = "execute",
 				name = "Add template",
-				func = function(info)
-					table.insert(clcInfo.cdb.templates, {
-						spec = { tree = 1, talent = 0, rank = 1},
-						icons = {},
-					})
-					UpdateTemplateList()
-				end,
+				func = clcInfo.display.templates.AddTemplate,
 			},
 		},
 	}
 	
 	mod.lastTemplateCount = 0
 	
-	UpdateTemplateList()
+	mod:UpdateTemplateList()
 end

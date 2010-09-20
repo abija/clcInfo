@@ -78,6 +78,17 @@ function mod:LoadActiveTemplate()
   			},
   		},
   	},
+  	show = {
+  		order = 20, type = "group", inline = true, name = "Show",
+  		args = {
+  			showWhen = {
+  				order = 1, type = "select", name = "",
+  				values = { always = "Always", combat = "In Combat", valid = "Valid Target", boss = "Boss" },
+  				get = function(info) return db.options.showWhen end,
+  				set = clcInfo.ChangeShowWhen,
+  			},
+  		},
+  	},
   	iconSkins = {
 			order = 30, type = "group", inline = true, name = "Icon Skins",
 			args = {
