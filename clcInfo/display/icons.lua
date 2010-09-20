@@ -31,8 +31,11 @@ local db
 local function OnUpdate(self, elapsed)
 	self.elapsed = self.elapsed + elapsed
 	-- if self.elapsed < self.freq then return end					-- manual updates per second for dev testing
-	if self.elapsed < 0.1 then return end
+	if self.elapsed < 0.2 then return end
 	self.elapsed = 0
+	
+	-- expose the object
+	clcInfo.env.cIcon = self
 	
 	-- needed vars to cover all posibilities
 	-- visible
@@ -345,6 +348,14 @@ function prototype:UpdateExec()
   
   -- reset alpha
   self.elements:SetAlpha(1)
+  
+  -- reset stuff changed when update is removed
+  self:SetScript("OnUpdate", OnUpdate)
+  self.externalUpdate = false
+  if self.ExecCleanup then
+  	self.ExecCleanup()
+  	self.ExecCleanup = nil
+  end
 end
 
 
@@ -362,6 +373,7 @@ function prototype:Delete()
 	-- delete the db entry
 	-- rebuild frames
 	table.remove(db, self.index)
+	mod:ClearIcons()
 	mod:InitIcons()
 end
 
@@ -403,9 +415,8 @@ function mod:New(index)
   end
 end
 
--- read data from config and create the icons
-function mod:InitIcons()
-	-- send all active icons to cache
+-- send all active icons to cache
+function mod:ClearIcons()
 	local icon
 	for i = 1, getn(self.active) do
 		-- remove from active
@@ -417,7 +428,11 @@ function mod:InitIcons()
 			table.insert(self.cache, icon)
 		end
 	end
-	
+end
+
+-- read data from config and create the icons
+-- IMPORTANT, always make sure you call clear first
+function mod:InitIcons()
 	if not clcInfo.activeTemplate then return end
 
 	db = clcInfo.activeTemplate.icons

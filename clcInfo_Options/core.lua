@@ -20,14 +20,25 @@ options = {
 }
 
 -- expose
-clcInfo.config = mod
 mod.AceDialog = AceDialog
 mod.AceRegistry = AceRegistry
 mod.options = options
 
+-- list of class modules
+mod.cmLoaders = {}
+
 local function Init()
 	mod:LoadTemplates()
 	mod:LoadActiveTemplate()
+	mod:LoadClassModules()
+end
+
+function mod:LoadClassModules()
+	-- delete old table
+	if options.args.classModules then options.args.classModules = nil end
+	for i = 1, #(mod.cmLoaders) do
+		mod.cmLoaders[i]()
+	end
 end
 
 function mod:Open()
@@ -35,7 +46,7 @@ function mod:Open()
 		Init()
 		
 		LibStub("AceConfig-3.0"):RegisterOptionsTable("clcInfo", options)
-		AceDialog:SetDefaultSize("clcInfo", 835, 525)
+		AceDialog:SetDefaultSize("clcInfo", 800, 600)
 		registered = true
 	end
 	

@@ -7,7 +7,7 @@ local function bprint(...)
 end
 
 -- exposed vars
-local mod = clcInfo.config
+local mod = clcInfo_Options
 local AceRegistry = mod.AceRegistry
 local options = mod.options
 
@@ -134,11 +134,11 @@ function mod:UpdateIconList()
 							inline = true,
 							args = {
 								width = {
-									order = 1, name = "Width", type = "range", min = 1, max = 200, step = 1,
+									order = 1, type = "range", min = 1, max = 200, step = 1, name = "Width",
 									get = Get, set = Set,
 								},
 								height = {
-									order = 2, name = "Height", type = "range", min = 1, max = 200, step = 1,
+									order = 2, type = "range", min = 1, max = 200, step = 1, name = "Height", 
 									get = Get, set = Set,
 								},
 							},
@@ -152,10 +152,19 @@ function mod:UpdateIconList()
 					order = 2, type = "group", name = "Behavior", 
 					args = {
 						code = {
-							order = 1, type = "group", name = "Code", inline = true,
+							order = 1, type = "group", inline = true, name = "Code",
 							args = {
 								exec = {
 									type = "input", multiline = true, name = "", width = "full",
+									get = Get, set = SetExec,
+								},
+							},
+						},
+						ups = {
+							order = 2, type = "group", inline = true, name = "Updates per second",
+							args = {
+								ups = {
+									type = "range", min = 1, max = 100, step = 1, name = "", 
 									get = Get, set = SetExec,
 								},
 							},

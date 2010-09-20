@@ -7,7 +7,7 @@ local function bprint(...)
 end
 
 -- exposed vars
-local mod = clcInfo.config
+local mod = clcInfo_Options
 local AceRegistry = mod.AceRegistry
 local options = mod.options
 

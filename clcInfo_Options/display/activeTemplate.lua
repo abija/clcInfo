@@ -7,7 +7,7 @@ local function bprint(...)
 end
 
 -- exposed vars
-local mod = clcInfo.config
+local mod = clcInfo_Options
 local AceRegistry = mod.AceRegistry
 local options = mod.options
 
@@ -47,21 +47,8 @@ function mod:LoadActiveTemplate()
   
   -- add icon button
   options.args.activeTemplate.args = {
-  	addElements = {
-  		order = 1, type = "group", inline = true, name = "Add Elements",
-  		args = {
-  			executeAddGrid = {
-  				order = 1, type = "execute", name = "Add Grid",
-  				func = AddGrid
-  			},
-  			executeAddIcon = {
-  				order = 2, type = "execute", name = "Add Icon",
-  				func = AddIcon
-  			},
-  		},
-  	},
   	lockElements = {
-  		order = 2, type = "group", inline = true, name = "Lock Elements",
+  		order = 1, type = "group", inline = true, name = "Lock Elements",
   		args = {
   			executeLockElements = {
   				type = "execute", name = "Lock Elements",
@@ -103,16 +90,23 @@ function mod:LoadActiveTemplate()
 			},
 		},
 		grids = {
-  		order = 100,
-  		type = "group",
-  		name = "Grids",
-  		args = {},
+  		order = 100, type = "group", name = "Grids",
+  		args = {
+  			executeAddGrid = {
+  				order = 1, type = "execute", name = "Add Grid",
+  				func = AddGrid
+  			},
+  		},
   	},
+  	
   	icons = {
-  		order = 200,
-  		type = "group",
-  		name = "Icons",
-  		args = {},
+  		order = 200, type = "group", name = "Icons",
+  		args = {
+  			executeAddIcon = {
+  				order = 1, type = "execute", name = "Add Icon",
+  				func = AddIcon,
+  			},
+  		},
   	},
   }
   

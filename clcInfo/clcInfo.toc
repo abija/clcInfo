@@ -14,4 +14,10 @@ display\grids.lua
 display\icons.lua
 
 data\global.lua
+data\custom.lua
 
+data\paladin\global.lua
+data\paladin\retribution.lua
+data\paladin\protection.lua
+data\paladin\holy.lua
+data\paladin\custom.lua

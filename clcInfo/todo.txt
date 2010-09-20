@@ -3,6 +3,9 @@
 - more lbf support
 -- better default skin?
 
+-- modify the way grids are moved / saved ?
+
+
 -- skin settings for elements inside a group?
 
 !!! remove the extra textures and just put a black one for icons? (last awake decision: no)
@@ -11,3 +14,21 @@
 - bprint system is retarded, fix !!!
 
 !!! some better way to handle stack font string
+
+
+!!! oor = red, oop = blue, other = gray
+
+!!!!!!! add option to run stuff after return
+!!!!!!!! when template changes, make sure before you do that, all the icons have ExecCleanup run if it's available
+
+
+!!!!!!!!!!!!!!!!!!!!! find a fix for:
+if not clcInfo.classModules then clcInfo.classModules = {} end
+if not clcInfo.classModules.paladin then clcInfo.classModules.paladin = {} end
+if not clcInfo.classModules.paladin.retribution then ....
+
+
+aditional forms of display to keep in mind:
+- sliding buttons: has a list of stuff to track, expands in 1 direction when more stuff should be displayed
+- bars
+- sliding bars

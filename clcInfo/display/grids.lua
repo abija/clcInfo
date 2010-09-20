@@ -6,8 +6,6 @@ local function bprint(...)
 	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\display\\grids> " .. table.concat(t, " "))
 end
 
-bprint("grids")
-
 --[[
 @info:
 	grid = frame to which display elements are attached
@@ -20,6 +18,7 @@ bprint("grids")
 		- spacing x
 		- spacing y
 		- positioning info relative to UIParent (x, y, point, relativePoint)
+		- skin information to apply to elements in grid
 --]]
 
 
@@ -104,8 +103,9 @@ end
 -- caaaaaaaaaaaaaaaaaaareful
 function prototype:Delete()
 	-- delete the db entry
-	-- rebuild frames
 	table.remove(db, self.index)
+	-- rebuild frames
+	mod:ClearGrids()
 	mod:InitGrids()
 end
 
@@ -113,7 +113,12 @@ end
 -- this should not be hardcoded, implement some sort of register system?
 function prototype:UpdateElements()
 	-- update icons
-	clcInfo.display.icons:UpdateLayoutAll()
+	local il = clcInfo.display.icons.active
+	for i = 1, #il do
+		if il[i].gridId == self.index then
+			il[i]:UpdateLayout()
+		end
+	end
 end
 
 --[[
@@ -147,9 +152,9 @@ function mod:New(index)
 	end
 end
 
--- read data from config and create the grids
-function mod:InitGrids()
-	-- send all active grids to cache
+
+-- send all active grids to cache
+function mod:ClearGrids()
 	local grid
 	for i = 1, getn(self.active) do
 		-- remove from active
@@ -161,7 +166,11 @@ function mod:InitGrids()
 			table.insert(self.cache, grid)
 		end
 	end
-	
+end
+
+-- read data from config and create the grids
+-- IMPORTANT, always make sure you call clear first
+function mod:InitGrids()
 	if not clcInfo.activeTemplate then return end
 
 	db = clcInfo.activeTemplate.grids

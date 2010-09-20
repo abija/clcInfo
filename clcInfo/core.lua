@@ -11,6 +11,9 @@ clcInfo = {}
 clcInfo.display = { templates = {}, grids = {}, icons = {}, icons_options = nil, }
 clcInfo.data = { auras = {}, }
 
+-- list of functions to call on initialize
+clcInfo.initList = {}
+
 clcInfo.activeTemplate = nil
 clcInfo.activeTemplateIndex = 0
 
@@ -31,16 +34,20 @@ clcInfo.lbf = LibStub("LibButtonFacade", true)
 SLASH_CLCINFO_OPTIONS1 = "/clcinfo"
 SlashCmdList["CLCINFO_OPTIONS"] = function()
 	local loaded, reason = LoadAddOn("clcInfo_Options")
-	if( not clcInfo.config ) then
+	if( not clcInfo_Options ) then
 		bprint("Failed to load configuration addon. Error returned: ", reason)
 		return
 	end
 	
-	clcInfo.config:Open()
+	clcInfo_Options:Open()
 end
 
 function clcInfo:OnInitialize()
 	self:ReadSavedData()
+	
+	for i = 1, #(self.initList) do
+		self.initList[i]()
+	end
 	self:TalentCheck()
 end
 
@@ -53,14 +60,20 @@ function clcInfo:TalentCheck()
 	end
 	--]]
 	
-	-- init stuff :D
+	-- clear stuff
+	self.display.icons:ClearIcons()
+	self.display.grids:ClearGrids()
+	
+	-- init stuff
 	self.display.grids:InitGrids()
 	self.display.icons:InitIcons()
+	
 	self:ChangeShowWhen()
 	
 	-- reload active template options
 	if clcInfo_Options then
 		clcInfo_Options:LoadActiveTemplate()
+		clcInfo_Options:LoadClassModules()
 	end
 end
 
@@ -106,6 +119,8 @@ iconOptions = { skinType, bfSkin }
 --------------------------------------------------------------------------------
 --]]
 local function DBPrepare_CDB()
+	AdaptConfig(clcInfoCharDB, { classModules = {}, templates = {} })
+
 	local xdb = clcInfoCharDB.templates
 	for i = 1, #xdb do
 		AdaptConfig(xdb[i], { spec = {}, grids = {}, icons = {}, options = {}, iconOptions = {} })
@@ -131,7 +146,7 @@ local function DBPrepare_CDB()
 				width = 30,
 				height = 30,
 				exec = "return DoNothing()",
-				ups = 10,
+				ups = 5,
 				gridId = 0,
 				gridX = 1,	
 				gridY = 1,	
@@ -172,6 +187,7 @@ function clcInfo:ReadSavedData()
 	-- char defaults
 	if not clcInfoCharDB then
 		clcInfoCharDB = {
+			classModules = {},
 			templates = {
 				-- this is a blank template
 				{
@@ -209,6 +225,8 @@ end
 -- handle showing and hiding elements depending on target/combat/other stuff
 --------------------------------------------------------------------------------
 function clcInfo.ChangeShowWhen(info, val)
+	if not clcInfo.activeTemplate then return end
+
 	if val then
 		clcInfo.activeTemplate.options.showWhen = val
 	else
@@ -282,7 +300,8 @@ function clcInfo.PLAYER_REGEN_DISABLED()
 end
 
 function clcInfo.PLAYER_TALENT_UPDATE()
-	self:TalentCheck()
+	bprint("PLAYER_TALENT_UPDATE")
+	clcInfo:TalentCheck()
 end
 --------------------------------------------------------------------------------
 
