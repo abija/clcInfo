@@ -188,6 +188,10 @@ function mod:AddGrid()
 		y = 0,
 		point = "CENTER",
     relativePoint = "CENTER",
+    -- skin settings, so that we use grid skin when in a grid
+    skinType = "Default",
+		bfSkin = "Blizzard",
+		bfGloss = 0,
 	}
 	-- must be called after init
 	table.insert(db, data)

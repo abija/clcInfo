@@ -59,15 +59,19 @@ local function Get(info)
 	return modGrids.active[tonumber(info[3])].db[info[6]]
 end
 
+local function GetSkinTypeList()
+	local list = { ["Default"] = "Default" }
+	if clcInfo.lbf then list["Button Facade"] = "Button Facade" end
+	return list
+end
+
 function mod:UpdateGridList()
 	local db = modGrids.active
 	local optionsGrids = options.args.activeTemplate.args.grids
 	
 	for i = 1, #db do
 		optionsGrids.args[tostring(i)] = {
-			type = "group",
-			name = "Grid" .. i,
-			childGroups = "tab",
+			type = "group", childGroups = "tab", name = "Grid" .. i,
 			args = {
 				-- layout options
 				tabLayout = {
@@ -114,7 +118,6 @@ function mod:UpdateGridList()
 								},
 							},
 						},
-						
 						spacing = {
 							order = 4, type = "group", inline = true, name = "Spacing",
 							args = {
@@ -131,8 +134,23 @@ function mod:UpdateGridList()
 					},
 				},
 				
+				tabSkin = {
+					order = 2, type = "group", name = "Skin",
+					args = {
+						selectType = {
+							order = 1, type = "group", inline = true, name = "Skin Type",
+							args = {
+								skinType = {
+									order = 1, type = "select", name = "Skin type", values = GetSkinTypeList,
+									get = Get, set = Set,
+								},
+							},
+						}
+					},
+				},
+				
 				deleteTab = {
-					order = 3, type = "group", name = "Delete",
+					order = 100, type = "group", name = "Delete",
 					args = {
 						-- delete button
 						executeDelete = {
@@ -144,6 +162,25 @@ function mod:UpdateGridList()
 			},
 		}
 	end
+	
+	-- if we have lbf then add it to options
+  if clcInfo.lbf then
+  	for i = 1, #db do
+	  	optionsGrids.args[tostring(i)].args.tabSkin.args.bfOptions = {
+	  		order = 2, type = "group", inline = true, name = "Button Facade Options",
+	  		args = {
+	  			bfSkin = {
+	  				order = 1, type = "select", name = "Button Facade Skin", values = clcInfo.lbf.ListSkins,
+	  				get = Get, set = Set,
+	  			},
+	  			bfGloss = {
+	  				order = 1, type = "range", name = "Gloss", step = 1, min = 0, max = 100,
+	  				get = Get, set = Set,
+	  			},
+	  		}
+	  	}
+	  end
+  end
 	
 	if mod.lastGridCount > #(db) then
 		-- nil the rest of the args

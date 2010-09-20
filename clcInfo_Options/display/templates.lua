@@ -127,8 +127,6 @@ function mod:UpdateTemplateList()
 						},
 					},
 				},
-
-
 			},
 		}
 	end

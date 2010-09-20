@@ -9,3 +9,5 @@
 
 
 - bprint system is retarded, fix !!!
+
+!!! some better way to handle stack font string

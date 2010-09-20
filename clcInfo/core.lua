@@ -139,6 +139,25 @@ local function DBPrepare_CDB()
 				sizeY = 1,
 			})
 		end
+		
+		-- fix the grids too
+		for j = 1, #(xdb[i].grids) do
+			AdaptConfig(xdb[i].grids[j], {
+				cellWidth = 30,
+				cellHeight = 30,
+				spacingX = 2,
+				spacingY = 2,
+				cellsX = 3,
+				cellsY = 3,
+				x = 0,
+				y = 0,
+				point = "CENTER",
+		    relativePoint = "CENTER",
+		    skinType = "Default",
+				bfSkin = "Blizzard",
+				bfGloss = 0,
+			})
+		end
 	end
 end
 
@@ -184,6 +203,11 @@ function clcInfo:UpdateOptions()
 	end
 end
 
+
+
+--------------------------------------------------------------------------------
+-- handle showing and hiding elements depending on target/combat/other stuff
+--------------------------------------------------------------------------------
 function clcInfo.ChangeShowWhen(info, val)
 	if val then
 		clcInfo.activeTemplate.options.showWhen = val
@@ -260,6 +284,7 @@ end
 function clcInfo.PLAYER_TALENT_UPDATE()
 	self:TalentCheck()
 end
+--------------------------------------------------------------------------------
 
 
 -- event frame

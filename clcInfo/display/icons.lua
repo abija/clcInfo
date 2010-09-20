@@ -206,8 +206,8 @@ local function BFTexture(t, tx, layer, scalex, scaley)
 	t:SetVertexColor(unpack(layer.Color or { 1, 1, 1, 1 }))
 	t:SetTexCoord(unpack(layer.TexCoords or { 0, 1, 0, 1 }))
 end
-function prototype:ApplyButtonFacadeSkin()
-	skin = (lbf:GetSkins())[clcInfo.activeTemplate.iconOptions.bfSkin]
+function prototype:ApplyButtonFacadeSkin(bfSkin, bfGloss)
+	skin = (lbf:GetSkins())[bfSkin]
 	if not skin then
 		-- try with blizzard
 		skin = lbf:GetSkins().Blizzard
@@ -228,7 +228,7 @@ function prototype:ApplyButtonFacadeSkin()
 	-- normal, gloss textures
 	BFTexture(self.elements.texNormal, self.elements, skin.Normal, scalex, scaley) 
 	BFTexture(self.elements.texGloss, self.elements, skin.Gloss, scalex, scaley)
-	self.elements.texGloss:SetAlpha(clcInfo.activeTemplate.iconOptions.bfGloss / 100)
+	self.elements.texGloss:SetAlpha(bfGloss / 100)
 	
 	-- rest of elements
 	local layer, e
@@ -314,14 +314,21 @@ function prototype:UpdateLayout()
 	self.elements:ClearAllPoints()
 	self.elements:SetAllPoints(self)
 	
+	-- stack
 	local fontFace, _, fontFlags = self.elements.stack:GetFont()
 	self.elements.stack:SetFont(fontFace, self.db.height / 2.7, fontFlags)
 	
 	self.elements.stack:ClearAllPoints()
 	self.elements.stack:SetPoint("BOTTOMRIGHT", self.elements, "BOTTOMRIGHT", 2 * self.db.width / 30, -2 * self.db.height / 30)
+	
+	-- get the grid skin if on a grid
+	local skinType, bfSkin, bfGloss, g
+	if onGrid then g = clcInfo.display.grids.active[self.db.gridId].db
+	else g = clcInfo.activeTemplate.iconOptions end
+	skinType, bfSkin, bfGloss = g.skinType, g.bfSkin, g.bfGloss
 
-	if clcInfo.activeTemplate.iconOptions.skinType == "Button Facade" and lbf then
-		self:ApplyButtonFacadeSkin()
+	if skinType == "Button Facade" and lbf then
+		self:ApplyButtonFacadeSkin(bfSkin, bfGloss)
 	else
 		self:ApplyMySkin()
 	end
