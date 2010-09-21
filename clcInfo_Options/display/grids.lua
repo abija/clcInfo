@@ -59,6 +59,14 @@ local function Get(info)
 	return modGrids.active[tonumber(info[3])].db[info[6]]
 end
 
+local function Lock(info)
+	modGrids.active[tonumber(info[3])]:Lock()
+end
+
+local function Unlock(info)
+	modGrids.active[tonumber(info[3])]:Unlock()
+end
+
 local function GetSkinTypeList()
 	local list = { ["Default"] = "Default" }
 	if clcInfo.lbf then list["Button Facade"] = "Button Facade" end
@@ -77,8 +85,20 @@ function mod:UpdateGridList()
 				tabLayout = {
 					order = 1, type = "group", name = "Layout",
 					args = {
+						lock = {
+							order = 1, type = "group", inline = true, name = "Lock",
+							args = {
+								lock = {
+				  				type = "execute", name = "Lock", func = Lock
+				  			},
+				  			unlock = {
+				  				type = "execute", name = "Unlock", func = Unlock,
+				  			},
+							},
+						},
+					
 						position = {
-							order = 1, type = "group", inline = true, name = "Position",
+							order = 2, type = "group", inline = true, name = "Position",
 							args = {
 								x = {
 									order = 1, name = "X", type = "range", min = -2000, max = 2000, step = 1,
@@ -92,7 +112,7 @@ function mod:UpdateGridList()
 						},
 							
 						cellSize = {
-							order = 2, type = "group", inline = true, name = "Cell Size",
+							order = 3, type = "group", inline = true, name = "Cell Size",
 							args = {
 								cellWidth = {
 									order = 1, name = "Cell Width", type = "range", min = 1, max = 200, step = 1,
@@ -106,7 +126,7 @@ function mod:UpdateGridList()
 						},
 							
 						cellNum = {
-							order = 3, type = "group", inline = true, name = "Number of cells",
+							order = 4, type = "group", inline = true, name = "Number of cells",
 							args = {
 								cellsX = {
 									order = 1, name = "Columns", type = "range", min = 1, max = 50, step = 1,
@@ -119,7 +139,7 @@ function mod:UpdateGridList()
 							},
 						},
 						spacing = {
-							order = 4, type = "group", inline = true, name = "Spacing",
+							order = 5, type = "group", inline = true, name = "Spacing",
 							args = {
 								spacingX = {
 									order = 3, name = "Horizontal", type = "range", min = 1, max = 50, step = 1,

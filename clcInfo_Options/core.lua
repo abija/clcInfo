@@ -27,6 +27,9 @@ mod.options = options
 -- list of class modules
 mod.cmLoaders = {}
 
+-- useful tables for options
+mod.anchorPoints = { CENTER = "CENTER", TOP = "TOP", BOTTOM = "BOTTOM", LEFT = "LEFT", RIGHT = "RIGHT", TOPLEFT = "TOPLEFT", TOPRIGHT = "TOPRIGHT", BOTTOMLEFT = "BOTTOMLEFT", BOTTOMRIGHT = "BOTTOMRIGHT" }
+
 local function Init()
 	mod:LoadTemplates()
 	mod:LoadActiveTemplate()
@@ -46,7 +49,7 @@ function mod:Open()
 		Init()
 		
 		LibStub("AceConfig-3.0"):RegisterOptionsTable("clcInfo", options)
-		AceDialog:SetDefaultSize("clcInfo", 800, 600)
+		AceDialog:SetDefaultSize("clcInfo", 810, 600)
 		registered = true
 	end
 	

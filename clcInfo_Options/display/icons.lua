@@ -59,6 +59,14 @@ local function Get(info)
 	return modIcons.active[tonumber(info[3])].db[info[6]]
 end
 
+local function Lock(info)
+	modIcons.active[tonumber(info[3])]:Lock()
+end
+
+local function Unlock(info)
+	modIcons.active[tonumber(info[3])]:Unlock()
+end
+
 local function SetExec(info, val)
 	local obj = modIcons.active[tonumber(info[3])]
 	obj.db[info[6]] = val
@@ -83,12 +91,12 @@ function mod:UpdateIconList()
 			name = "Icon" .. i,
 			childGroups = "tab",
 			args = {
-				-- layout options
-				tabLayout = {
-					order = 1, type = "group", name = "Layout",
+				-- grid options
+				tabGrid = {
+					order = 1, type = "group", name = "Grid",
 					args = {
 						grid = {
-							order = 1,  type = "group", inline = true, name = "Grid Options",
+							order = 1,  type = "group", inline = true, name = "",
 							args = {
 								gridId = {
 									order = 1, type = "select", name = "Select Grid", values = GetGridList,
@@ -112,9 +120,32 @@ function mod:UpdateIconList()
 								},
 							},
 						},
+					},
+				},
+			
+				-- layout options
+				tabLayout = {
+					order = 2, type = "group", name = "Layout",
+					args = {
+						__dGrid = {
+							order = 1, type = "description",
+							name = "If a grid is selected, none of the following options have any real effect.\n",
+						},
+						
+						lock = {
+							order = 100, type = "group", inline = true, name = "Lock",
+							args = {
+								lock = {
+				  				type = "execute", name = "Lock", func = Lock
+				  			},
+				  			unlock = {
+				  				type = "execute", name = "Unlock", func = Unlock,
+				  			},
+							},
+						},
 					
 						position = {
-							order = 2, type = "group", inline = true, name = "Position ( [0, 0] is bottom left corner )",
+							order = 101, type = "group", inline = true, name = "Position ( [0, 0] is bottom left corner )",
 							args = {
 								x = {
 									order = 1, name = "X", type = "range", min = 0, max = 4000, step = 1,
@@ -128,10 +159,7 @@ function mod:UpdateIconList()
 						},
 							
 						size = {
-							order = 3,
-							type = "group",
-							name = "Size",
-							inline = true,
+							order = 102, type = "group", inline = true, name = "Size",
 							args = {
 								width = {
 									order = 1, type = "range", min = 1, max = 200, step = 1, name = "Width",
@@ -149,7 +177,7 @@ function mod:UpdateIconList()
 				
 				-- behavior options
 				tabBehavior = {
-					order = 2, type = "group", name = "Behavior", 
+					order = 3, type = "group", name = "Behavior", 
 					args = {
 						code = {
 							order = 1, type = "group", inline = true, name = "Code",
@@ -172,7 +200,7 @@ function mod:UpdateIconList()
 					},
 				},
 				deleteTab = {
-					order = 3, type = "group", name = "Delete", 
+					order = 100, type = "group", name = "Delete", 
 					args = {
 						-- delete button
 						executeDelete = {

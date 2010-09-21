@@ -342,8 +342,15 @@ function prototype:UpdateExec()
 	self.freq = 1/self.db.ups
 	self.elapsed = 0
 
+	local err
 	-- exec
-	self.exec = loadstring(self.db.exec)
+	self.exec, err = loadstring(self.db.exec)
+	-- apply DoNothing if we have an error
+	if not self.exec then
+		self.exec = loadstring("return DoNothing()")
+		bprint("code error:", err)
+		bprint("in:", self.db.exec)
+	end
   setfenv(self.exec, clcInfo.env)
   
   -- reset alpha
@@ -424,6 +431,11 @@ function mod:ClearIcons()
 		if icon then
 			-- hide (also disables the updates)
 			icon:Hide()
+			-- run cleanup functions
+			if icon.ExecCleanup then 
+				icon.ExecCleanup()
+  			icon.ExecCleanup = nil
+  		end
 			-- add to cache
 			table.insert(self.cache, icon)
 		end

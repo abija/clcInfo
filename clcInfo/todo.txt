@@ -7,8 +7,10 @@
 
 
 -- skin settings for elements inside a group?
-
+!!!!!!!!!!!!!!!!!!!!!!! fix all the : . self bullshit
 !!! remove the extra textures and just put a black one for icons? (last awake decision: no)
+
+- lock/unlock added to each element
 
 
 - bprint system is retarded, fix !!!

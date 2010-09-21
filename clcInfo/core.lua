@@ -13,6 +13,8 @@ clcInfo.data = { auras = {}, }
 
 -- list of functions to call on initialize
 clcInfo.initList = {}
+-- list of functions registered to call from command line parameteres
+clcInfo.cmdList = {}
 
 clcInfo.activeTemplate = nil
 clcInfo.activeTemplateIndex = 0
@@ -32,15 +34,30 @@ clcInfo.lbf = LibStub("LibButtonFacade", true)
 
 -- slash command to open options
 SLASH_CLCINFO_OPTIONS1 = "/clcinfo"
-SlashCmdList["CLCINFO_OPTIONS"] = function()
-	local loaded, reason = LoadAddOn("clcInfo_Options")
-	if( not clcInfo_Options ) then
-		bprint("Failed to load configuration addon. Error returned: ", reason)
+SlashCmdList["CLCINFO_OPTIONS"] = function(msg)
+	msg = msg and string.lower(string.trim(msg))
+
+	-- no msg -> open options
+	if msg == "" then
+		local loaded, reason = LoadAddOn("clcInfo_Options")
+		if( not clcInfo_Options ) then
+			bprint("Failed to load configuration addon. Error returned: ", reason)
+			return
+		end
+		
+		clcInfo_Options:Open()
 		return
 	end
 	
-	clcInfo_Options:Open()
+	-- simple argument handling
+	local args = {}
+	for v in string.gmatch(msg, "[^ ]+") do tinsert(args, v) end
+	local cmd = table.remove(args, 1)
+	if clcInfo.cmdList[cmd] then
+		clcInfo.cmdList[cmd](args)
+	end
 end
+
 
 function clcInfo:OnInitialize()
 	self:ReadSavedData()

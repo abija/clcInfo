@@ -19,11 +19,18 @@ local mod = clcInfo.classModules.paladin.retribution
 -- environment mod, functions added here are visible to execs
 local emod = clcInfo.env
 
-
 -- any error sets this to false
 local enabled = true
 
--- temp options
+-- TODO, maybe fix?
+-- some lazy staic numbers
+local MAX_FCFS = 10							-- elements in fcfs
+local MAX_PRESETS = 10					-- number of presets
+
+-- preset frames
+local presetFrame, presetPopup
+
+-- options
 local db
 
 -- used for "pluging in"
@@ -59,7 +66,7 @@ local spells = {
 		how		= { id = 48806 },		-- hammer of wrath
 		cs 		= { id = 35395 },		-- crusader strike
 		ds 		= { id = 53385 },		-- divine storm
-		jud 	= { id = 53408 },		-- judgement (using wisdom atm)
+		j 		= { id = 53408 },		-- judgement (using wisdom icon)
 		cons 	= { id = 48819 },		-- consecration
 		exo 	= { id = 48801 },		-- exorcism
 		dp 		= { id = 54428 },		-- divine plea
@@ -111,17 +118,20 @@ local function UpdateFCFS()
 		-- toggle it off
 		enabled = false
 	end
+	
+	mod.PresetFrame_Update()
 end
 -- expose it
 mod.UpdateFCFS = UpdateFCFS
 
--- only needed exposed to check shit
-function mod:DisplayFCFS()
+local function DisplayFCFS()
 	bprint("Active Retribution FCFS:")
 	for i, data in ipairs(pq) do
 		bprint(i .. " " .. data.name)
 	end
 end
+-- expose it
+emod.DisplayFCFS = DisplayFCFS
 
 --	algorithm:
 --		get min cooldown
@@ -195,40 +205,6 @@ local function RetRotation()
 	else
 		gcd = 0
 	end
-
-	-- highlight when used
-	--[[
-	if db.highlight then
-		gcdStart, gcdDuration = GetSpellCooldown(dq[1])
-		if not gcdDuration then return end -- try to solve respec issues
-		if gcdStart > 0 then
-			gcdMS = gcdStart + gcdDuration - ctime
-		else
-			gcdMS = 0
-		end
-		
-		if lastMS == dq[1] then
-			if lastgcd < gcdMS and gcdMS <= 1.5 then
-				-- pressed main skill
-				startgcd = gcdMS
-				if db.highlightChecked then
-					clcretSB1:SetChecked(true)
-				else
-					clcretSB1:LockHighlight()
-				end
-			end
-			lastgcd = gcdMS
-			if (startgcd >= gcdMS) and (gcd > 1) then
-				self:UpdateUI()
-				return
-			end
-			clcretSB1:UnlockHighlight()
-			clcretSB1:SetChecked(false)
-		end
-		lastMS = dq[1]
-		lastgcd = gcdMS
-	end
-	--]]
 	
 	-- update cooldowns
 	for i = 1, numSpells do
@@ -272,7 +248,7 @@ local function PrepareCDB()
 	if not clcInfo.cdb.classModules.paladin.retribution then
 		clcInfo.cdb.classModules.paladin.retribution = {
 			fcfs = {
-				"jud",
+				"j",
 				"ds",
 				"cs",
 				"ds",
@@ -284,14 +260,360 @@ local function PrepareCDB()
 				"none",
 			},
 			
+			presets = {},
+			
+			presetFrame = {
+				visible = false,
+				enableMouse = false,
+				expandDown = false,
+				alpha = 1,
+				width = 200,
+				height = 25,
+				x = 0,
+				y = 0,
+				point = "CENTER",
+				relativePoint = "CENTER",
+				backdropColor = { 0.1, 0.1, 0.1, 0.5 },
+				backdropBorderColor = { 0.4, 0.4, 0.4 },
+				fontSize = 13,
+				fontColor = { 1, 1, 1, 1 },
+			},
+			
 			highlight = true,
 			highlightChecked = true,
 			rangePerSkill = false,
 		}
+		
+		-- blank presets
+		local presets = clcInfo.cdb.classModules.paladin.retribution.presets
+		for i = 1, MAX_PRESETS do 
+			presets[i] = { name = "", data = "" }
+		end
 	end
 	
 	db = clcInfo.cdb.classModules.paladin.retribution
 end
+
+
+--------------------------------------------------------------------------------
+-- PresetFunctions
+--------------------------------------------------------------------------------
+-- update layout
+local function PresetFrame_UpdateLayout()
+	local opt = db.presetFrame
+
+	-- preset frame
+	local frame = presetFrame
+		
+	frame:SetWidth(opt.width)
+	frame:SetHeight(opt.height)
+	frame:ClearAllPoints()
+	frame:SetPoint(opt.point, "UIParent", opt.relativePoint, opt.x, opt.y)
+	
+	frame:SetBackdropColor(unpack(opt.backdropColor))
+	frame:SetBackdropBorderColor(unpack(opt.backdropBorderColor))
+	
+	frame.text:SetFont(STANDARD_TEXT_FONT, opt.fontSize)
+	frame.text:SetVertexColor(unpack(opt.fontColor))
+	
+	frame.text:SetAllPoints(frame)
+	frame.text:SetJustifyH("CENTER")
+	frame.text:SetJustifyV("MIDDLE")
+	
+	-- popup
+	local popup = presetPopup
+	popup:SetBackdropColor(unpack(opt.backdropColor))
+	popup:SetBackdropBorderColor(unpack(opt.backdropBorderColor))
+	
+	popup:SetWidth(opt.width)
+	popup:SetHeight((opt.fontSize + 7) * MAX_PRESETS + 40)
+	popup:ClearAllPoints()
+	if opt.expandDown then
+		popup:SetPoint("TOP", frame, "BOTTOM", 0, 0)
+	else
+		popup:SetPoint("BOTTOM", frame, "TOP", 0, 0)
+	end
+	
+	local button
+	for i = 1, MAX_PRESETS do
+		button = presetButtons[i]
+	
+		button:SetWidth(opt.width - 20)
+		button:SetHeight(opt.fontSize + 7)
+		button:ClearAllPoints()
+		button:SetPoint("TOPLEFT", popup, "TOPLEFT", 10, -10 - (opt.fontSize + 9) * (i - 1))
+
+		button.name:SetJustifyH("LEFT")
+		button.name:SetJustifyV("MIDDLE")
+		button.name:SetAllPoints()
+		button.name:SetVertexColor(unpack(opt.fontColor))
+		
+		button.name:SetFont(STANDARD_TEXT_FONT, opt.fontSize)
+	end
+	
+end
+
+local function PresetFrame_UpdateMouse()
+	if presetFrame then
+		presetFrame:EnableMouse(db.presetFrame.enableMouse)
+	end
+end
+
+-- checks if the current rotation is in any of the presets and updates text
+local function PresetFrame_Update()
+	if not presetFrame then return end
+
+	local t = {}
+	for i = 1, #pq do
+		t[i] = pq[i].alias
+	end
+	local rotation = table.concat(t, " ")
+	
+	local preset = "no preset"
+	for i = 1, MAX_PRESETS do
+		-- bprint(rotation, " | ", db.presets[i].data)
+		if db.presets[i].data == rotation and rotation ~= "" then
+			preset = db.presets[i].name
+			break
+		end
+	end
+	
+	presetFrame.text:SetText(preset)
+	
+	-- update the buttons
+	if presetButtons then
+		local button
+		for i = 1, MAX_PRESETS do
+			button = presetButtons[i]
+			if db.presets[i].name ~= "" then
+				button.name:SetText(db.presets[i].name)
+				button:Show()
+			else
+				button:Hide()
+			end
+		end
+	end
+end
+
+local function PresetFrame_UpdateAll()
+	if presetFrame then
+		PresetFrame_UpdateLayout()
+		PresetFrame_UpdateMouse()
+		PresetFrame_Update()
+	end
+end
+
+-- load a preset
+local function Preset_Load(index)
+	if db.presets[index].name == "" then return end
+
+	if (not presetFrame) or (not presetFrame:IsVisible()) then
+		bprint("Loading preset:", db.presets[index].name)
+	end
+	
+	local list = { strsplit(" ", db.presets[index].data) }
+
+	local num = 0
+	for i = 1, #list do
+		if spells[list[i]] then
+			num = num + 1
+			db.fcfs[num] = list[i]
+		end
+	end
+	
+	-- none on the rest
+	if num < MAX_PRESETS then
+		for i = num + 1, MAX_PRESETS do
+			db.fcfs[i] = "none"
+		end
+	end
+	
+	-- redo queue
+	UpdateFCFS()
+	PresetFrame_Update()
+end
+
+local function PresetFrame_Init()
+	local opt = db.presetFrame
+	
+	local backdrop = {
+		bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+		edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+		tile = true, tileSize = 16, edgeSize = 8,
+		insets = { left = 2, right = 2, top = 2, bottom = 2 }
+	}
+
+	-- frame
+	local frame = CreateFrame("Button")
+	presetFrame = frame
+	
+	frame:EnableMouse(opt.enableMouse)
+	frame:SetBackdrop(backdrop)
+	frame:SetFrameStrata("FULLSCREEN_DIALOG")
+	
+	-- fontstring
+	local fs = frame:CreateFontString(nil, nil, "GameFontHighlight")
+	frame.text = fs
+	
+	-- popup frame
+	local popup = CreateFrame("Frame", nil, frame)
+	presetPopup = popup
+	
+	popup:Hide()
+	popup:SetBackdrop(backdrop)
+	popup:SetFrameStrata("FULLSCREEN_DIALOG")
+	
+	-- buttons for the popup frame
+	local button
+	presetButtons = {}
+	for i = 1, MAX_PRESETS do
+		button = CreateFrame("Button", nil, popup)
+		presetButtons[i] = button
+		
+		button.highlightTexture = button:CreateTexture(nil, "HIGHLIGHT")
+		button.highlightTexture:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+		button.highlightTexture:SetBlendMode("ADD")
+		button.highlightTexture:SetAllPoints()
+		
+		button.name = button:CreateFontString(nil, nil, "GameFontHighlight")
+		button.name:SetText(db.presets[i].name)
+		
+		button:SetScript("OnClick", function()
+			Preset_Load(i)
+			popup:Hide()
+		end)
+	end
+	
+	-- toggle popup on click
+	frame:SetScript("OnClick", function()
+		if popup:IsVisible() then
+			popup:Hide()
+		else
+			popup:Show()
+		end
+	end)
+	
+	-- update the layout
+	PresetFrame_UpdateAll()	
+end
+
+
+
+-- toggles show and hide
+local function PresetFrame_Toggle()
+	-- the frame is not loaded by default, so check if init took place
+	if not presetFrame then
+		-- need to do init
+		PresetFrame_Init()
+		presetFrame:Show()
+		db.presetFrame.visible = true
+		return
+	end
+
+	if presetFrame:IsVisible() then
+		presetFrame:Hide()
+		db.presetFrame.visible = false
+	else
+		presetFrame:Show()
+		db.presetFrame.visible = true
+	end
+end
+
+-- save current to preset
+local function Preset_SaveCurrent(index)
+	bprint(index)
+	local t = {}
+	for i = 1, #pq do
+		t[i] = pq[i].alias
+	end
+	local rotation = table.concat(t, " ")
+	db.presets[index].data = rotation
+	
+	PresetFrame_Update()
+end
+
+
+-- expose needed functions for options
+mod.PresetFrame_Toggle = PresetFrame_Toggle
+mod.PresetFrame_UpdateAll = PresetFrame_UpdateAll
+mod.Preset_Load = Preset_Load
+mod.Preset_SaveCurrent = Preset_SaveCurrent
+mod.PresetFrame_Update = PresetFrame_Update
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- Init
+--------------------------------------------------------------------------------
+local function OnInitialize()
+	PrepareCDB()
+	InitSpells()
+	UpdateFCFS()
+	
+	if db.presetFrame.visible then
+		PresetFrame_Init()
+	end
+end
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- Cmd line arguments
+--------------------------------------------------------------------------------
+-- IMPORTANT: args is an indexed table
+--------------------------------------------------------------------------------
+
+-- pass a full rotation from command line
+-- intended to be used in macros
+local function CmdRetFCFS(args)
+	-- add args to options
+	local num = 0
+	for i, arg in ipairs(args) do
+		if spells[arg] then
+			num = num + 1
+			db.fcfs[num] = arg
+		else
+			-- inform on wrong arguments
+			bprint(arg .. " not found")
+		end
+	end
+	
+	-- none on the rest
+	if num < MAX_FCFS then
+		for i = num + 1, MAX_FCFS do
+			db.fcfs[i] = "none"
+		end
+	end
+	
+	-- redo queue
+	UpdateFCFS()
+	
+	-- update the options window
+	clcInfo:UpdateOptions()
+	
+	--[[
+	if InterfaceOptionsFrame:IsVisible() then
+		InterfaceOptionsFrame_OpenToCategory("FCFS")
+	end
+	--]]
+	
+	if presetFrame then
+		PresetFrame_Update()
+	end
+end
+
+
+-- load a preset from cmd line
+-- intended to be used in macros
+local function CmdRetLP(args)
+	local name = table.concat(args, " ")
+	if name == "" then return end
+	
+	for i = 1, MAX_PRESETS do
+		if name == string.lower(db.presets[i].name) then return Preset_Load(i) end
+	end
+end
+
+--------------------------------------------------------------------------------
 
 
 --[[
@@ -299,15 +621,27 @@ end
 this part does the pluging in
 --------------------------------------------------------------------------------
 --]]
-local function OnInitialize()
-	PrepareCDB()
-	InitSpells()
-	UpdateFCFS()
-end
 -- register the init function so that the main emod runs it on init
 clcInfo.initList[#(clcInfo.initList) + 1] = OnInitialize
 
+-- register for slashcmd
+clcInfo.cmdList["ret_fcfs"] = CmdRetFCFS
+clcInfo.cmdList["ret_lp"] = CmdRetLP
 
+-- function to be executed when OnUpdate is called manually
+local function S2Exec()
+	if not enabled then return end
+	return emod.Spell(dq[2], db.rangePerSkill or spells.cs.name)
+end
+-- cleanup function for when exec changes
+local function ExecCleanup()
+	s2 = nil
+end
+
+
+--------------------------------------------------------------------------------
+-- usable in exec
+--------------------------------------------------------------------------------
 function emod:PaladinRetribution_RotationS1()
 	local gotskill = false
 	if enabled then
@@ -318,17 +652,6 @@ function emod:PaladinRetribution_RotationS1()
 	if gotskill then
 		return emod.Spell(dq[1], db.rangePerSkill or spells.cs.name)
 	end
-end
-
--- this function should be executed when OnUpdate is called manually
---------------------------------------------------------------------------------
-local function S2Exec()
-	if not enabled then return end
-	return emod.Spell(dq[2], db.rangePerSkill or spells.cs.name)
-end
--- call this when we update exec so first function doesn't still call it
-local function ExecUpdate()
-	s2 = nil
 end
 function emod:PaladinRetribution_RotationS2()
 	-- remove this button's OnUpdate
