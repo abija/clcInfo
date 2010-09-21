@@ -35,9 +35,7 @@ end
 function mod:LoadActiveTemplate()
   -- delete the old template
   options.args.activeTemplate = {
-  	type = "group",
-    name = "Active Template",
-    args = {}
+  	order = 1, type = "group", name = "Active Template", args = {}
   }  
 
   -- check if there's an active template

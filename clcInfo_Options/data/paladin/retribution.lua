@@ -94,7 +94,7 @@ end
 local function LoadModule()
 	-- create tables if there aren't any
 	if not options.args.classModules then 
-		options.args.classModules = { order = 500, type = "group", name = "Class Modules", args = {} }
+		options.args.classModules = { order = 50, type = "group", name = "Class Modules", args = {} }
 	end
 	options = options.args.classModules
 	

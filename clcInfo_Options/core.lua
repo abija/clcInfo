@@ -38,7 +38,8 @@ end
 
 function mod:LoadClassModules()
 	-- delete old table
-	if options.args.classModules then options.args.classModules = nil end
+	options.args.classModules = { order = 50, type = "group", name = "Class Modules", args = {} }
+	
 	for i = 1, #(mod.cmLoaders) do
 		mod.cmLoaders[i]()
 	end

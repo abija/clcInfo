@@ -54,9 +54,28 @@ local function Set(info, val)
 	obj.db[info[6]] = val
 	obj:UpdateLayout()
 end
-
 local function Get(info)
 	return modIcons.active[tonumber(info[3])].db[info[6]]
+end
+
+local function SetLockedGrid(info, val)
+	local obj = modIcons.active[tonumber(info[3])]
+	obj.db.sizeX = val
+	obj.db.sizeY = val
+	obj:UpdateLayout()
+end
+local function GetLockedGrid(info)
+	return modIcons.active[tonumber(info[3])].db.sizeX
+end
+
+local function SetLockedLayout(info, val)
+	local obj = modIcons.active[tonumber(info[3])]
+	obj.db.width = val
+	obj.db.height = val
+	obj:UpdateLayout()
+end
+local function GetLockedLayout(info)
+	return modIcons.active[tonumber(info[3])].db.width
 end
 
 local function Lock(info)
@@ -103,20 +122,24 @@ function mod:UpdateIconList()
 									get = Get, set = Set, 
 								},
 								gridX = {
-									order = 2, name = "Column", type = "range", min = 1, max = 50, step = 1,
+									order = 2, name = "Column", type = "range", min = 1, max = 200, step = 1,
 									get = Get, set = Set,
 								},
 								gridY = {
-									order = 3, name = "Row", type = "range", min = 1, max = 50, step = 1,
+									order = 3, name = "Row", type = "range", min = 1, max = 200, step = 1,
 									get = Get, set = Set,
 								},
 								sizeX = {
-									order = 4, name = "Width", type = "range", min = 1, max = 50, step = 1,
+									order = 4, name = "Width", type = "range", min = 1, max = 200, step = 1,
 									get = Get, set = Set,
 								},
 								sizeY = {
-									order = 5, name = "Height", type = "range", min = 1, max = 50, step = 1,
+									order = 5, name = "Height", type = "range", min = 1, max = 200, step = 1,
 									get = Get, set = Set,
+								},
+								sizeXY = {
+									order = 6, name = "Width and Height", type = "range", min = 1, max = 200, step = 1,
+									get = GetLockedGrid, set = SetLockedGrid,
 								},
 							},
 						},
@@ -168,6 +191,10 @@ function mod:UpdateIconList()
 								height = {
 									order = 2, type = "range", min = 1, max = 200, step = 1, name = "Height", 
 									get = Get, set = Set,
+								},
+								wandh = {
+									order = 3, type = "range", min = 1, max = 200, step = 1, name = "Width and Height", 
+									get = GetLockedLayout, set = SetLockedLayout,
 								},
 							},
 						},

@@ -10,28 +10,67 @@ local function bprint(...)
 	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\data\\paladin\\retribution> " .. table.concat(t, " "))
 end
 
--- create a module in the main addon
-if not clcInfo.classModules then clcInfo.classModules = {} end
-if not clcInfo.classModules.paladin then clcInfo.classModules.paladin = {} end
-clcInfo.classModules.paladin.retribution = {}
-local mod = clcInfo.classModules.paladin.retribution
-
--- environment mod, functions added here are visible to execs
-local emod = clcInfo.env
-
--- any error sets this to false
-local enabled = true
-
 -- TODO, maybe fix?
 -- some lazy staic numbers
 local MAX_FCFS = 10							-- elements in fcfs
 local MAX_PRESETS = 10					-- number of presets
 
+-- default settings for this module
+--------------------------------------------------------------------------------
+local defaults = {
+	fcfs = { "j", "ds", "cs", "how", "cons", "exo", "none", "none", "none", "none" },
+	presets = {},
+	presetFrame = {
+		visible = false,
+		enableMouse = false,
+		expandDown = false,
+		alpha = 1,
+		width = 200,
+		height = 25,
+		x = 0,
+		y = 0,
+		point = "CENTER",
+		relativePoint = "CENTER",
+		backdropColor = { 0.1, 0.1, 0.1, 0.5 },
+		backdropBorderColor = { 0.4, 0.4, 0.4 },
+		fontSize = 13,
+		fontColor = { 1, 1, 1, 1 },
+	},
+	highlight = true,
+	highlightChecked = true,
+	rangePerSkill = false,
+}
+-- blank presets
+for i = 1, MAX_PRESETS do 
+	defaults.presets[i] = { name = "", data = "" }
+end
+--------------------------------------------------------------------------------
+
+-- create a module in the main addon
+local mod = clcInfo:RegisterClassModule(class, "retribution")
+local db
+
+-- this function, if it exists, will be called at init
+function mod.OnInitialize()
+	db = clcInfo:RegisterClassModuleDB(class, "retribution", defaults)
+	clcInfo.spew = db
+	mod.InitSpells()
+	mod.UpdateFCFS()
+	
+	if db.presetFrame.visible then
+		mod.PresetFrame_Init()
+	end
+end
+
+-- functions visible to exec should be attached to this
+local emod = clcInfo.env
+
+
+-- any error sets this to false
+local enabled = true
+
 -- preset frames
 local presetFrame, presetPopup
-
--- options
-local db
 
 -- used for "pluging in"
 local s2
@@ -84,13 +123,13 @@ local lastMS = ""
 local gcdMS = 0
 
 -- get the spell names from ids
-local function InitSpells()
+function mod.InitSpells()
 	for alias, data in pairs(spells) do
 		data.name = GetSpellInfo(data.id)
 	end
 end
 
-local function UpdateFCFS()
+function mod.UpdateFCFS()
 	local newpq = {}
 	local check = {}
 	numSpells = 0
@@ -121,17 +160,13 @@ local function UpdateFCFS()
 	
 	mod.PresetFrame_Update()
 end
--- expose it
-mod.UpdateFCFS = UpdateFCFS
 
-local function DisplayFCFS()
+function mod.DisplayFCFS()
 	bprint("Active Retribution FCFS:")
 	for i, data in ipairs(pq) do
 		bprint(i .. " " .. data.name)
 	end
 end
--- expose it
-emod.DisplayFCFS = DisplayFCFS
 
 --	algorithm:
 --		get min cooldown
@@ -194,7 +229,7 @@ local function GetSkills()
 end
 
 -- ret queue function
-local function RetRotation()
+function mod.RetRotation()
 	local ctime, gcd, gcdStart, gcdDuration, v
 	ctime = GetTime()
 	
@@ -239,67 +274,12 @@ local function RetRotation()
 	return true
 end
 
--- default values for this module
-local function PrepareCDB()
-	if not clcInfo.cdb.classModules.paladin then
-		clcInfo.cdb.classModules.paladin = {}
-	end
-	
-	if not clcInfo.cdb.classModules.paladin.retribution then
-		clcInfo.cdb.classModules.paladin.retribution = {
-			fcfs = {
-				"j",
-				"ds",
-				"cs",
-				"ds",
-				"how",
-				"cons",
-				"exo",
-				"none",
-				"none",
-				"none",
-			},
-			
-			presets = {},
-			
-			presetFrame = {
-				visible = false,
-				enableMouse = false,
-				expandDown = false,
-				alpha = 1,
-				width = 200,
-				height = 25,
-				x = 0,
-				y = 0,
-				point = "CENTER",
-				relativePoint = "CENTER",
-				backdropColor = { 0.1, 0.1, 0.1, 0.5 },
-				backdropBorderColor = { 0.4, 0.4, 0.4 },
-				fontSize = 13,
-				fontColor = { 1, 1, 1, 1 },
-			},
-			
-			highlight = true,
-			highlightChecked = true,
-			rangePerSkill = false,
-		}
-		
-		-- blank presets
-		local presets = clcInfo.cdb.classModules.paladin.retribution.presets
-		for i = 1, MAX_PRESETS do 
-			presets[i] = { name = "", data = "" }
-		end
-	end
-	
-	db = clcInfo.cdb.classModules.paladin.retribution
-end
-
 
 --------------------------------------------------------------------------------
--- PresetFunctions
+-- mod.PresetFunctions
 --------------------------------------------------------------------------------
 -- update layout
-local function PresetFrame_UpdateLayout()
+function mod.PresetFrame_UpdateLayout()
 	local opt = db.presetFrame
 
 	-- preset frame
@@ -353,14 +333,14 @@ local function PresetFrame_UpdateLayout()
 	
 end
 
-local function PresetFrame_UpdateMouse()
+function mod.PresetFrame_UpdateMouse()
 	if presetFrame then
 		presetFrame:EnableMouse(db.presetFrame.enableMouse)
 	end
 end
 
 -- checks if the current rotation is in any of the presets and updates text
-local function PresetFrame_Update()
+function mod.PresetFrame_Update()
 	if not presetFrame then return end
 
 	local t = {}
@@ -395,16 +375,16 @@ local function PresetFrame_Update()
 	end
 end
 
-local function PresetFrame_UpdateAll()
+function mod.PresetFrame_UpdateAll()
 	if presetFrame then
-		PresetFrame_UpdateLayout()
-		PresetFrame_UpdateMouse()
-		PresetFrame_Update()
+		mod.PresetFrame_UpdateLayout()
+		mod.PresetFrame_UpdateMouse()
+		mod.PresetFrame_Update()
 	end
 end
 
 -- load a preset
-local function Preset_Load(index)
+function mod.Preset_Load(index)
 	if db.presets[index].name == "" then return end
 
 	if (not presetFrame) or (not presetFrame:IsVisible()) then
@@ -429,11 +409,11 @@ local function Preset_Load(index)
 	end
 	
 	-- redo queue
-	UpdateFCFS()
-	PresetFrame_Update()
+	mod.UpdateFCFS()
+	mod.PresetFrame_Update()
 end
 
-local function PresetFrame_Init()
+function mod.PresetFrame_Init()
 	local opt = db.presetFrame
 	
 	local backdrop = {
@@ -479,7 +459,7 @@ local function PresetFrame_Init()
 		button.name:SetText(db.presets[i].name)
 		
 		button:SetScript("OnClick", function()
-			Preset_Load(i)
+			mod.Preset_Load(i)
 			popup:Hide()
 		end)
 	end
@@ -494,17 +474,17 @@ local function PresetFrame_Init()
 	end)
 	
 	-- update the layout
-	PresetFrame_UpdateAll()	
+	mod.PresetFrame_UpdateAll()	
 end
 
 
 
 -- toggles show and hide
-local function PresetFrame_Toggle()
+function mod.PresetFrame_Toggle()
 	-- the frame is not loaded by default, so check if init took place
 	if not presetFrame then
 		-- need to do init
-		PresetFrame_Init()
+		mod.PresetFrame_Init()
 		presetFrame:Show()
 		db.presetFrame.visible = true
 		return
@@ -520,8 +500,7 @@ local function PresetFrame_Toggle()
 end
 
 -- save current to preset
-local function Preset_SaveCurrent(index)
-	bprint(index)
+function mod.Preset_SaveCurrent(index)
 	local t = {}
 	for i = 1, #pq do
 		t[i] = pq[i].alias
@@ -529,32 +508,8 @@ local function Preset_SaveCurrent(index)
 	local rotation = table.concat(t, " ")
 	db.presets[index].data = rotation
 	
-	PresetFrame_Update()
+	mod.PresetFrame_Update()
 end
-
-
--- expose needed functions for options
-mod.PresetFrame_Toggle = PresetFrame_Toggle
-mod.PresetFrame_UpdateAll = PresetFrame_UpdateAll
-mod.Preset_Load = Preset_Load
-mod.Preset_SaveCurrent = Preset_SaveCurrent
-mod.PresetFrame_Update = PresetFrame_Update
-
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
--- Init
---------------------------------------------------------------------------------
-local function OnInitialize()
-	PrepareCDB()
-	InitSpells()
-	UpdateFCFS()
-	
-	if db.presetFrame.visible then
-		PresetFrame_Init()
-	end
-end
---------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
 -- Cmd line arguments
@@ -585,7 +540,7 @@ local function CmdRetFCFS(args)
 	end
 	
 	-- redo queue
-	UpdateFCFS()
+	mod.UpdateFCFS()
 	
 	-- update the options window
 	clcInfo:UpdateOptions()
@@ -597,7 +552,7 @@ local function CmdRetFCFS(args)
 	--]]
 	
 	if presetFrame then
-		PresetFrame_Update()
+		mod.PresetFrame_Update()
 	end
 end
 
@@ -609,25 +564,20 @@ local function CmdRetLP(args)
 	if name == "" then return end
 	
 	for i = 1, MAX_PRESETS do
-		if name == string.lower(db.presets[i].name) then return Preset_Load(i) end
+		if name == string.lower(db.presets[i].name) then return mod.Preset_Load(i) end
 	end
 end
-
---------------------------------------------------------------------------------
-
-
---[[
---------------------------------------------------------------------------------
-this part does the pluging in
---------------------------------------------------------------------------------
---]]
--- register the init function so that the main emod runs it on init
-clcInfo.initList[#(clcInfo.initList) + 1] = OnInitialize
 
 -- register for slashcmd
 clcInfo.cmdList["ret_fcfs"] = CmdRetFCFS
 clcInfo.cmdList["ret_lp"] = CmdRetLP
 
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- emod. functions are usable by icon execs
+-- S2 disables on update for that icon so that is called by first S1 update
+--------------------------------------------------------------------------------
 -- function to be executed when OnUpdate is called manually
 local function S2Exec()
 	if not enabled then return end
@@ -637,15 +587,10 @@ end
 local function ExecCleanup()
 	s2 = nil
 end
-
-
---------------------------------------------------------------------------------
--- usable in exec
---------------------------------------------------------------------------------
-function emod:PaladinRetribution_RotationS1()
+function emod.PaladinRetribution_RotationS1()
 	local gotskill = false
 	if enabled then
-		gotskill = RetRotation()
+		gotskill = mod.RetRotation()
 	end
 	
 	if s2 then UpdateS2(s2, 100) end	-- update with a big "elapsed" so it's updated on call
@@ -653,7 +598,7 @@ function emod:PaladinRetribution_RotationS1()
 		return emod.Spell(dq[1], db.rangePerSkill or spells.cs.name)
 	end
 end
-function emod:PaladinRetribution_RotationS2()
+function emod.PaladinRetribution_RotationS2()
 	-- remove this button's OnUpdate
 	s2 = emod.cIcon
 	s2.externalUpdate = true
@@ -662,3 +607,4 @@ function emod:PaladinRetribution_RotationS2()
 	s2.exec = S2Exec
 	s2.ExecCleanup = ExecCleanup
 end
+--------------------------------------------------------------------------------

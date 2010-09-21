@@ -41,7 +41,7 @@ args:
 	unitCaster
 		if specified, it will check caster of the buff against this argument
 --------------------------------------------------------------------------------		
-expected return: visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a
+expected return: visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a, desaturate
 --]]
 function mod.Aura(filter, unitTarget, spell, unitCaster)
 	-- check the unit
@@ -87,7 +87,7 @@ args:
 		*	"ready"					- display spell only when ready
 		* "not ready"			- display spell only when not ready
 --------------------------------------------------------------------------------
-expected return: visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a
+expected return: visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a, desaturate
 --]]	
 function mod.Spell(spell, checkRange, showWhen)
 	-- check if spell exists and get texture
@@ -107,19 +107,26 @@ function mod.Spell(spell, checkRange, showWhen)
 		end
 	end
 	
-	local isUsable, notEnoughMana = IsUsableSpell(spell)
-	local r, g, b, a = 1, 1, 1, 1
-	if not isUsable or notEnoughMana then r, g, b, a = 0.3, 0.3, 0.3, 1 end
 	
+	-- current vertex color priority: oor > usable > oom
 	local oor = nil
 	if checkRange and UnitExists("target") then
 		if checkRange == true then checkRange = spell end
 		oor = IsSpellInRange(checkRange, "target")
 		oor = oor ~= nil and oor == 0
-		if oor then r, g, b, a = r * 0.8, g * 0.1, b * 0.1, a end
+		if oor then
+			return true, texture, start, duration, enable, nil, nil, nil, true, 0.8, 0.1, 0.1, 1
+		end
 	end
 	
-	return true, texture, start, duration, enable, nil, nil, nil, true, r, g, b, a
+	local isUsable, notEnoughMana = IsUsableSpell(spell)
+	if notEnoughMana then
+		return true, texture, start, duration, enable, nil, nil, nil, true, 0.1, 0.1, 0.8, 1
+	elseif not isUsable then
+		return true, texture, start, duration, enable, nil, nil, nil, true, 0.3, 0.3, 0.3, 1
+	end
+
+	return true, texture, start, duration, enable, nil, nil, nil, true, 1, 1, 1, 1
 end
 
 
@@ -136,7 +143,7 @@ args:
 		*	"ready"					- display spell only when ready
 		* "not ready"			- display spell only when not ready
 --------------------------------------------------------------------------------
-expected return: visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a
+expected return: visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a, desaturate
 --------------------------------------------------------------------------------
 TODO
 	multiple items with same name ?
@@ -160,11 +167,15 @@ function mod.Item(item, equipped, showWhen)
 	end
 	
 	-- check if it's usable
+	-- current vertex color priority: oor > oom > usable
 	local isUsable, notEnoughMana = IsUsableItem(item)
-	local r, g, b, a = 1, 1, 1, 1
-	if not isUsable or notEnoughMana then r, g, b, a = 0.3, 0.3, 0.3, 1 end
-	
-	return true, texture, start, duration, enable, nil, nil, nil, true, r, g, b, a
+	if notEnoughMana then
+		return true, texture, start, duration, enable, nil, nil, nil, true, 0.1, 0.1, 0.8, 1
+	elseif not isUsable then
+		return true, texture, start, duration, enable, nil, nil, nil, true, 0.3, 0.3, 0.3, 1
+	end
+
+	return true, texture, start, duration, enable, nil, nil, nil, true, 1, 1, 1, 1
 end
 
 
@@ -186,7 +197,7 @@ args:
 	r1, g1, b1, a1, r2, g2, b2, a2, r3, g3, b3, a3
 		maybe modify vertex color too?
 --------------------------------------------------------------------------------
-expected return: visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a
+expected return: visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a, desaturate
 --------------------------------------------------------------------------------
 --]]
 local icdList = {}

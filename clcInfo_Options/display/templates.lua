@@ -54,7 +54,7 @@ local function SpecSet(info, val)
 	local i = tonumber(info[2])
 	clcInfo.cdb.templates[i].spec[info[5]] = val
 	options.args.templates.args[info[2]].args.tabSpec.args.spec.name = SpecToString(i)
-	clcInfo:TalentCheck()
+	clcInfo:OnTemplatesUpdate()
 end
 
 function mod:UpdateTemplateList()
@@ -146,9 +146,7 @@ end
 -- 		+	delete template
 function mod:LoadTemplates()
 	options.args.templates = {
-		type = "group",
-		name = "Templates",
-		args = {
+		order = 100, type = "group", name = "Templates", args = {
 			-- add template button
 			executeAdd = {
 				type = "execute",

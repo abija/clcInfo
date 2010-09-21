@@ -8,16 +8,19 @@ end
 
 -- clcInfo = LibStub("AceAddon-3.0"):NewAddon("clcInfo", "AceConsole-3.0")
 clcInfo = {}
-clcInfo.display = { templates = {}, grids = {}, icons = {}, icons_options = nil, }
-clcInfo.data = { auras = {}, }
+clcInfo.display = { templates = {}, grids = {}, icons = {} }
 
--- list of functions to call on initialize
-clcInfo.initList = {}
+clcInfo.classModules = {}
+
 -- list of functions registered to call from command line parameteres
 clcInfo.cmdList = {}
 
+-- active template
 clcInfo.activeTemplate = nil
 clcInfo.activeTemplateIndex = 0
+
+-- string that has talent info
+clcInfo.lastBuild = nil
 
 -- spawn all elements parented in a single frame, so it's easier to hide/show them
 -- the mother frame :D
@@ -62,20 +65,43 @@ end
 function clcInfo:OnInitialize()
 	self:ReadSavedData()
 	
-	for i = 1, #(self.initList) do
-		self.initList[i]()
+	-- init the class modules
+	for c in pairs(clcInfo.classModules) do
+		for s in pairs(clcInfo.classModules[c]) do
+			if clcInfo.classModules[c][s].OnInitialize then
+				clcInfo.classModules[c][s].OnInitialize()
+			end
+		end
 	end
+	
+	-- scan the talents
 	self:TalentCheck()
 end
 
 function clcInfo:TalentCheck()
-	clcInfo.display.templates:FindTemplate()
-	--[[
-	if not clcInfo.display.templates:FindTemplate() then
-		-- announce or not ?
-		-- bprint("No template available for current talent configuration.")
+	-- get current spec as a string
+	local t = {}
+	local name, rank, j
+	for i = 1, 3 do
+		t[#t + 1] = "_"
+		j = 1
+		name, _, _, _, rank = GetTalentInfo(i, j)
+		while name do
+			t[#t + 1] = tostring(rank)
+			j = j + 1
+			name, _, _, _, rank = GetTalentInfo(i, j)
+		end
 	end
-	--]]
+	
+	local build = table.concat(t, "")
+	if build ~= self.lastBuild then
+		self.lastBuild = build
+		clcInfo:OnTemplatesUpdate()
+	end
+end
+
+function clcInfo:OnTemplatesUpdate()
+	clcInfo.display.templates:FindTemplate()
 	
 	-- clear stuff
 	self.display.icons:ClearIcons()
@@ -87,19 +113,30 @@ function clcInfo:TalentCheck()
 	
 	self:ChangeShowWhen()
 	
-	-- reload active template options
+	-- change active 
 	if clcInfo_Options then
 		clcInfo_Options:LoadActiveTemplate()
-		clcInfo_Options:LoadClassModules()
 	end
+	
+	self:UpdateOptions()
 end
 
-function clcInfo:FindTemplate()
 
+function clcInfo:RegisterClassModule(class, name)
+	class = string.lower(class)
+	name = string.lower(name)
+	if not clcInfo.classModules[class] then clcInfo.classModules[class] = {} end
+	clcInfo.classModules[class][name] = {}
+	return clcInfo.classModules[class][name]
 end
 
-function clcInfo:CreateTemplate()
-	local tlp = {}
+function clcInfo:RegisterClassModuleDB(class, name, defaults)
+	class = string.lower(class)
+	name = string.lower(name)
+	defaults = defaults or {}
+	if not clcInfo.cdb.classModules[class] then clcInfo.cdb.classModules[class] = {} end
+	if not clcInfo.cdb.classModules[class][name] then  clcInfo.cdb.classModules[class][name] = defaults end
+	return clcInfo.cdb.classModules[class][name]
 end
 
 
@@ -317,7 +354,6 @@ function clcInfo.PLAYER_REGEN_DISABLED()
 end
 
 function clcInfo.PLAYER_TALENT_UPDATE()
-	bprint("PLAYER_TALENT_UPDATE")
 	clcInfo:TalentCheck()
 end
 --------------------------------------------------------------------------------
@@ -335,9 +371,9 @@ clcInfo.eventFrame:Hide()
 clcInfo.eventFrame:SetScript("OnEvent", function(self, event)
 	if event == "QUEST_LOG_UPDATE" then
 		-- intialize, unregister, change event function
-		clcInfo:OnInitialize()
 		clcInfo.eventFrame:UnregisterEvent("QUEST_LOG_UPDATE")
 		clcInfo.eventFrame:SetScript("OnEvent", OnEvent)
+		clcInfo:OnInitialize()
 	end
 end)
 

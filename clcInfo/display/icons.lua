@@ -44,7 +44,7 @@ local function OnUpdate(self, elapsed)
 	-- count																			(stack)
 	-- alpha
 	-- svc, r, g, b, a                    				(svc - true if we change vertex info)
-	local visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a = self.exec()
+	local visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a, desaturate = self.exec()
 	if not visible then self:FakeHide() return end
 	if alpha ~= nil and alpha == 0 then self:FakeHide() return end	-- hide on alpha = 0
 	
@@ -132,8 +132,10 @@ function prototype:Init()
 	self.toolbox:Hide()
 	self.toolbox:SetFrameLevel(self.elements:GetFrameLevel() + 2)
 	
-	self.label = self.toolbox:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
-	self.label:SetPoint("BOTTOMLEFT", self.elements.texMain, "TOPLEFT", -2, 2)
+	self.label = self.toolbox:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
+	self.label:SetPoint("BOTTOMLEFT", self.elements.texMain, "TOPLEFT", 0, 1)
+	local fontFace, _, fontFlags = self.label:GetFont()
+	self.label:SetFont(fontFace, 6, fontFlags)
 	
 	-- lock
 	self.lockTex = self.toolbox:CreateTexture(nil, "BACKGROUND")
@@ -303,7 +305,7 @@ local function TryGridPositioning(self)
 		
 	return true
 end
-function prototype:UpdateLayout()
+function prototype:UpdateLayout()	
 	-- check if it's attached to some grid
 	local onGrid = TryGridPositioning(self)
 	
@@ -468,7 +470,7 @@ function mod:AddIcon()
 		width = 30,
 		height = 30,
 		exec = "return DoNothing()",
-		ups = 10,
+		ups = 5,
 		gridId = 0,
 		gridX = 1,	-- column
 		gridY = 1,	-- row

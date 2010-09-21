@@ -34,3 +34,5 @@ aditional forms of display to keep in mind:
 - sliding buttons: has a list of stuff to track, expands in 1 direction when more stuff should be displayed
 - bars
 - sliding bars
+
+!!! make sure that cIcon is the one we want, check for threading problems

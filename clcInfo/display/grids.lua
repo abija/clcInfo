@@ -115,7 +115,7 @@ function prototype:UpdateElements()
 	-- update icons
 	local il = clcInfo.display.icons.active
 	for i = 1, #il do
-		if il[i].gridId == self.index then
+		if il[i].db.gridId == self.index then
 			il[i]:UpdateLayout()
 		end
 	end

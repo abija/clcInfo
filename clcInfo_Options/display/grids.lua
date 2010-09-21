@@ -54,9 +54,18 @@ local function Set(info, val)
 	obj.db[info[6]] = val
 	obj:Update()
 end
-
 local function Get(info)
 	return modGrids.active[tonumber(info[3])].db[info[6]]
+end
+
+local function SetLocked(info, val)
+	local obj = modGrids.active[tonumber(info[3])]
+	obj.db.cellWidth = val
+	obj.db.cellHeight = val
+	obj:Update()
+end
+local function GetLocked(info)
+	return modGrids.active[tonumber(info[3])].db.cellWidth
 end
 
 local function Lock(info)
@@ -121,6 +130,10 @@ function mod:UpdateGridList()
 								cellHeight = {
 									order = 2, name = "Cell Height", type = "range", min = 1, max = 200, step = 1,
 									get = Get, set = Set,
+								},
+								WandH = {
+									order = 3, name = "With and Height", type = "range", min = 1, max = 200, step = 1,
+									get = GetLocked, set = SetLocked,
 								},
 							},
 						},
