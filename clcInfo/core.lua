@@ -6,9 +6,11 @@ local function bprint(...)
 	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\core> " .. table.concat(t, " "))
 end
 
+local __version = 1
+
 -- clcInfo = LibStub("AceAddon-3.0"):NewAddon("clcInfo", "AceConsole-3.0")
 clcInfo = {}
-clcInfo.display = { templates = {}, grids = {}, icons = {} }
+clcInfo.display = { templates = {}, grids = {}, icons = {}, bars = {} }
 
 clcInfo.classModules = {}
 
@@ -26,8 +28,16 @@ clcInfo.lastBuild = nil
 -- the mother frame :D
 clcInfo.mf = CreateFrame("Frame", "clcInfoMF")
 
+-- frame levels
+-- grid: mf + 1
+-- icons, bars: mf + 2
+clcInfo.frameLevel = clcInfo.mf:GetFrameLevel()
+
 -- add all data functions in this environment and pass them to the exec calls
 clcInfo.env = setmetatable({}, {__index = _G})
+
+-- SharedMedia
+clcInfo.LSM = LibStub("LibSharedMedia-3.0")
 
 -- Button Facade
 clcInfo.lbf = LibStub("LibButtonFacade", true)
@@ -59,8 +69,12 @@ SlashCmdList["CLCINFO_OPTIONS"] = function(msg)
 end
 
 
+
+
+
 function clcInfo:OnInitialize()
 	self:ReadSavedData()
+	self:FixSavedData()
 	
 	-- init the class modules
 	for c in pairs(clcInfo.classModules) do
@@ -73,6 +87,11 @@ function clcInfo:OnInitialize()
 	
 	-- scan the talents
 	self:TalentCheck()
+	
+	-- register events
+	clcInfo.eventFrame:RegisterEvent("PLAYER_TALENT_UPDATE")
+	clcInfo.eventFrame:RegisterEvent("UNIT_ENTERED_VEHICLE")
+	clcInfo.eventFrame:RegisterEvent("UNIT_EXITED_VEHICLE")
 end
 
 function clcInfo:TalentCheck()
@@ -102,11 +121,13 @@ function clcInfo:OnTemplatesUpdate()
 	
 	-- clear stuff
 	self.display.icons:ClearIcons()
+	self.display.bars:ClearBars()
 	self.display.grids:ClearGrids()
 	
 	-- init stuff
 	self.display.grids:InitGrids()
 	self.display.icons:InitIcons()
+	self.display.bars:InitBars()
 	
 	self:ChangeShowWhen()
 	
@@ -137,7 +158,6 @@ function clcInfo:RegisterClassModuleDB(class, name, defaults)
 end
 
 function clcInfo:ReadSavedData()
-	
 	-- global defaults
 	if not clcInfoDB then
 		clcInfoDB = {
@@ -154,6 +174,7 @@ function clcInfo:ReadSavedData()
 					spec = { tree = 1, talent = 0, rank = 1 },
 					grids = {},
 					icons = {},
+					bars = {},
 					options = {
 						gridSize = 1,
 						showWhen = "always",
@@ -185,17 +206,23 @@ end
 --------------------------------------------------------------------------------
 function clcInfo.ChangeShowWhen(info, val)
 	if not clcInfo.activeTemplate then return end
+	
+	local mf = clcInfo.mf
+	
+	-- vehicle check
+	if UnitUsingVehicle("player") then
+		mf:Hide()
+		return
+	end
 
 	if val then
 		clcInfo.activeTemplate.options.showWhen = val
 	else
 		val = clcInfo.activeTemplate.options.showWhen
 	end
-	
-	local f = clcInfo.eventFrame
-	local mf = clcInfo.mf
-	
+
 	-- unregister all events first
+	local f = clcInfo.eventFrame
 	f:UnregisterEvent("PLAYER_REGEN_ENABLED")
 	f:UnregisterEvent("PLAYER_REGEN_DISABLED")
 	f:UnregisterEvent("PLAYER_TARGET_CHANGED")
@@ -261,6 +288,17 @@ end
 function clcInfo.PLAYER_TALENT_UPDATE()
 	clcInfo:TalentCheck()
 end
+
+function clcInfo.UNIT_ENTERED_VEHICLE(self, event, unit)
+	if unit == "player" then
+	-- vehicle check
+		if UnitUsingVehicle("player") then
+			clcInfo.mf:Hide()
+			return
+		end
+	end
+end
+clcInfo.UNIT_EXITED_VEHICLE = clcInfo.ChangeShowWhen
 --------------------------------------------------------------------------------
 
 
@@ -283,4 +321,47 @@ clcInfo.eventFrame:SetScript("OnEvent", function(self, event)
 end)
 
 clcInfo.eventFrame:RegisterEvent("QUEST_LOG_UPDATE")
-clcInfo.eventFrame:RegisterEvent("PLAYER_TALENT_UPDATE")
+
+
+
+--------------------------------------------------------------------------------
+-- TODO, make this GOOD
+-- !!! think properly about this shit
+--------------------------------------------------------------------------------
+--[[
+mirrors config table t2 to t1
+	* looks for keys in t2 that do not exist in t1 and adds them
+	* looks for keys in t1 that do not exist in t2 and deletes them
+	* common keys are not changed
+--]]
+local function HasKey(t, key)
+	for k, v in pairs(t) do
+		if k == key then return true end
+	end
+	return false
+end
+local function AdaptConfig(t1, t2)
+	for k, v in pairs(t2) do
+		if not HasKey(t1, k) then t1[k] = v end
+	end
+
+	for k, v in pairs(t1) do
+		if not HasKey(t2, k) then t1[k] = nil end
+	end
+end
+
+-- NOT FINISHED
+function clcInfo:FixSavedData()
+	-- check last version
+	
+	if not clcInfoCharDB.lastVersion then clcInfoCharDB.lastVersion = 0 end
+	if clcInfoCharDB.lastVersion == __version then return end
+	clcInfoCharDB.lastVersion = __version
+	
+	AdaptConfig(clcInfoCharDB, { classModules = {}, templates = {} })
+	local xdb = clcInfoCharDB.templates
+	for i = 1, #xdb do
+		AdaptConfig(xdb[i], { spec = {}, grids = {}, icons = {}, bars = {}, options = {}, iconOptions = {} })
+	end
+end
+--------------------------------------------------------------------------------

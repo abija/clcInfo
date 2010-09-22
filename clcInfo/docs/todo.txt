@@ -1,7 +1,19 @@
+* fix frame levels
 - alert system
 - an external addon that plugs into it to see what needs to be done there
+-- remove more static stuff to allow display plugins and other custom stuff (all interaction with main module being done through registered functions)
+|_ in other words, more oop?
 
-- more lbf support
+- deleting object is backwards
+	- should be done by the mod not the object
+	
+- active template skinning options moved to respective elements global
+
+
+
+
+
+- more accurate lbf support for icons
 - better default skin?
 
 -- modify the way grids are moved / saved ?

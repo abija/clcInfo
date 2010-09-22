@@ -22,6 +22,10 @@ local function AddIcon()
 	clcInfo.display.icons:AddIcon()
 	mod:UpdateIconList()
 end
+local function AddBar()
+	clcInfo.display.bars:AddBar()
+	mod.UpdateBarList()
+end
 
 --------------------------------------------------------------------------------
 
@@ -43,7 +47,6 @@ function mod:LoadActiveTemplate()
   local db = clcInfo.activeTemplate
   
   
-  -- add icon button
   options.args.activeTemplate.args = {
   	lockElements = {
   		order = 1, type = "group", inline = true, name = "Lock Elements",
@@ -90,20 +93,21 @@ function mod:LoadActiveTemplate()
 		grids = {
   		order = 100, type = "group", name = "Grids",
   		args = {
-  			executeAddGrid = {
-  				order = 1, type = "execute", name = "Add Grid",
-  				func = AddGrid
-  			},
+  			addGrid = { order = 1, type = "execute", name = "Add Grid", func = AddGrid },
   		},
   	},
   	
   	icons = {
   		order = 200, type = "group", name = "Icons",
   		args = {
-  			executeAddIcon = {
-  				order = 1, type = "execute", name = "Add Icon",
-  				func = AddIcon,
-  			},
+  			addIcon = { order = 1, type = "execute", name = "Add Icon", func = AddIcon },
+  		},
+  	},
+  	
+  	bars = {
+  		order = 300, type = "group", name = "Bars",
+  		args = {
+  			addBar = { order = 1, type = "execute", name = "Add Bar", func = AddBar },
   		},
   	},
   }
@@ -139,4 +143,7 @@ function mod:LoadActiveTemplate()
   
   mod.lastIconCount = 0
   mod:UpdateIconList()
+  
+  mod.lastBarCount = 0
+  mod.UpdateBarList()
 end

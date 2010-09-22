@@ -13,6 +13,7 @@ core.lua
 display\templates.lua
 display\grids.lua
 display\icons.lua
+display\bars.lua
 
 data\global_icon.lua
 data\global_bar.lua

@@ -13,6 +13,7 @@ display\templates.lua
 display\activeTemplate.lua
 display\grids.lua
 display\icons.lua
+display\bars.lua
 
 data\global.lua
 data\custom.lua

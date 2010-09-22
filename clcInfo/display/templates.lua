@@ -36,6 +36,7 @@ function mod:AddTemplate()
 		spec = { tree = 1, talent = 0, rank = 1 },
 		grids = {},
 		icons = {},
+		bars = {},
 		options = {
 			gridSize = 1,
 			showWhen = "always",
@@ -54,16 +55,19 @@ end
 function mod:LockElements()
 	clcInfo.display.grids:LockAll()
 	clcInfo.display.icons:LockAll()
+	clcInfo.display.bars:LockAll()
 end
 
 function mod:UnlockElements()
 	clcInfo.display.grids:UnlockAll()
 	clcInfo.display.icons:UnlockAll()
+	clcInfo.display.bars:UnlockAll()
 end
 
 function mod:UpdateElementsLayout()
 	clcInfo.display.grids:UpdateAll()
 	clcInfo.display.icons:UpdateLayoutAll()
+	clcInfo.display.bars:UpdateLayoutAll()
 end
 
 if clcInfo.lbf then

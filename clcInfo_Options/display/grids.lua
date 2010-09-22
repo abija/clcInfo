@@ -81,6 +81,11 @@ local function AddIcon(info)
 	mod:UpdateIconList()
 end
 
+local function AddBar(info)
+	clcInfo.display.bars:AddBar(tonumber(info[3]))
+	mod:UpdateBarList()
+end
+
 local function GetSkinTypeList()
 	local list = { ["Default"] = "Default", ["BareBone"] = "BareBone" }
 	if clcInfo.lbf then list["Button Facade"] = "Button Facade" end
@@ -99,8 +104,15 @@ function mod:UpdateGridList()
 				tabLayout = {
 					order = 1, type = "group", name = "Layout",
 					args = {
+						add = {
+							order = 1, type = "group", inline = true, name = "Add Elements", args = {
+								addIcon = { order = 1, type = "execute", name = "Add Icon", func = AddIcon },
+								addBar = { order = 2, type = "execute", name = "Add Bar", func = AddBar },
+				  		}
+						},
+					
 						lock = {
-							order = 1, type = "group", inline = true, name = "Lock",
+							order = 2, type = "group", inline = true, name = "Lock",
 							args = {
 								lock = {
 				  				order = 1, type = "execute", name = "Lock", func = Lock
@@ -108,14 +120,11 @@ function mod:UpdateGridList()
 				  			unlock = {
 				  				order = 2, type = "execute", name = "Unlock", func = Unlock,
 				  			},
-				  			addIcon = {
-				  				order = 3, type = "execute", name = "Add Icon", func = AddIcon,
-				  			},
 							},
 						},
 					
 						position = {
-							order = 2, type = "group", inline = true, name = "Position",
+							order = 3, type = "group", inline = true, name = "Position",
 							args = {
 								x = {
 									order = 1, name = "X", type = "range", min = -2000, max = 2000, step = 1,
@@ -129,7 +138,7 @@ function mod:UpdateGridList()
 						},
 							
 						cellSize = {
-							order = 3, type = "group", inline = true, name = "Cell Size",
+							order = 4, type = "group", inline = true, name = "Cell Size",
 							args = {
 								cellWidth = {
 									order = 1, name = "Cell Width", type = "range", min = 1, max = 200, step = 1,
@@ -140,14 +149,14 @@ function mod:UpdateGridList()
 									get = Get, set = Set,
 								},
 								WandH = {
-									order = 3, name = "With and Height", type = "range", min = 1, max = 200, step = 1,
+									order = 3, name = "Width and Height", type = "range", min = 1, max = 200, step = 1,
 									get = GetLocked, set = SetLocked,
 								},
 							},
 						},
 							
 						cellNum = {
-							order = 4, type = "group", inline = true, name = "Number of cells",
+							order = 5, type = "group", inline = true, name = "Number of cells",
 							args = {
 								cellsX = {
 									order = 1, name = "Columns", type = "range", min = 1, max = 50, step = 1,
@@ -160,7 +169,7 @@ function mod:UpdateGridList()
 							},
 						},
 						spacing = {
-							order = 5, type = "group", inline = true, name = "Spacing",
+							order = 6, type = "group", inline = true, name = "Spacing",
 							args = {
 								spacingX = {
 									order = 3, name = "Horizontal", type = "range", min = 1, max = 50, step = 1,

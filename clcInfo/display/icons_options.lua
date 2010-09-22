@@ -1,4 +1,64 @@
 --[[
+local function DBPrepare_CDB()
+	AdaptConfig(clcInfoCharDB, { classModules = {}, templates = {} })
+
+	local xdb = clcInfoCharDB.templates
+	for i = 1, #xdb do
+		AdaptConfig(xdb[i], { spec = {}, grids = {}, icons = {}, options = {}, iconOptions = {} })
+		AdaptConfig(xdb[i].spec, { tree = 1, talent = 0, rank = 1 })
+		AdaptConfig(xdb[i].options, {
+			gridSize = 1,
+			showWhen = "always",
+		})
+		AdaptConfig(xdb[i].iconOptions, {
+			skinType = "Default",
+			bfSkin = "Blizzard",
+			bfGloss = 0,
+		})
+
+		-- fix the icons
+		for j = 1, #(xdb[i].icons) do
+			AdaptConfig(xdb[i].icons[j], {
+				x = 0,
+				y = 0,
+				point = "BOTTOMLEFT",
+				relativeTo = "UIParent",
+		    relativePoint = "BOTTOMLEFT",
+				width = 30,
+				height = 30,
+				exec = "return DoNothing()",
+				ups = 5,
+				gridId = 0,
+				gridX = 1,	
+				gridY = 1,	
+				sizeX = 1,
+				sizeY = 1,
+			})
+		end
+
+		-- fix the grids too
+		for j = 1, #(xdb[i].grids) do
+			AdaptConfig(xdb[i].grids[j], {
+				cellWidth = 30,
+				cellHeight = 30,
+				spacingX = 2,
+				spacingY = 2,
+				cellsX = 3,
+				cellsY = 3,
+				x = 0,
+				y = 0,
+				point = "CENTER",
+		    relativePoint = "CENTER",
+		    skinType = "Default",
+				bfSkin = "Blizzard",
+				bfGloss = 0,
+			})
+		end
+	end
+end
+--]]
+
+--[[
 -- adjust the settings to current button
 function prototype:OpenOptions()
   local f = clcInfo.display.icons_options

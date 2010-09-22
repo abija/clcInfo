@@ -3,7 +3,7 @@ local function bprint(...)
 	for i = 1, select("#", ...) do
 		t[i] = tostring(select(i, ...))
 	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\data\\global> " .. table.concat(t, " "))
+	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\data\\global_icon> " .. table.concat(t, " "))
 end
 
 local mod = clcInfo.env

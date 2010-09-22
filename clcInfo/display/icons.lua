@@ -30,8 +30,9 @@ local db
 -- OPTIMIZE! OPTIMIZE! OPTIMIZE! OPTIMIZE! OPTIMIZE!
 local function OnUpdate(self, elapsed)
 	self.elapsed = self.elapsed + elapsed
-	-- if self.elapsed < self.freq then return end					-- manual updates per second for dev testing
-	if self.elapsed < 0.2 then return end
+	if self.elapsed < self.freq then return end
+	-- manual set updates per second for dev testing
+	-- if self.elapsed < 0.2 then return end
 	self.elapsed = 0
 	
 	-- expose the object
@@ -111,7 +112,6 @@ function prototype:Init()
 	self.elements = CreateFrame("Frame", nil, self)
 
 	-- todo create only what's needed
-	self.elements.backdrop = {}
 	self.elements.texBackground = self.elements:CreateTexture(nil, "BACKGROUND")
 	self.elements.texMain = self.elements:CreateTexture(nil, "BORDER")
 	self.elements.texMain:SetAllPoints()
@@ -345,7 +345,7 @@ end
 function prototype:UpdateExec()
 	-- updates per second
 	self.freq = 1/self.db.ups
-	self.elapsed = 0
+	self.elapsed = 100 -- force instant update
 
 	local err
 	-- exec
@@ -414,6 +414,7 @@ function mod:New(index)
 		icon.index = index
 		icon.db = db[index]
 		self.active[index] = icon
+		icon:SetFrameLevel(clcInfo.frameLevel + 2)
 		icon:Init()
 	end
 	

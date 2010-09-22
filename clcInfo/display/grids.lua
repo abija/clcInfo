@@ -119,6 +119,13 @@ function prototype:UpdateElements()
 			il[i]:UpdateLayout()
 		end
 	end
+	
+	il = clcInfo.display.bars.active
+	for i = 1, #il do
+		if il[i].db.gridId == self.index then
+			il[i]:UpdateLayout()
+		end
+	end
 end
 
 --[[
@@ -140,6 +147,7 @@ function mod:New(index)
 		grid.index = index
 		grid.db = db[index]
 		self.active[index] = grid
+		grid:SetFrameLevel(clcInfo.frameLevel + 1)
 		grid:Init()
 	end
 	
