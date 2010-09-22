@@ -44,7 +44,7 @@ local function OnUpdate(self, elapsed)
 	-- count																			(stack)
 	-- alpha
 	-- svc, r, g, b, a                    				(svc - true if we change vertex info)
-	local visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a, desaturate = self.exec()
+	local visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a = self.exec()
 	if not visible then self:FakeHide() return end
 	if alpha ~= nil and alpha == 0 then self:FakeHide() return end	-- hide on alpha = 0
 	
@@ -334,6 +334,9 @@ function prototype:UpdateLayout()
 
 	if skinType == "Button Facade" and lbf then
 		self:ApplyButtonFacadeSkin(bfSkin, bfGloss)
+	elseif skinType == "BareBone" then
+		self.elements.texGloss:Hide()
+		self.elements.texNormal:Hide()
 	else
 		self:ApplyMySkin()
 	end
@@ -457,9 +460,11 @@ function mod:InitIcons()
 	end
 end
 
-function mod:AddIcon()
+function mod:AddIcon(gridId)
 	local x = (UIParent:GetWidth() - 30) / 2 * UIParent:GetScale()
 	local y = (UIParent:GetHeight() - 30) / 2 * UIParent:GetScale()
+	
+	if gridId == nil then gridId = 0 end
 
 	local data = {
 		x = x,
@@ -471,7 +476,7 @@ function mod:AddIcon()
 		height = 30,
 		exec = "return DoNothing()",
 		ups = 5,
-		gridId = 0,
+		gridId = gridId,
 		gridX = 1,	-- column
 		gridY = 1,	-- row
 		sizeX = 1, 	-- size in cells

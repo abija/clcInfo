@@ -53,7 +53,6 @@ local db
 -- this function, if it exists, will be called at init
 function mod.OnInitialize()
 	db = clcInfo:RegisterClassModuleDB(class, "retribution", defaults)
-	clcInfo.spew = db
 	mod.InitSpells()
 	mod.UpdateFCFS()
 	
@@ -581,13 +580,13 @@ clcInfo.cmdList["ret_lp"] = CmdRetLP
 -- function to be executed when OnUpdate is called manually
 local function S2Exec()
 	if not enabled then return end
-	return emod.Spell(dq[2], db.rangePerSkill or spells.cs.name)
+	return emod.IconSpell(dq[2], db.rangePerSkill or spells.cs.name)
 end
 -- cleanup function for when exec changes
 local function ExecCleanup()
 	s2 = nil
 end
-function emod.PaladinRetribution_RotationS1()
+function emod.IconRetFCFS_S1()
 	local gotskill = false
 	if enabled then
 		gotskill = mod.RetRotation()
@@ -595,10 +594,10 @@ function emod.PaladinRetribution_RotationS1()
 	
 	if s2 then UpdateS2(s2, 100) end	-- update with a big "elapsed" so it's updated on call
 	if gotskill then
-		return emod.Spell(dq[1], db.rangePerSkill or spells.cs.name)
+		return emod.IconSpell(dq[1], db.rangePerSkill or spells.cs.name)
 	end
 end
-function emod.PaladinRetribution_RotationS2()
+function emod.IconRetFCFS_S2()
 	-- remove this button's OnUpdate
 	s2 = emod.cIcon
 	s2.externalUpdate = true

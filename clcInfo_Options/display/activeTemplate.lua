@@ -27,7 +27,7 @@ end
 
 
 local function GetSkinTypeList()
-	local list = { ["Default"] = "Default" }
+	local list = { ["Default"] = "Default", ["BareBone"] = "BareBone" }
 	if clcInfo.lbf then list["Button Facade"] = "Button Facade" end
 	return list
 end

@@ -1,0 +1,34 @@
+- alert system
+- an external addon that plugs into it to see what needs to be done there
+
+- more lbf support
+- better default skin?
+
+-- modify the way grids are moved / saved ?
+
+
+- bprint system is retarded, fix !!!
+
+!!! some better way to handle stack font string
+
+!!!!!!! add option to run stuff after return
+
+
+aditional forms of display to keep in mind:
+- sliding buttons: has a list of stuff to track, expands in 1 direction when more stuff should be displayed
+- bars
+- sliding bars
+- eventually have needed clcbpt features work?
+
+!!! make sure that cIcon is the one we want, check for threading problems
+
+
+-- make a system based on addon version to fix the db at first run after a new version comes out?
+
+
+
+
+
+data types:
+- list of auras
+- list of stuff in general?

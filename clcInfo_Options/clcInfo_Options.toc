@@ -5,6 +5,8 @@
 ## Dependencies: clcInfo
 ## LoadOnDemand: 1
 
+embeds.xml
+
 core.lua
 
 display\templates.lua
@@ -21,3 +23,4 @@ data\paladin\protection.lua
 data\paladin\holy.lua
 data\paladin\custom.lua
 
+data\deathknight\global.lua

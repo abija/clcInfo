@@ -29,9 +29,6 @@ clcInfo.mf = CreateFrame("Frame", "clcInfoMF")
 -- add all data functions in this environment and pass them to the exec calls
 clcInfo.env = setmetatable({}, {__index = _G})
 
--- AceGUI
-clcInfo.gui = LibStub("AceGUI-3.0")
-
 -- Button Facade
 clcInfo.lbf = LibStub("LibButtonFacade", true)
 
@@ -139,97 +136,6 @@ function clcInfo:RegisterClassModuleDB(class, name, defaults)
 	return clcInfo.cdb.classModules[class][name]
 end
 
-
--- config fix functions
-
---[[
-mirrors config table t2 to t1
-	* looks for keys in t2 that do not exist in t1 and adds them
-	* looks for keys in t1 that do not exist in t2 and deletes them
-	* common keys are not changed
---]]
-local function HasKey(t, key)
-	for k, v in pairs(t) do
-		if k == key then return true end
-	end
-	return false
-end
-local function AdaptConfig(t1, t2)
-	for k, v in pairs(t2) do
-		if not HasKey(t1, k) then t1[k] = v end
-	end
-	
-	for k, v in pairs(t1) do
-		if not HasKey(t2, k) then t1[k] = nil end
-	end
-end
-
---[[
-templates
---------------------------------------------------------------------------------
-spec = {tree, talent, rank}
-icons = {}
-iconOptions = { skinType, bfSkin }
---------------------------------------------------------------------------------
---]]
-local function DBPrepare_CDB()
-	AdaptConfig(clcInfoCharDB, { classModules = {}, templates = {} })
-
-	local xdb = clcInfoCharDB.templates
-	for i = 1, #xdb do
-		AdaptConfig(xdb[i], { spec = {}, grids = {}, icons = {}, options = {}, iconOptions = {} })
-		AdaptConfig(xdb[i].spec, { tree = 1, talent = 0, rank = 1 })
-		AdaptConfig(xdb[i].options, {
-			gridSize = 1,
-			showWhen = "always",
-		})
-		AdaptConfig(xdb[i].iconOptions, {
-			skinType = "Default",
-			bfSkin = "Blizzard",
-			bfGloss = 0,
-		})
-		
-		-- fix the icons
-		for j = 1, #(xdb[i].icons) do
-			AdaptConfig(xdb[i].icons[j], {
-				x = 0,
-				y = 0,
-				point = "BOTTOMLEFT",
-				relativeTo = "UIParent",
-		    relativePoint = "BOTTOMLEFT",
-				width = 30,
-				height = 30,
-				exec = "return DoNothing()",
-				ups = 5,
-				gridId = 0,
-				gridX = 1,	
-				gridY = 1,	
-				sizeX = 1,
-				sizeY = 1,
-			})
-		end
-		
-		-- fix the grids too
-		for j = 1, #(xdb[i].grids) do
-			AdaptConfig(xdb[i].grids[j], {
-				cellWidth = 30,
-				cellHeight = 30,
-				spacingX = 2,
-				spacingY = 2,
-				cellsX = 3,
-				cellsY = 3,
-				x = 0,
-				y = 0,
-				point = "CENTER",
-		    relativePoint = "CENTER",
-		    skinType = "Default",
-				bfSkin = "Blizzard",
-				bfGloss = 0,
-			})
-		end
-	end
-end
-
 function clcInfo:ReadSavedData()
 	
 	-- global defaults
@@ -261,7 +167,6 @@ function clcInfo:ReadSavedData()
 			},
 		}
 	end
-	DBPrepare_CDB()
 
 	clcInfo.db = clcInfoDB	
 	clcInfo.cdb = clcInfoCharDB

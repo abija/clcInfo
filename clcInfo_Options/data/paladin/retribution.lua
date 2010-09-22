@@ -100,7 +100,7 @@ local function LoadModule()
 	
 	-- retribution options
 	options.args.retribution = {
-		order = 3, type = "group", childGroups = "tab", name = "Retribution",
+		order = 4, type = "group", childGroups = "tab", name = "Retribution",
 		args = {
 			tabGeneral = {
 				order = 1, type = "group", name = "General", args = {

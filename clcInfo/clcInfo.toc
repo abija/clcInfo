@@ -1,10 +1,11 @@
 ## Interface: 30300
 ## Title: clcInfo
-## Notes: clcInfo Notes
 ## Author: clc
 ## SavedVariables: clcInfoDB
 ## SavedVariablesPerCharacter: clcInfoCharDB
-## OptionalDeps:  Ace3, LibSharedMedia-3.0
+## OptionalDeps:  Ace3
+
+embeds.xml
 
 default.lua
 core.lua
@@ -13,7 +14,8 @@ display\templates.lua
 display\grids.lua
 display\icons.lua
 
-data\global.lua
+data\global_icon.lua
+data\global_bar.lua
 data\custom.lua
 
 data\paladin\global.lua
@@ -21,3 +23,5 @@ data\paladin\retribution.lua
 data\paladin\protection.lua
 data\paladin\holy.lua
 data\paladin\custom.lua
+
+data\deathknight\global.lua

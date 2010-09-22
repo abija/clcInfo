@@ -76,8 +76,13 @@ local function Unlock(info)
 	modGrids.active[tonumber(info[3])]:Unlock()
 end
 
+local function AddIcon(info)
+	clcInfo.display.icons:AddIcon(tonumber(info[3]))
+	mod:UpdateIconList()
+end
+
 local function GetSkinTypeList()
-	local list = { ["Default"] = "Default" }
+	local list = { ["Default"] = "Default", ["BareBone"] = "BareBone" }
 	if clcInfo.lbf then list["Button Facade"] = "Button Facade" end
 	return list
 end
@@ -98,10 +103,13 @@ function mod:UpdateGridList()
 							order = 1, type = "group", inline = true, name = "Lock",
 							args = {
 								lock = {
-				  				type = "execute", name = "Lock", func = Lock
+				  				order = 1, type = "execute", name = "Lock", func = Lock
 				  			},
 				  			unlock = {
-				  				type = "execute", name = "Unlock", func = Unlock,
+				  				order = 2, type = "execute", name = "Unlock", func = Unlock,
+				  			},
+				  			addIcon = {
+				  				order = 3, type = "execute", name = "Add Icon", func = AddIcon,
 				  			},
 							},
 						},
