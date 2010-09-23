@@ -70,7 +70,14 @@ function mod:UpdateElementsLayout()
 	clcInfo.display.bars:UpdateLayoutAll()
 end
 
+-- TODO, optimize the callback handling ?
 if clcInfo.lbf then
 	-- register callback
 	clcInfo.lbf:RegisterSkinCallback("clcInfo", mod.UpdateElementsLayout, mod)
+end
+
+if clcInfo.LSM then
+	-- register callback
+	clcInfo.LSM.RegisterCallback( mod, "LibSharedMedia_Registered", "UpdateElementsLayout" )
+	clcInfo.LSM.RegisterCallback( mod, "LibSharedMedia_SetGlobal", "UpdateElementsLayout" )
 end

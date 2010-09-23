@@ -52,6 +52,8 @@ local function OnUpdate(self, elapsed)
 		
 		self.elements.textLeft:SetText(textLeft)
 		self.elements.textRight:SetText(textRight)
+		
+		self.elements.icon:SetTexture(texture)
 	
 		bar:SetMinMaxValues(minValue, maxValue)
 		bar:SetValue(value)
@@ -72,6 +74,7 @@ end
 function prototype:Init()
 	-- create a child frame that holds all the elements and it's hidden/shown instead of main one that has update function
 	self.elements = CreateFrame("Frame", nil, self)
+	local ex = self.elements
 
 	-- todo create only what's needed
 	-- backdrop that goes around bar and icon
@@ -82,21 +85,23 @@ function prototype:Init()
 	-- frame for icon backdrop
 	-- frame for bar backdrop
 	
-	self.elements.bd = {}
+	ex.bd = {}
 	
-	self.elements.iconFrame = CreateFrame("Frame", nil, self.elements)
-	self.elements.iconBd = {}
-	self.elements.icon = self.elements.iconFrame:CreateTexture(nil, "ARTWORK")
+	ex.iconFrame = CreateFrame("Frame", nil, ex)
+	ex.iconBd = {}
+	ex.icon = ex.iconFrame:CreateTexture(nil, "ARTWORK")
+	ex.icon:SetTexture("Interface\\Icons\\ABILITY_SEAL")
+	ex.icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
 	
-	self.elements.barFrame = CreateFrame("Frame", nil, self.elements)
-	self.elements.barBd = {}
-	self.elements.bar = CreateFrame("StatusBar", nil, self.elements.barFrame)
+	ex.barFrame = CreateFrame("Frame", nil, ex)
+	ex.barBd = {}
+	ex.bar = CreateFrame("StatusBar", nil, ex.barFrame)
 	
 	-- TODO - look for better fonts, there are some _LEFT fonts in blizzard's lists?
-	self.elements.textLeft = self.elements.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
-	self.elements.textLeft:SetJustifyH("LEFT")
-	self.elements.textRight = self.elements.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
-	self.elements.textRight:SetJustifyH("RIGHT")
+	ex.textLeft = ex.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
+	ex.textLeft:SetJustifyH("LEFT")
+	ex.textRight = ex.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
+	ex.textRight:SetJustifyH("RIGHT")
 	
 	self.elapsed = 0
 	self:FakeHide()
@@ -138,11 +143,15 @@ function prototype:Unlock()
   self.lockTextLeft = ex.textLeft:GetText()
   self.lockTextRight = ex.textRight:GetText()
   self.lockValue = ex.bar:GetValue()
+  self.lockMinValue, self.lockMaxValue = ex.bar:GetMinMaxValues()
+  
   -- change them
   ex.textLeft:SetText(self.label)
-  ex.textRight:SetText("")
-  local _, maxv = ex.bar:GetMinMaxValues()
-  ex.bar:SetValue(maxv)
+  ex.textRight:SetText("35")
+  ex.bar:SetMinMaxValues(0, 1)
+  ex.bar:SetValue(0.55)
+  
+  self:FakeShow()
 end
 
 -- disables control of the frame
@@ -154,9 +163,11 @@ function prototype:Lock()
   local ex = self.elements
   ex.textLeft:SetText(self.lockTextLeft)
   ex.textRight:SetText(self.lockTextRight)
+  ex.bar:SetMinMaxValues(self.lockMinValue, self.lockMaxValue)
   ex.bar:SetValue(self.lockValue)
   
   -- restore update function
+  self:FakeHide()
   self:SetScript("OnUpdate", OnUpdate)
 end
 
@@ -193,9 +204,6 @@ local function SimpleSkin(self)
 	local opt = self.db
 	local ex = self.elements
 	
-	-- at least 1 px bar
-	if opt.width <= (opt.height + 1) then opt.width = opt.height + 2 end
-	
 	-- hide backdrops like a bawss
 	ex:SetBackdrop(nil)
 	ex.iconFrame:SetBackdrop(nil)
@@ -206,9 +214,11 @@ local function SimpleSkin(self)
 	if not opt.barBg then
 		ex.barFrame:SetBackdrop(nil)
 	else
-		ex.barBd.bgFile = LSM:Fetch("statusbar", "Minimalist")
+		ex.barBd.bgFile = LSM:Fetch("statusbar", opt.barBgTexture)
+		ex.barBd.insets 	= { left = 0, right = 0, top = 0, bottom = 0 }
 		ex.barFrame:SetBackdrop(ex.barBd)
 		ex.barFrame:SetBackdropColor(unpack(opt.barBgColor))
+		ex.barFrame:SetBackdropBorderColor(0, 0, 0, 0)
 	end
 	
 	-- icon is same size as height and positioned to the left
@@ -221,12 +231,12 @@ local function SimpleSkin(self)
 	ex.barFrame:SetHeight(opt.height)
 	ex.barFrame:SetPoint("LEFT", ex, "LEFT", opt.height + 1, 0)
 	
-	ex.bar:SetStatusBarTexture(LSM:Fetch("statusbar", "Minimalist"))
+	ex.bar:SetStatusBarTexture(LSM:Fetch("statusbar", opt.barTexture))
 	ex.bar:SetStatusBarColor(unpack(opt.barColor))
 	
 	-- font size should be height - 5 ? good balpark?
 	-- stack
-	local fh = opt.height - 3
+	local fh = opt.height * 0.7
 	if fh < 6 then fh = 6 end
 	local fontFace, _, fontFlags = ex.textLeft:GetFont()
 	ex.textLeft:SetFont(fontFace, fh, fontFlags)
@@ -235,7 +245,114 @@ local function SimpleSkin(self)
 	ex.textRight:SetPoint("RIGHT", ex.barFrame, "RIGHT", -2, 0)
 end
 
+-- plenty of options
 local function AdvancedSkin(self)
+	local opt = self.db
+	local skin = opt.skin
+	local ex = self.elements
+	
+	-- full backdrop
+	if skin.bd then
+		ex.bd.bgFile 		= LSM:Fetch("background", skin.bdBg)
+		ex.bd.edgeFile	= LSM:Fetch("border", skin.bdBorder)
+		ex.bd.edgeSize	= skin.edgeSize
+		ex.bd.insets 		= { left = skin.inset, right = skin.inset, top = skin.inset, bottom = skin.inset }
+		ex:SetBackdrop(ex.bd)
+		ex:SetBackdropColor(unpack(skin.bdColor))
+		ex:SetBackdropBorderColor(unpack(skin.bdBorderColor))
+	else
+		ex:SetBackdrop(nil)
+	end
+	
+	-- icon positioning: right, left or hidden
+	local iconSizeLeft, iconSpaceLeft, iconSizeRight, iconSpaceRight
+	if skin.iconAlign == "right" then
+		iconSizeLeft = 0
+		iconSpaceLeft = 0
+		iconSizeRight = opt.height - 2 * skin.padding
+		iconSpaceRight = skin.iconSpacing
+	elseif skin.iconAlign == "left" then
+		iconSizeLeft = opt.height - 2 * skin.padding
+		iconSpaceLeft = skin.iconSpacing
+		iconSizeRight = 0
+		iconSpaceRight = 0
+	else
+		iconSizeLeft = 0
+		iconSpaceLeft = 0
+		iconSizeRight = 0
+		iconSpaceRight = 0
+	end
+	
+	-- icon frame
+	ex.iconFrame:ClearAllPoints()
+	if skin.iconAlign == "right" then
+		ex.iconFrame:Show()
+		ex.iconFrame:SetPoint("TOPRIGHT", -skin.padding, -skin.padding)
+		ex.iconFrame:SetPoint("BOTTOMLEFT", ex, "BOTTOMRIGHT", -skin.padding - iconSizeRight, skin.padding)
+	elseif skin.iconAlign == "left" then
+		ex.iconFrame:Show()
+		ex.iconFrame:SetPoint("TOPLEFT", skin.padding, -skin.padding)
+		ex.iconFrame:SetPoint("BOTTOMRIGHT", ex, "BOTTOMLEFT", skin.padding + iconSizeLeft, skin.padding)
+	else
+		ex.iconFrame:Hide()
+	end
+	ex.icon:SetPoint("TOPLEFT", skin.iconPadding, -skin.iconPadding)
+	ex.icon:SetPoint("BOTTOMRIGHT", -skin.iconPadding, skin.iconPadding)
+	
+	-- icon backdrop
+	if skin.iconBd then
+		ex.iconBd.bgFile = LSM:Fetch("statusbar", skin.iconBdBg)
+		ex.iconBd.edgeFile = LSM:Fetch("border", skin.iconBdBorder)
+		ex.iconBd.insets 	= { left = skin.iconInset, right = skin.iconInset, top = skin.iconInset, bottom = skin.iconInset }
+		ex.iconBd.edgeSize = skin.iconEdgeSize
+		ex.iconFrame:SetBackdrop(ex.iconBd)
+		ex.iconFrame:SetBackdropColor(unpack(skin.iconBdColor))
+		ex.iconFrame:SetBackdropBorderColor(unpack(skin.iconBdBorderColor))
+	else
+		ex.iconFrame:SetBackdrop(nil)
+	end
+	
+	-- barframe positioning
+	ex.barFrame:ClearAllPoints()
+	ex.barFrame:SetPoint("TOPLEFT", skin.padding + iconSizeLeft + iconSpaceLeft, -skin.padding)
+	ex.barFrame:SetPoint("BOTTOMRIGHT", - skin.padding - iconSizeRight - iconSpaceRight, skin.padding)
+	
+	-- barframe backdrop
+	ex.barBd = {}
+	if skin.barBd then
+		ex.barBd.bgFile = LSM:Fetch("statusbar", opt.barBgTexture)
+		ex.barBd.edgeFile = LSM:Fetch("border", skin.barBdBorder)
+		ex.barBd.insets 	= { left = skin.barInset, right = skin.barInset, top = skin.barInset, bottom = skin.barInset }
+		ex.barBd.edgeSize = skin.barEdgeSize
+		ex.barFrame:SetBackdrop(ex.barBd)
+		ex.barFrame:SetBackdropColor(unpack(opt.barBgColor))
+		ex.barFrame:SetBackdropBorderColor(unpack(skin.barBdBorderColor))
+	else
+		ex.barBd.bgFile = LSM:Fetch("statusbar", opt.barBgTexture)
+		ex.barBd.insets 	= { left = skin.barInset, right = skin.barInset, top = skin.barInset, bottom = skin.barInset }
+		ex.barFrame:SetBackdrop(ex.barBd)
+		ex.barFrame:SetBackdropColor(unpack(opt.barBgColor))
+	end
+	
+	-- bar
+	ex.bar:ClearAllPoints()
+	ex.bar:SetPoint("TOPLEFT", ex.barFrame, "TOPLEFT", skin.barPadding, -skin.barPadding)
+	ex.bar:SetPoint("BOTTOMRIGHT", ex.barFrame, "BOTTOMRIGHT", -skin.barPadding, skin.barPadding)
+	ex.bar:SetStatusBarTexture(LSM:Fetch("statusbar", opt.barTexture))
+	ex.bar:SetStatusBarColor(unpack(opt.barColor))
+	
+	-- texts
+	local fh = ex.bar:GetHeight() * skin.textLeftSize / 100
+	if fh < 5 then fh = 5 end
+	ex.textLeft:SetFont(LSM:Fetch("font", skin.textLeftFont), fh)
+	ex.textLeft:ClearAllPoints()
+	ex.textLeft:SetPoint("LEFT", ex.bar, "LEFT", skin.textLeftPadding, 0)
+	
+	fh = ex.bar:GetHeight() * skin.textRightSize / 100
+	if fh < 5 then fh = 5 end
+	ex.textRight:SetFont(LSM:Fetch("font", skin.textRightFont), fh)
+	ex.textRight:ClearAllPoints()
+	ex.textRight:SetPoint("RIGHT", ex.bar, "RIGHT", - skin.textRightPadding, 0)
 end
 
 function prototype:UpdateLayout()	
@@ -254,7 +371,9 @@ function prototype:UpdateLayout()
 	
 	-- fix the looks
 	-- TODO remember to implement grid skinning
-	if db.advancedSkin then
+	-- at least 1 px bar
+	if self.db.width <= (self.db.height + 1) then self.db.width = self.db.height + 2 end
+	if self.db.advancedSkin then
 		AdvancedSkin(self)
 	else
 		SimpleSkin(self)
@@ -393,20 +512,22 @@ function mod:AddBar(gridId)
 		point = "BOTTOMLEFT",
 		relativeTo = "UIParent",
     relativePoint = "BOTTOMLEFT",
-		width = 130,
-		height = 15,
+		width = 200,
+		height = 20,
 		exec = "return DoNothing()",
 		ups = 5,
 		gridId = gridId,
 		gridX = 1,	-- column
 		gridY = 1,	-- row
-		sizeX = 7, 	-- size in cells
+		sizeX = 10, 	-- size in cells
 		sizeY = 1, 	-- size in cells
 		advancedSkin = false,
 		
 		-- colors should be also specified per bar
-		barColor = { 1, 1, 0, 1 },
-		barBgColor = { 0, 0, 0, 0.3 },
+		barColor 			= { 0.43, 0.56, 1, 1 },
+		barBgColor 		= { 0.17, 0.22, 0.43, 0.5 },
+		barTexture		= "Aluminium",
+		barBgTexture	= "Aluminium",
 		-- also should be able to disable bg for simple layout
 		barBg = true,
 		
@@ -418,42 +539,44 @@ function mod:AddBar(gridId)
 			edgeSize								= 8,
 		
 			-- full backdrop
-			bd											= true,	-- false to hide it
+			bd											= false,	-- false to hide it
 			bdBg										= "Blizzard Tooltip",
 			bdColor									= { 0, 0, 0, 0 },
-			bdBorder								= "clcCastBar Border",
-			bdBorderColor						= { 0, 0, 0, 0 },
+			bdBorder								= "Blizzard Tooltip",
+			bdBorderColor						= { 1, 1, 1, 1 },
 			
 		
 			-- icon
-			iconSpacing							= 2,
+			iconSpacing							= -1,
 			iconAlign								= "left",
 			iconInset								= 0,
-			iconPadding							= 0,
+			iconPadding							= 1,
 			iconEdgeSize						= 8,
 			
 			-- icon backdrop
 			iconBd									= true,	-- false to hide it
 			iconBdBg								= "Blizzard Tooltip",
 			iconBdColor							= { 0, 0, 0, 0 },
-			iconBdBorder						= "clcCastBar Border",
-			iconBdBorderColor				= { 0, 0, 0, 0 },
+			iconBdBorder						= "Blizzard Tooltip",
+			iconBdBorderColor				= { 1, 1, 1, 1 },
 			
 			-- bar
-			barTexture							= "clcCastBar Statusbar",
-			barInset								= 0,
-			barPadding							= 0,
-			barEdgeSize							= 8,
+			barInset								= 2,
+			barPadding							= 2,
+			barEdgeSize							= 6,
 			
 			-- bar backdrop
 			barBd										= true, -- false to hide it
-			barBdBg									= "clcCastBar Statusbar",		-- this is the background bar texture
-			barBdColor 							= { 0, 0, 0, 0 },
-			barBdBorder 						= "clcCastBar Border",
-			barBdBorderColor 				= { 0, 0, 0, 0 },
+			barBdBorder 						= "Blizzard Tooltip",
+			barBdBorderColor 				= { 1, 1, 1, 1 },
 			
-			font										= "Friz Quadrata TT",
-			textPadding							= 4,
+			textLeftFont						= "Arial Narrow",
+			textLeftSize						= 70,
+			textLeftPadding					= 2,
+			
+			textRightFont						= "Arial Narrow",
+			textRightSize						= 70,
+			textRightPadding				= 2,
 		}
 	}
 	

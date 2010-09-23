@@ -8,6 +8,7 @@
 	- should be done by the mod not the object
 	
 - active template skinning options moved to respective elements global
+- way to copy settings from bar advanced (even between templates/chars)
 
 
 
