@@ -31,8 +31,8 @@ function mod:FindTemplate()
 end
 
 -- add a template
-function mod:AddTemplate()
-	table.insert(clcInfo.cdb.templates, {
+function mod:GetDefault()
+	return {
 		spec = { tree = 1, talent = 0, rank = 1 },
 		grids = {},
 		icons = {},
@@ -41,12 +41,14 @@ function mod:AddTemplate()
 			gridSize = 1,
 			showWhen = "always",
 		},
-		iconOptions = {
-			skinType = "Default",
-			bfSkin = "Blizzard",
-			bfGloss = 0,
-		},
-	})
+		skinOptions = {
+    	icons = clcInfo.display.icons:GetDefaultSkin(),
+    	bars = clcInfo.display.bars:GetDefaultSkin()
+    },
+	}
+end
+function mod:AddTemplate()
+	table.insert(clcInfo.cdb.templates, mod:GetDefault())
 	if clcInfo_Options then
 		clcInfo_Options:UpdateTemplateList()
 	end

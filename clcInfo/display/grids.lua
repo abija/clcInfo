@@ -189,8 +189,8 @@ function mod:InitGrids()
 	end
 end
 
-function mod:AddGrid()
-	local data = {
+function mod:GetDefault()
+	return {
 		-- cell size
 		cellWidth = 30,
 		cellHeight = 30,
@@ -206,10 +206,15 @@ function mod:AddGrid()
 		point = "CENTER",
     relativePoint = "CENTER",
     -- skin settings, so that we use grid skin when in a grid
-    skinType = "Default",
-		bfSkin = "Blizzard",
-		bfGloss = 0,
+    skinOptions = {
+    	icons = clcInfo.display.icons:GetDefaultSkin(),
+    	bars = clcInfo.display.bars:GetDefaultSkin()
+    },
 	}
+end
+function mod:AddGrid()
+	local data = mod:GetDefault()
+		
 	-- must be called after init
 	table.insert(db, data)
 	self:New(getn(db))

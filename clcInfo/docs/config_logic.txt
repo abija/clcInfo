@@ -1,0 +1,9 @@
+skin options are in
+
+any chance to fix it?
+
+- icon 			-> icon.lua, grid.lua, template.lua, core.lua
+- bar 			-> bar.lua, grid.lua, template.lua, core.lua
+- grid 			-> grid.lua, template.lua, core.lua
+- template 	-> template.lua, core.lua
+- core			-> templateoptions, default template

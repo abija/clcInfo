@@ -100,6 +100,21 @@ local function GetGridList()
 	return list
 end
 
+-- set/get for skin icons
+local function SetSkinIcons(info, val)
+	local obj = modIcons.active[tonumber(info[3])]
+	obj.db.skin[info[6]] = val
+	obj:UpdateLayout()
+end
+local function GetSkinIcons(info)
+	return modIcons.active[tonumber(info[3])].db.skin[info[6]]
+end
+local function GetSkinTypeList()
+	local list = { ["Default"] = "Default", ["BareBone"] = "BareBone" }
+	if clcInfo.lbf then list["Button Facade"] = "Button Facade" end
+	return list
+end
+
 function mod:UpdateIconList()
 	local db = modIcons.active
 	local optionsIcons = options.args.activeTemplate.args.icons
@@ -110,17 +125,45 @@ function mod:UpdateIconList()
 			name = "Icon" .. i,
 			childGroups = "tab",
 			args = {
-				-- grid options
-				tabGrid = {
-					order = 1, type = "group", name = "Grid",
+				-- general
+				tabGeneral = {
+					order = 1, type = "group", name = "General",
 					args = {
+						lock = {
+							order = 1, type = "group", inline = true, name = "",
+							args = {
+								lock = {
+				  				type = "execute", name = "Lock", func = Lock
+				  			},
+				  			unlock = {
+				  				type = "execute", name = "Unlock", func = Unlock,
+				  			},
+							},
+						},
 						grid = {
-							order = 1,  type = "group", inline = true, name = "",
+							order = 11, type = "group", inline = true, name = "",
 							args = {
 								gridId = {
 									order = 1, type = "select", name = "Select Grid", values = GetGridList,
 									get = Get, set = Set, 
 								},
+								skinSource = {
+									order = 2, type = "select", name = "Use skin from",
+									values = { Self = "Self", Template = "Template", Grid = "Grid" },
+									get = Get, set = Set, 
+								},
+							},
+						},
+					},
+				},
+			
+				-- grid options
+				tabGrid = {
+					order = 2, type = "group", name = "Grid",
+					args = {
+						grid = {
+							order = 1,  type = "group", inline = true, name = "",
+							args = {
 								gridX = {
 									order = 2, name = "Column", type = "range", min = 1, max = 200, step = 1,
 									get = Get, set = Set,
@@ -148,23 +191,11 @@ function mod:UpdateIconList()
 			
 				-- layout options
 				tabLayout = {
-					order = 2, type = "group", name = "Layout",
+					order = 3, type = "group", name = "Layout",
 					args = {
 						__dGrid = {
 							order = 1, type = "description",
 							name = "If a grid is selected, none of the following options have any real effect.\n",
-						},
-						
-						lock = {
-							order = 100, type = "group", inline = true, name = "Lock",
-							args = {
-								lock = {
-				  				type = "execute", name = "Lock", func = Lock
-				  			},
-				  			unlock = {
-				  				type = "execute", name = "Unlock", func = Unlock,
-				  			},
-							},
 						},
 					
 						position = {
@@ -201,10 +232,25 @@ function mod:UpdateIconList()
 					},
 				},
 				
+				tabSkin = {
+					order = 4, type = "group", name = "Skin",
+					args = {
+						selectType = {
+							order = 1, type = "group", inline = true, name = "Skin Type",
+							args = {
+								skinType = {
+									order = 1, type = "select", name = "Skin type", values = GetSkinTypeList,
+									get = GetSkinIcons, set = SetSkinIcons,
+								},
+							},
+						},
+					},
+				},
+				
 				
 				-- behavior options
 				tabBehavior = {
-					order = 3, type = "group", name = "Behavior", 
+					order = 5, type = "group", name = "Behavior", 
 					args = {
 						code = {
 							order = 1, type = "group", inline = true, name = "Code",
@@ -239,6 +285,25 @@ function mod:UpdateIconList()
 			},
 		}
 	end
+	
+	-- if we have lbf then add it to options
+  if clcInfo.lbf then
+  	for i = 1, #db do
+	  	optionsIcons.args[tostring(i)].args.tabSkin.args.bfOptions = {
+	  		order = 2, type = "group", inline = true, name = "Button Facade Options",
+	  		args = {
+	  			bfSkin = {
+	  				order = 1, type = "select", name = "Button Facade Skin", values = clcInfo.lbf.ListSkins,
+	  				get = GetSkinIcons, set = SetSkinIcons,
+	  			},
+	  			bfGloss = {
+	  				order = 1, type = "range", name = "Gloss", step = 1, min = 0, max = 100,
+	  				get = GetSkinIcons, set = SetSkinIcons,
+	  			},
+	  		}
+	  	}
+	  end
+  end
 	
 	if mod.lastIconCount > #(db) then
 		-- nil the rest of the args

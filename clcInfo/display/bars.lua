@@ -40,7 +40,7 @@ local function OnUpdate(self, elapsed)
 		-- expose the object
 		clcInfo.env.cBar = self
 		
-		local visible, texture, minValue, maxValue, value, valueFunc, textLeft, textRight, alpha, svc, r, g, b, a = self.exec()
+		local visible, texture, minValue, maxValue, value, valueFunc, textLeft, textCenter, textRight, alpha, svc, r, g, b, a = self.exec()
 		self.visible = visible
 		if not visible then self:FakeHide() return end
 		
@@ -48,9 +48,11 @@ local function OnUpdate(self, elapsed)
 		self.value = value
 		
 		textLeft = textLeft or ""
+		textCenter = textCenter or ""
 		righText = textRight or ""
 		
 		self.elements.textLeft:SetText(textLeft)
+		self.elements.textCenter:SetText(textCenter)
 		self.elements.textRight:SetText(textRight)
 		
 		self.elements.icon:SetTexture(texture)
@@ -91,7 +93,7 @@ function prototype:Init()
 	ex.iconBd = {}
 	ex.icon = ex.iconFrame:CreateTexture(nil, "ARTWORK")
 	ex.icon:SetTexture("Interface\\Icons\\ABILITY_SEAL")
-	ex.icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
+	ex.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 	
 	ex.barFrame = CreateFrame("Frame", nil, ex)
 	ex.barBd = {}
@@ -100,6 +102,8 @@ function prototype:Init()
 	-- TODO - look for better fonts, there are some _LEFT fonts in blizzard's lists?
 	ex.textLeft = ex.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
 	ex.textLeft:SetJustifyH("LEFT")
+	ex.textCenter = ex.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
+	ex.textCenter:SetJustifyH("CENTER")
 	ex.textRight = ex.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
 	ex.textRight:SetJustifyH("RIGHT")
 	
@@ -141,13 +145,15 @@ function prototype:Unlock()
   -- store important values
   local ex = self.elements
   self.lockTextLeft = ex.textLeft:GetText()
+  self.lockTextCenter = ex.textCenter:GetText()
   self.lockTextRight = ex.textRight:GetText()
   self.lockValue = ex.bar:GetValue()
   self.lockMinValue, self.lockMaxValue = ex.bar:GetMinMaxValues()
   
   -- change them
   ex.textLeft:SetText(self.label)
-  ex.textRight:SetText("35")
+  ex.textCenter:SetText(self.label)
+  ex.textRight:SetText(self.label)
   ex.bar:SetMinMaxValues(0, 1)
   ex.bar:SetValue(0.55)
   
@@ -162,6 +168,7 @@ function prototype:Lock()
   -- restore changed values
   local ex = self.elements
   ex.textLeft:SetText(self.lockTextLeft)
+  ex.textCenter:SetText(self.lockTextCenter)
   ex.textRight:SetText(self.lockTextRight)
   ex.bar:SetMinMaxValues(self.lockMinValue, self.lockMaxValue)
   ex.bar:SetValue(self.lockValue)
@@ -173,7 +180,7 @@ end
 
 
 -- display the elements according to the settings
-local function TryGridPositioning(self)
+local function TryGridPositioning(self, skin)
 	if self.db.gridId <= 0 then return false end
 	
 	local f = clcInfo.display.grids.active[self.db.gridId]
@@ -200,7 +207,7 @@ local function TryGridPositioning(self)
 end
 
 -- for lazy/normal? people
-local function SimpleSkin(self)
+local function SimpleSkin(self, skin)
 	local opt = self.db
 	local ex = self.elements
 	
@@ -211,13 +218,13 @@ local function SimpleSkin(self)
 	ex.bar:SetAllPoints(ex.barFrame)
 	ex.icon:SetAllPoints(ex.iconFrame)
 	
-	if not opt.barBg then
+	if not skin.barBg then
 		ex.barFrame:SetBackdrop(nil)
 	else
-		ex.barBd.bgFile = LSM:Fetch("statusbar", opt.barBgTexture)
+		ex.barBd.bgFile = LSM:Fetch("statusbar", skin.barBgTexture)
 		ex.barBd.insets 	= { left = 0, right = 0, top = 0, bottom = 0 }
 		ex.barFrame:SetBackdrop(ex.barBd)
-		ex.barFrame:SetBackdropColor(unpack(opt.barBgColor))
+		ex.barFrame:SetBackdropColor(unpack(skin.barBgColor))
 		ex.barFrame:SetBackdropBorderColor(0, 0, 0, 0)
 	end
 	
@@ -231,18 +238,26 @@ local function SimpleSkin(self)
 	ex.barFrame:SetHeight(opt.height)
 	ex.barFrame:SetPoint("LEFT", ex, "LEFT", opt.height + 1, 0)
 	
-	ex.bar:SetStatusBarTexture(LSM:Fetch("statusbar", opt.barTexture))
-	ex.bar:SetStatusBarColor(unpack(opt.barColor))
+	ex.bar:SetStatusBarTexture(LSM:Fetch("statusbar", skin.barTexture))
+	ex.bar:SetStatusBarColor(unpack(skin.barColor))
 	
 	-- font size should be height - 5 ? good balpark?
 	-- stack
 	local fh = opt.height * 0.7
 	if fh < 6 then fh = 6 end
 	local fontFace, _, fontFlags = ex.textLeft:GetFont()
+	
 	ex.textLeft:SetFont(fontFace, fh, fontFlags)
 	ex.textLeft:SetPoint("LEFT", ex.barFrame, "LEFT", 2, 0)
+	ex.textLeft:SetVertexColor(1, 1, 1, 1)
+	
+	ex.textCenter:SetFont(fontFace, fh, fontFlags)
+	ex.textCenter:SetPoint("CENTER", ex.barFrame)
+	ex.textCenter:SetVertexColor(1, 1, 1, 1)
+	
 	ex.textRight:SetFont(fontFace, fh, fontFlags)
 	ex.textRight:SetPoint("RIGHT", ex.barFrame, "RIGHT", -2, 0)
+	ex.textRight:SetVertexColor(1, 1, 1, 1)
 end
 
 -- plenty of options
@@ -320,26 +335,26 @@ local function AdvancedSkin(self)
 	-- barframe backdrop
 	ex.barBd = {}
 	if skin.barBd then
-		ex.barBd.bgFile = LSM:Fetch("statusbar", opt.barBgTexture)
+		ex.barBd.bgFile = LSM:Fetch("statusbar", skin.barBgTexture)
 		ex.barBd.edgeFile = LSM:Fetch("border", skin.barBdBorder)
 		ex.barBd.insets 	= { left = skin.barInset, right = skin.barInset, top = skin.barInset, bottom = skin.barInset }
 		ex.barBd.edgeSize = skin.barEdgeSize
 		ex.barFrame:SetBackdrop(ex.barBd)
-		ex.barFrame:SetBackdropColor(unpack(opt.barBgColor))
+		ex.barFrame:SetBackdropColor(unpack(skin.barBgColor))
 		ex.barFrame:SetBackdropBorderColor(unpack(skin.barBdBorderColor))
 	else
-		ex.barBd.bgFile = LSM:Fetch("statusbar", opt.barBgTexture)
+		ex.barBd.bgFile = LSM:Fetch("statusbar", skin.barBgTexture)
 		ex.barBd.insets 	= { left = skin.barInset, right = skin.barInset, top = skin.barInset, bottom = skin.barInset }
 		ex.barFrame:SetBackdrop(ex.barBd)
-		ex.barFrame:SetBackdropColor(unpack(opt.barBgColor))
+		ex.barFrame:SetBackdropColor(unpack(skin.barBgColor))
 	end
 	
 	-- bar
 	ex.bar:ClearAllPoints()
 	ex.bar:SetPoint("TOPLEFT", ex.barFrame, "TOPLEFT", skin.barPadding, -skin.barPadding)
 	ex.bar:SetPoint("BOTTOMRIGHT", ex.barFrame, "BOTTOMRIGHT", -skin.barPadding, skin.barPadding)
-	ex.bar:SetStatusBarTexture(LSM:Fetch("statusbar", opt.barTexture))
-	ex.bar:SetStatusBarColor(unpack(opt.barColor))
+	ex.bar:SetStatusBarTexture(LSM:Fetch("statusbar", skin.barTexture))
+	ex.bar:SetStatusBarColor(unpack(skin.barColor))
 	
 	-- texts
 	local fh = ex.bar:GetHeight() * skin.textLeftSize / 100
@@ -347,12 +362,21 @@ local function AdvancedSkin(self)
 	ex.textLeft:SetFont(LSM:Fetch("font", skin.textLeftFont), fh)
 	ex.textLeft:ClearAllPoints()
 	ex.textLeft:SetPoint("LEFT", ex.bar, "LEFT", skin.textLeftPadding, 0)
+	ex.textLeft:SetVertexColor(unpack(skin.textLeftColor))
+	
+	fh = ex.bar:GetHeight() * skin.textCenterSize / 100
+	if fh < 5 then fh = 5 end
+	ex.textCenter:SetFont(LSM:Fetch("font", skin.textCenterFont), fh)
+	ex.textCenter:ClearAllPoints()
+	ex.textCenter:SetPoint("CENTER", ex.bar)
+	ex.textCenter:SetVertexColor(unpack(skin.textCenterColor))
 	
 	fh = ex.bar:GetHeight() * skin.textRightSize / 100
 	if fh < 5 then fh = 5 end
 	ex.textRight:SetFont(LSM:Fetch("font", skin.textRightFont), fh)
 	ex.textRight:ClearAllPoints()
 	ex.textRight:SetPoint("RIGHT", ex.bar, "RIGHT", - skin.textRightPadding, 0)
+	ex.textRight:SetVertexColor(unpack(skin.textRightColor))
 end
 
 function prototype:UpdateLayout()	
@@ -369,14 +393,24 @@ function prototype:UpdateLayout()
 	self.elements:ClearAllPoints()
 	self.elements:SetAllPoints(self)
 	
-	-- fix the looks
 	-- TODO remember to implement grid skinning
+	
 	-- at least 1 px bar
 	if self.db.width <= (self.db.height + 1) then self.db.width = self.db.height + 2 end
-	if self.db.advancedSkin then
-		AdvancedSkin(self)
+	
+	local skin
+	if onGrid and self.db.skinSource == "Grid" then
+		skin = clcInfo.display.grids.active[self.db.gridId].db.skinOptions.bars
+	elseif self.db.skinSource == "Template" then
+		skin = clcInfo.activeTemplate.skinOptions.bars
 	else
-		SimpleSkin(self)
+		skin = self.db.skin
+	end
+	
+	if skin.advancedSkin then
+		AdvancedSkin(self, skin)
+	else
+		SimpleSkin(self, skin)
 	end
 end
 
@@ -499,14 +533,77 @@ function mod:InitBars()
 	end
 end
 
-function mod:AddBar(gridId)
+
+-- the bullcrap of skin related settings
+function mod.GetDefaultSkin()
+	return {
+		advancedSkin = false,
+			
+		barColor 			= { 0.43, 0.56, 1, 1 },
+		barBgColor 		= { 0.17, 0.22, 0.43, 0.5 },
+		barTexture		= "Aluminium",
+		barBgTexture	= "Aluminium",
+		barBg = true,
+		
+		-- icon + bar
+		inset										= 0,
+		padding									= 0,
+		edgeSize								= 8,
+	
+		-- full backdrop
+		bd											= false,	-- false to hide it
+		bdBg										= "Blizzard Tooltip",
+		bdColor									= { 0, 0, 0, 0 },
+		bdBorder								= "Blizzard Tooltip",
+		bdBorderColor						= { 1, 1, 1, 1 },
+		
+	
+		-- icon
+		iconSpacing							= -1,
+		iconAlign								= "left",
+		iconInset								= 0,
+		iconPadding							= 1,
+		iconEdgeSize						= 8,
+		
+		-- icon backdrop
+		iconBd									= true,	-- false to hide it
+		iconBdBg								= "Blizzard Tooltip",
+		iconBdColor							= { 0, 0, 0, 0 },
+		iconBdBorder						= "Blizzard Tooltip",
+		iconBdBorderColor				= { 1, 1, 1, 1 },
+		
+		-- bar
+		barInset								= 2,
+		barPadding							= 2,
+		barEdgeSize							= 6,
+		
+		-- bar backdrop
+		barBd										= true, -- false to hide it
+		barBdBorder 						= "Blizzard Tooltip",
+		barBdBorderColor 				= { 1, 1, 1, 1 },
+		
+		textLeftFont						= "Arial Narrow",
+		textLeftSize						= 70,
+		textLeftPadding					= 2,
+		textLeftColor						= {1, 1, 1, 1},
+		
+		textCenterFont					= "Arial Narrow",
+		textCenterSize					= 70,
+		textCenterColor					= {1, 1, 1, 1},
+		
+		textRightFont						= "Arial Narrow",
+		textRightSize						= 70,
+		textRightPadding				= 2,
+		textRightColor					= {1, 1, 1, 1},
+	}
+end
+function mod:GetDefault()
 	local x = (UIParent:GetWidth() - 130) / 2 * UIParent:GetScale()
 	local y = (UIParent:GetHeight() - 15) / 2 * UIParent:GetScale()
 	
-	if gridId == nil then gridId = 0 end
-	
+
 	-- bar default settings
-	local data = {
+	return {
 		x = x,
 		y = y,
 		point = "BOTTOMLEFT",
@@ -516,69 +613,21 @@ function mod:AddBar(gridId)
 		height = 20,
 		exec = "return DoNothing()",
 		ups = 5,
-		gridId = gridId,
+		gridId = 0,
 		gridX = 1,	-- column
 		gridY = 1,	-- row
-		sizeX = 10, 	-- size in cells
+		sizeX = 10, -- size in cells
 		sizeY = 1, 	-- size in cells
-		advancedSkin = false,
 		
-		-- colors should be also specified per bar
-		barColor 			= { 0.43, 0.56, 1, 1 },
-		barBgColor 		= { 0.17, 0.22, 0.43, 0.5 },
-		barTexture		= "Aluminium",
-		barBgTexture	= "Aluminium",
-		-- also should be able to disable bg for simple layout
-		barBg = true,
-		
-		-- the bullcrap of skin related settings
-		skin = {
-			-- icon + bar
-			inset										= 0,
-			padding									= 0,
-			edgeSize								= 8,
-		
-			-- full backdrop
-			bd											= false,	-- false to hide it
-			bdBg										= "Blizzard Tooltip",
-			bdColor									= { 0, 0, 0, 0 },
-			bdBorder								= "Blizzard Tooltip",
-			bdBorderColor						= { 1, 1, 1, 1 },
-			
-		
-			-- icon
-			iconSpacing							= -1,
-			iconAlign								= "left",
-			iconInset								= 0,
-			iconPadding							= 1,
-			iconEdgeSize						= 8,
-			
-			-- icon backdrop
-			iconBd									= true,	-- false to hide it
-			iconBdBg								= "Blizzard Tooltip",
-			iconBdColor							= { 0, 0, 0, 0 },
-			iconBdBorder						= "Blizzard Tooltip",
-			iconBdBorderColor				= { 1, 1, 1, 1 },
-			
-			-- bar
-			barInset								= 2,
-			barPadding							= 2,
-			barEdgeSize							= 6,
-			
-			-- bar backdrop
-			barBd										= true, -- false to hide it
-			barBdBorder 						= "Blizzard Tooltip",
-			barBdBorderColor 				= { 1, 1, 1, 1 },
-			
-			textLeftFont						= "Arial Narrow",
-			textLeftSize						= 70,
-			textLeftPadding					= 2,
-			
-			textRightFont						= "Arial Narrow",
-			textRightSize						= 70,
-			textRightPadding				= 2,
-		}
+		skinSource = "Template",	-- template, grid, self
+		skin = mod:GetDefaultSkin(),
 	}
+end
+function mod:AddBar(gridId)
+	local data = mod:GetDefault()
+	gridId = gridId or 0
+	data.gridId = gridId
+	if gridId > 0 then data.skinSource = "Grid" end
 	
 	-- must be called after init
 	table.insert(db, data)

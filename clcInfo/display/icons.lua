@@ -328,8 +328,13 @@ function prototype:UpdateLayout()
 	
 	-- get the grid skin if on a grid
 	local skinType, bfSkin, bfGloss, g
-	if onGrid then g = clcInfo.display.grids.active[self.db.gridId].db
-	else g = clcInfo.activeTemplate.iconOptions end
+	if onGrid and self.db.skinSource == "Grid" then
+		g = clcInfo.display.grids.active[self.db.gridId].db.skinOptions.icons
+	elseif self.db.skinSource == "Template" then
+		g = clcInfo.activeTemplate.skinOptions.icons
+	else
+		g = self.db.skin
+	end
 	skinType, bfSkin, bfGloss = g.skinType, g.bfSkin, g.bfGloss
 
 	if skinType == "Button Facade" and lbf then
@@ -461,13 +466,18 @@ function mod:InitIcons()
 	end
 end
 
-function mod:AddIcon(gridId)
+function mod:GetDefaultSkin()
+	return {
+		skinType = "Default",
+		bfSkin = "Blizzard",
+		bfGloss = 0,
+	}
+end
+function mod:GetDefault()
 	local x = (UIParent:GetWidth() - 30) / 2 * UIParent:GetScale()
 	local y = (UIParent:GetHeight() - 30) / 2 * UIParent:GetScale()
 	
-	if gridId == nil then gridId = 0 end
-
-	local data = {
+	return {
 		x = x,
 		y = y,
 		point = "BOTTOMLEFT",
@@ -477,12 +487,22 @@ function mod:AddIcon(gridId)
 		height = 30,
 		exec = "return DoNothing()",
 		ups = 5,
-		gridId = gridId,
+		gridId = 0,
 		gridX = 1,	-- column
 		gridY = 1,	-- row
 		sizeX = 1, 	-- size in cells
 		sizeY = 1, 	-- size in cells
+		
+		skinSource = "Template",	-- template, grid, self
+		skin = mod:GetDefaultSkin(),
 	}
+end
+function mod:AddIcon(gridId)
+	local data = mod:GetDefault()
+	gridId = gridId or 0
+	data.gridId = gridId
+	if gridId > 0 then data.skinSource = "Grid" end
+	
 	-- must be called after init
 	table.insert(db, data)
 	self:New(getn(db))

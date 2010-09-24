@@ -6,8 +6,6 @@ local function bprint(...)
 	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\core> " .. table.concat(t, " "))
 end
 
-local __version = 1
-
 -- clcInfo = LibStub("AceAddon-3.0"):NewAddon("clcInfo", "AceConsole-3.0")
 clcInfo = {}
 clcInfo.display = { templates = {}, grids = {}, icons = {}, bars = {} }
@@ -74,7 +72,7 @@ end
 
 function clcInfo:OnInitialize()
 	self:ReadSavedData()
-	self:FixSavedData()
+	if not self:FixSavedData() then return end
 	
 	-- init the class modules
 	for c in pairs(clcInfo.classModules) do
@@ -168,25 +166,9 @@ function clcInfo:ReadSavedData()
 	if not clcInfoCharDB then
 		clcInfoCharDB = {
 			classModules = {},
-			templates = {
-				-- this is a blank template
-				{
-					spec = { tree = 1, talent = 0, rank = 1 },
-					grids = {},
-					icons = {},
-					bars = {},
-					options = {
-						gridSize = 1,
-						showWhen = "always",
-					},
-					iconOptions = {
-						skinType = "Default",
-						bfSkin = "Blizzard",
-						bfGloss = 0,
-					},
-				},
-			},
+			templates = {},				
 		}
+		table.insert(clcInfoCharDB.templates, clcInfo.display.templates:GetDefault())
 	end
 
 	clcInfo.db = clcInfoDB	
@@ -324,44 +306,3 @@ clcInfo.eventFrame:RegisterEvent("QUEST_LOG_UPDATE")
 
 
 
---------------------------------------------------------------------------------
--- TODO, make this GOOD
--- !!! think properly about this shit
---------------------------------------------------------------------------------
---[[
-mirrors config table t2 to t1
-	* looks for keys in t2 that do not exist in t1 and adds them
-	* looks for keys in t1 that do not exist in t2 and deletes them
-	* common keys are not changed
---]]
-local function HasKey(t, key)
-	for k, v in pairs(t) do
-		if k == key then return true end
-	end
-	return false
-end
-local function AdaptConfig(t1, t2)
-	for k, v in pairs(t2) do
-		if not HasKey(t1, k) then t1[k] = v end
-	end
-
-	for k, v in pairs(t1) do
-		if not HasKey(t2, k) then t1[k] = nil end
-	end
-end
-
--- NOT FINISHED
-function clcInfo:FixSavedData()
-	-- check last version
-	
-	if not clcInfoCharDB.lastVersion then clcInfoCharDB.lastVersion = 0 end
-	if clcInfoCharDB.lastVersion == __version then return end
-	clcInfoCharDB.lastVersion = __version
-	
-	AdaptConfig(clcInfoCharDB, { classModules = {}, templates = {} })
-	local xdb = clcInfoCharDB.templates
-	for i = 1, #xdb do
-		AdaptConfig(xdb[i], { spec = {}, grids = {}, icons = {}, bars = {}, options = {}, iconOptions = {} })
-	end
-end
---------------------------------------------------------------------------------
