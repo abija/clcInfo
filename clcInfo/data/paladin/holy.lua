@@ -1,0 +1,57 @@
+-- build check
+local _, _, _, toc = GetBuildInfo()
+if toc >= 40000 then return end
+
+-- don't load if class is wrong
+local _, class = UnitClass("player")
+if class ~= "PALADIN" then return end
+
+local function bprint(...)
+	local t = {}
+	for i = 1, select("#", ...) do
+		t[i] = tostring(select(i, ...))
+	end
+	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\data\\paladin\\holy> " .. table.concat(t, " "))
+end
+
+local emod = clcInfo.env
+
+-- sacred shield shit
+do
+	local groupUnitList = { "player", "playerpet" }
+	-- add group
+	for i = 1, 4 do
+		groupUnitList[#groupUnitList] = "party" .. i
+		groupUnitList[#groupUnitList] = "partypet" .. i
+	end
+	-- add raid
+	for i = 1, 40 do
+		groupUnitList[#groupUnitList] = "raid" .. i
+		groupUnitList[#groupUnitList] = "raidpet" .. i
+	end
+	-- add bosses
+	for i = 1, 5 do
+		groupUnitList[#groupUnitList] = "boss" .. i
+	end
+	function emod.BarSacredShield(timeRight)
+		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
+		local j
+		for i = 1, #groupUnitList do
+			if UnitExists(groupUnitList[i]) then
+				j = 1
+				name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitBuff(groupUnitList[i], j)
+				while name do
+					if spellID == 53601 and caster == "player" then
+						local value = expires - GetTime()
+						if timeRight then
+							timeRight = tostring(math.floor(value + 0.5))
+						end
+						return true, icon, 0, duration, value, "normal", name, "", timeRight
+					end
+					j = j + 1
+					name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitBuff(groupUnitList[i], j)
+				end
+			end
+		end
+	end
+end

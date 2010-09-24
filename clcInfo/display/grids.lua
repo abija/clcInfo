@@ -76,9 +76,8 @@ function prototype:Update()
 	if g.cellHeight < 1 then g.cellHeight = 1 end
 	
 	self:ClearAllPoints() -- TODO check if it's any difference
-	-- border of 10 to make it easier to drag
-	self:SetWidth(g.cellsX * g.cellWidth + (g.cellsX - 1) * g.spacingX + 20)
-	self:SetHeight(g.cellsY * g.cellHeight + (g.cellsY - 1) * g.spacingY + 20)
+	self:SetWidth(g.cellsX * g.cellWidth + (g.cellsX - 1) * g.spacingX)
+	self:SetHeight(g.cellsY * g.cellHeight + (g.cellsY - 1) * g.spacingY)
 	self:SetPoint(g.point, "UIParent", g.relativePoint, g.x, g.y)	
 	
 	self:UpdateElements()

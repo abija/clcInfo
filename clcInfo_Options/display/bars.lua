@@ -125,7 +125,7 @@ function mod:UpdateBarList()
 					order = 1, type = "group", name = "General",
 					args = {
 						lock = {
-							order = 100, type = "group", inline = true, name = "",
+							order = 1, type = "group", inline = true, name = "",
 							args = {
 								lock = {
 				  				type = "execute", name = "Lock", func = Lock
@@ -136,7 +136,7 @@ function mod:UpdateBarList()
 							},
 						},
 						grid = {
-							order = 11, type = "group", inline = true, name = "",
+							order = 2, type = "group", inline = true, name = "",
 							args = {
 								gridId = {
 									order = 1, type = "select", name = "Select Grid", values = GetGridList,
@@ -146,6 +146,23 @@ function mod:UpdateBarList()
 									order = 2, type = "select", name = "Use skin from",
 									values = { Self = "Self", Template = "Template", Grid = "Grid" },
 									get = Get, set = Set, 
+								},
+							},
+						},
+						ownColors = {
+							order = 3, type = "group", inline = true, name = "Colors",
+							args = {
+								ownColors = {
+									order = 1, type = "toggle", width = "full", name = "Force own colors.",
+									get = Get, set = Set,
+								},
+								barColor = {
+										order = 2, type = "color", hasAlpha = true, name = "Bar",
+										get = GetSkinBarsColor, set = SetSkinBarsColor,
+									},
+								barBgColor = {
+									order = 3, type = "color", hasAlpha = true, name = "Background",
+									get = GetSkinBarsColor, set = SetSkinBarsColor,
 								},
 							},
 						},

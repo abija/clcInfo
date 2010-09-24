@@ -211,11 +211,11 @@ function mod:UpdateGridList()
 							order = 6, type = "group", inline = true, name = "Spacing",
 							args = {
 								spacingX = {
-									order = 3, name = "Horizontal", type = "range", min = 1, max = 50, step = 1,
+									order = 3, name = "Horizontal", type = "range", min = -10, max = 50, step = 1,
 									get = Get, set = Set,
 								},
 								spacingY = {
-									order = 4, name = "Vertical", type = "range", min = 1, max = 50, step = 1,
+									order = 4, name = "Vertical", type = "range", min = -10, max = 50, step = 1,
 									get = Get, set = Set,
 								},
 							},

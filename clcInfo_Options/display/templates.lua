@@ -11,6 +11,8 @@ local mod = clcInfo_Options
 local AceRegistry = mod.AceRegistry
 local options = mod.options
 
+local currentTree
+
 -- TODO!
 -- use temp spec entry and a save button isntead of updating every change
 -- TODO
@@ -51,10 +53,34 @@ end
 
 local function SpecSet(info, val)
 	--local db = clcInfo.cdb.templates
-	local i = tonumber(info[2])
-	clcInfo.cdb.templates[i].spec[info[5]] = val
-	options.args.templates.args[info[2]].args.tabSpec.args.spec.name = SpecToString(i)
+	clcInfo.cdb.templates[tonumber(info[2])].spec[info[5]] = val
 	clcInfo:OnTemplatesUpdate()
+end
+
+local function GetTalentTrees()
+	local list = {}
+	local name
+	for i = 1, 3 do  
+		name = GetTalentTabInfo(i)
+		table.insert(list, name)
+	end
+	return list
+end
+local function GetTreeTalents(tree)
+	local list = {}
+	local n = GetNumTalents(tree)
+	local name
+	for i = 1, n do
+		name = GetTalentInfo(tree, i)
+		table.insert(list, name)
+	end
+	return list
+end
+
+local specTrees = GetTalentTrees()
+local specTalents = { GetTreeTalents(1), GetTreeTalents(2), GetTreeTalents(3) }
+local function GetTalentList(info)
+	return specTalents[clcInfo.cdb.templates[tonumber(info[2])].spec.tree]
 end
 
 function mod:UpdateTemplateList()
@@ -72,40 +98,19 @@ function mod:UpdateTemplateList()
 					order = 1,
 					args = {
 						spec = {
-							type = "group",
-							inline = true,
-							name = SpecToString(i),
-							order = 1,
+							order = 1, type = "group", inline = true, name = "",							
 							args = {
 								tree = {
-									type = "range",
-									name = "Tree",
-									order = 1,
-									min = 1,
-									max = 3,
-									step = 1,
-									get = SpecGet,
-									set = SpecSet,	
+									order = 1, type = "select", name = "Tree", values = specTrees,
+									get = SpecGet, set = SpecSet,	
 								},
 								talent = {
-									type = "range",
-									name = "Talent",
-									order = 2,
-									min = 0,
-									max = 50,
-									step = 1,
-									get = SpecGet,
-									set = SpecSet,		
+									order = 2, type = "select", name = "Talent", values = GetTalentList,
+									get = SpecGet, set = SpecSet,		
 								},
 								rank = {
-									type = "range",
-									name = "Rank",
-									order = 3,
-									min = 1,
-									max = 5,
-									step = 1,
-									get = SpecGet,
-									set = SpecSet,		
+									order = 3, type = "range", min = 1, max = 5, step = 1, name = "Rank",
+									get = SpecGet, set = SpecSet,		
 								},
 							},
 						},

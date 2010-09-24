@@ -186,7 +186,10 @@ end
 --------------------------------------------------------------------------------
 -- handle showing and hiding elements depending on target/combat/other stuff
 --------------------------------------------------------------------------------
-function clcInfo.ChangeShowWhen(info, val)
+-- IMPORTANT!!!
+-- TODO!!!
+-- because I'm a retard I used this function in an option Set or Get
+function clcInfo.ChangeShowWhen()
 	if not clcInfo.activeTemplate then return end
 	
 	local mf = clcInfo.mf
@@ -197,11 +200,7 @@ function clcInfo.ChangeShowWhen(info, val)
 		return
 	end
 
-	if val then
-		clcInfo.activeTemplate.options.showWhen = val
-	else
-		val = clcInfo.activeTemplate.options.showWhen
-	end
+	local val = clcInfo.activeTemplate.options.showWhen
 
 	-- unregister all events first
 	local f = clcInfo.eventFrame
@@ -280,7 +279,11 @@ function clcInfo.UNIT_ENTERED_VEHICLE(self, event, unit)
 		end
 	end
 end
-clcInfo.UNIT_EXITED_VEHICLE = clcInfo.ChangeShowWhen
+function clcInfo.UNIT_EXITED_VEHICLE(self, event, unit)
+	if unit == "player" then
+		clcInfo.ChangeShowWhen()
+	end
+end
 --------------------------------------------------------------------------------
 
 

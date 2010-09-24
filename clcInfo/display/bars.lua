@@ -40,11 +40,12 @@ local function OnUpdate(self, elapsed)
 		-- expose the object
 		clcInfo.env.cBar = self
 		
-		local visible, texture, minValue, maxValue, value, valueFunc, textLeft, textCenter, textRight, alpha, svc, r, g, b, a = self.exec()
+		-- mode is either "normal" or "reversed" which refer to elapsed based bars or unspecified
+		local visible, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight, alpha, svc, r, g, b, a = self.exec()
 		self.visible = visible
 		if not visible then self:FakeHide() return end
 		
-		self.valueFunc = valueFunc
+		self.mode = mode
 		self.value = value
 		
 		textLeft = textLeft or ""
@@ -55,19 +56,27 @@ local function OnUpdate(self, elapsed)
 		self.elements.textCenter:SetText(textCenter)
 		self.elements.textRight:SetText(textRight)
 		
-		self.elements.icon:SetTexture(texture)
+		if texture ~= self.lastTexture then
+			self.elements.icon:SetTexture(texture)
+			self.lastTexture = texture
+		end
 	
 		bar:SetMinMaxValues(minValue, maxValue)
 		bar:SetValue(value)
 	else
+		-- on timer based bars, regardless if we update info or not, the bar still needs to progress
+		-- on custom bars, probably will just skip
+		-- STIL NOT DECIDED !!!
 		if not self.visible then self:FakeHide() return end
-		if self.valueFunc then
-			self.value = self.valueFunc(self.value, elapsed)
+		
+		if self.mode == "normal" then
+			self.value = self.value - elapsed
+		elseif self.mode == "reversed" then
+			self.value = self.value + elapsed
 		end
+		
 		bar:SetValue(self.value)	
 	end
-	
-	-- regardless if we update info or not, the bar still needs to progress
 	self:FakeShow()
 end
 
@@ -111,6 +120,9 @@ function prototype:Init()
 	self:FakeHide()
 	self:Show()
 	self:SetScript("OnUpdate", OnUpdate)	
+	
+	-- needed stuff
+	self.lastTexture = nil
 	
 	-- move and config
   self:EnableMouse(false)
@@ -157,6 +169,8 @@ function prototype:Unlock()
   ex.bar:SetMinMaxValues(0, 1)
   ex.bar:SetValue(0.55)
   
+  self.locked = false
+  
   self:FakeShow()
 end
 
@@ -172,6 +186,8 @@ function prototype:Lock()
   ex.textRight:SetText(self.lockTextRight)
   ex.bar:SetMinMaxValues(self.lockMinValue, self.lockMaxValue)
   ex.bar:SetValue(self.lockValue)
+  
+  self.locked = true
   
   -- restore update function
   self:FakeHide()
@@ -199,8 +215,8 @@ local function TryGridPositioning(self, skin)
 	self:SetHeight(self.db.height)
 	
 	-- position
-	local x = 10 + g.cellWidth * (self.db.gridX - 1) + g.spacingX * (self.db.gridX - 1)
-	local y = 10 + g.cellHeight * (self.db.gridY - 1) + g.spacingY * (self.db.gridY - 1)
+	local x = g.cellWidth * (self.db.gridX - 1) + g.spacingX * (self.db.gridX - 1)
+	local y = g.cellHeight * (self.db.gridY - 1) + g.spacingY * (self.db.gridY - 1)
 	self:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", x, y)
 		
 	return true
@@ -412,6 +428,12 @@ function prototype:UpdateLayout()
 	else
 		SimpleSkin(self, skin)
 	end
+	
+	-- own colors to make it easier to configure
+	if self.db.ownColors then
+		self.elements.bar:SetStatusBarColor(unpack(self.db.skin.barColor))
+		self.elements.barFrame:SetBackdropColor(unpack(self.db.skin.barBgColor))
+	end
 end
 
 function prototype:UpdateExec()
@@ -420,7 +442,7 @@ function prototype:UpdateExec()
 	self.elapsed = 100 --> forc instant update
 	
 	self.visible = false
-	self.valueFunc = nil
+	self.mode = nil
 	self.value = 0
 	
 	local err
@@ -435,7 +457,9 @@ function prototype:UpdateExec()
   setfenv(self.exec, clcInfo.env)
   
   -- reset stuff changed when update is removed
-  self:SetScript("OnUpdate", OnUpdate)
+  if self.locked then
+  	self:SetScript("OnUpdate", OnUpdate)
+  end
   self.externalUpdate = false
   if self.ExecCleanup then
   	self.ExecCleanup()
@@ -616,10 +640,11 @@ function mod:GetDefault()
 		gridId = 0,
 		gridX = 1,	-- column
 		gridY = 1,	-- row
-		sizeX = 10, -- size in cells
+		sizeX = 1, 	-- size in cells
 		sizeY = 1, 	-- size in cells
 		
 		skinSource = "Template",	-- template, grid, self
+		ownColors	= false,
 		skin = mod:GetDefaultSkin(),
 	}
 end

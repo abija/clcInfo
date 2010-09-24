@@ -25,3 +25,9 @@ data\paladin\holy.lua
 data\paladin\custom.lua
 
 data\deathknight\global.lua
+
+data\paladin\global_40.lua
+data\paladin\retribution_40.lua
+data\paladin\protection_40.lua
+data\paladin\retribution_40.lua
+data\paladin\holy_40.lua

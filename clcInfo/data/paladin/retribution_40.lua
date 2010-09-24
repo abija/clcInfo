@@ -1,6 +1,7 @@
 -- build check
 local _, _, _, toc = GetBuildInfo()
-if toc >= 40000 then return end
+if toc < 40000 then return end
+
 
 -- don't load if class is wrong
 local _, class = UnitClass("player")

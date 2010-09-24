@@ -4,12 +4,13 @@
 -- remove more static stuff to allow display plugins and other custom stuff (all interaction with main module being done through registered functions)
 |_ in other words, more oop?
 
-- deleting object is backwards
-- should be done by the mod not the object
+- deleting object is backwards (should be done by the mod not the object)
 	
 - active template skinning options moved to respective elements global
 - way to copy settings from bar advanced (even between templates/chars)
 - gradients, flash for bars
+- vertical bars? :p
+
 
 
 - function to cleanup unused vars from db somehow
@@ -43,7 +44,7 @@ aditional forms of display to keep in mind:
 
 -- make a system based on addon version to fix the db at first run after a new version comes out?
 
-
+-- for icons, make that buff/spell combo into a function
 
 
 

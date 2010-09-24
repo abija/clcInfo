@@ -53,6 +53,7 @@ local function OnUpdate(self, elapsed)
 	if texture ~= self.lastTexture then
 		self.elements.texMain:SetTexture(texture)
 		self.lockTex:SetTexture(texture)
+		self.lastTexture = texture
 	end
 	
 	---[[
@@ -299,8 +300,8 @@ local function TryGridPositioning(self)
 	self:SetHeight(self.db.height)
 	
 	-- position
-	local x = 10 + g.cellWidth * (self.db.gridX - 1) + g.spacingX * (self.db.gridX - 1)
-	local y = 10 + g.cellHeight * (self.db.gridY - 1) + g.spacingY * (self.db.gridY - 1)
+	local x = g.cellWidth * (self.db.gridX - 1) + g.spacingX * (self.db.gridX - 1)
+	local y = g.cellHeight * (self.db.gridY - 1) + g.spacingY * (self.db.gridY - 1)
 	self:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", x, y)
 		
 	return true

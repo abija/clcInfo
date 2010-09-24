@@ -105,7 +105,10 @@ function mod:LoadActiveTemplate()
   				order = 1, type = "select", name = "",
   				values = { always = "Always", combat = "In Combat", valid = "Valid Target", boss = "Boss" },
   				get = function(info) return db.options.showWhen end,
-  				set = clcInfo.ChangeShowWhen,
+  				set = function(info, val)
+	  				db.options.showWhen = val
+  					clcInfo:ChangeShowWhen()
+  				end
   			},
   		},
   	},
