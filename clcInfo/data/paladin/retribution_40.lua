@@ -15,41 +15,11 @@ local function bprint(...)
 	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\data\\paladin\\retribution> " .. table.concat(t, " "))
 end
 
--- TODO, maybe fix?
--- some lazy staic numbers
-local MAX_FCFS = 10							-- elements in fcfs
-local MAX_PRESETS = 10					-- number of presets
-
 -- default settings for this module
 --------------------------------------------------------------------------------
 local defaults = {
-	fcfs = { "j", "ds", "cs", "how", "cons", "exo", "none", "none", "none", "none" },
-	presets = {},
-	presetFrame = {
-		visible = false,
-		enableMouse = false,
-		expandDown = false,
-		alpha = 1,
-		width = 200,
-		height = 25,
-		x = 0,
-		y = 0,
-		point = "CENTER",
-		relativePoint = "CENTER",
-		backdropColor = { 0.1, 0.1, 0.1, 0.5 },
-		backdropBorderColor = { 0.4, 0.4, 0.4 },
-		fontSize = 13,
-		fontColor = { 1, 1, 1, 1 },
-	},
-	highlight = true,
-	highlightChecked = true,
 	rangePerSkill = false,
 }
--- blank presets
-for i = 1, MAX_PRESETS do 
-	defaults.presets[i] = { name = "", data = "" }
-end
---------------------------------------------------------------------------------
 
 -- create a module in the main addon
 local mod = clcInfo:RegisterClassModule(class, "retribution")
@@ -58,43 +28,25 @@ local db
 -- this function, if it exists, will be called at init
 function mod.OnInitialize()
 	db = clcInfo:RegisterClassModuleDB(class, "retribution", defaults)
-	mod.InitSpells()
-	mod.UpdateFCFS()
 	
-	if db.presetFrame.visible then
-		mod.PresetFrame_Init()
-	end
+	mod:InitSpells()
 end
 
 -- functions visible to exec should be attached to this
 local emod = clcInfo.env
 
+-- rotations
+local rmod = {}
 
 -- any error sets this to false
 local enabled = true
-
--- preset frames
-local presetFrame, presetPopup
 
 -- used for "pluging in"
 local s2
 local UpdateS2
 
--- cleanse spell name, used for gcd
-local cleanseSpellName = GetSpellInfo(4987)
-
--- various other spells
 local taowSpellName = GetSpellInfo(59578) 				-- the art of war
-local sovName, sovId, sovSpellTexture
-if UnitFactionGroup("player") == "Alliance" then
-	sovId = 31803
-	sovName = GetSpellInfo(31803)						-- holy vengeance
-	sovSpellTexture = GetSpellInfo(31801)
-else
-	sovId = 53742
-	sovName = GetSpellInfo(53742)						-- blood corruption
-	sovSpellTexture = GetSpellInfo(53736)
-end
+local spellHandOfLight = GetSpellInfo(90174)
 
 -- priority queue generated from fcfs
 local pq
@@ -102,73 +54,28 @@ local ppq
 -- number of spells in the queue
 local numSpells
 -- display queue
-local dq = { cleanseSpellName, cleanseSpellName }
+local dq = { "", "" }
 
 -- the spells available for the fcfs
 local spells = {
-		how		= { id = 48806 },		-- hammer of wrath
-		cs 		= { id = 35395 },		-- crusader strike
-		ds 		= { id = 53385 },		-- divine storm
-		j 		= { id = 53408 },		-- judgement (using wisdom icon)
-		cons 	= { id = 48819 },		-- consecration
-		exo 	= { id = 48801 },		-- exorcism
-		dp 		= { id = 54428 },		-- divine plea
-		ss 		= { id = 53601 },		-- sacred shield
-		hw		= { id = 2812  },		-- holy wrath
-		sor 	= { id = 53600 },		-- shield of righteousness
+	how		= { id = 24275 	},		-- hammer of wrath
+	cs 		= { id = 35395 	},		-- crusader strike
+	tv 		= { id = 85256 	},		-- templar's verdict
+	tv1 	= { id = 85256 	},		-- templar's verdict
+	tv2		= { id = 85256 	},		-- templar's verdict
+	tv3 	= { id = 85256 	},		-- templar's verdict
+	inq 	= { id = 84963	},		-- inquisition
+	ds 		= { id = 53385 	},		-- divine storm
+	jol 	= { id = 20271 	},		-- judgement
+	cons 	= { id = 26573 	},		-- consecration
+	exo 	= { id = 879 		},		-- exorcism
+	hw		= { id = 2812  	},		-- holy wrath
 }
--- expose for options
-mod.spells = spells
-
--- used for the highlight lock on skill use
-local lastgcd = 0
-local startgcd = -1
-local lastMS = ""
-local gcdMS = 0
 
 -- get the spell names from ids
 function mod.InitSpells()
 	for alias, data in pairs(spells) do
 		data.name = GetSpellInfo(data.id)
-	end
-end
-
-function mod.UpdateFCFS()
-	local newpq = {}
-	local check = {}
-	numSpells = 0
-	
-	for i, alias in ipairs(db.fcfs) do
-		if not check[alias] then -- take care of double entries
-			check[alias] = true
-			if alias ~= "none" then
-				-- fix blank entries
-				if not spells[alias] then
-					db.fcfs[i] = "none"
-				else
-					numSpells = numSpells + 1
-					newpq[numSpells] = { alias = alias, name = spells[alias].name }
-				end
-			end
-		end
-	end
-	
-	pq = newpq
-	
-	-- check if people added enough spells
-	if numSpells < 2 then
-		bprint("You need at least 2 skills in the queue.")
-		-- toggle it off
-		enabled = false
-	end
-	
-	mod.PresetFrame_Update()
-end
-
-function mod.DisplayFCFS()
-	bprint("Active Retribution FCFS:")
-	for i, data in ipairs(pq) do
-		bprint(i .. " " .. data.name)
 	end
 end
 
@@ -188,7 +95,7 @@ local function GetMinCooldown()
 	end
 	
 	-- get min cooldown
-	for i = 1, numSpells do
+	for i = 1, #pq do
 		v = pq[i]
 		-- if skill is a better choice change index
 		if (v.alias == "dp" and delayDP) or (v.alias == "ss") then	
@@ -222,9 +129,13 @@ local function GetSkills()
 	cd = cd + 1.5
 	
 	-- substract the cd from prediction cooldowns
-	for i = 1, numSpells do
+	for i = 1, #pq do
 		v = pq[i]
-		v.cd = max(0, v.cd - cd)
+		if (dq[1].name == spells.tv.name) and (v.name == "tv1" or v.name == "tv2" or v.name == "tv3") then
+			v.cd = 100
+		else
+			v.cd = max(0, v.cd - cd)
+		end
 	end
 	
 	-- dq[2] = get the skill with shortest cooldown
@@ -232,350 +143,256 @@ local function GetSkills()
 	dq[2] = pq[index].name
 end
 
--- ret queue function
-function mod.RetRotation()
-	local ctime, gcd, gcdStart, gcdDuration, v
-	ctime = GetTime()
+--------------------------------------------------------------------------------
+--[[
+test rotation r2:
+put priority on tv2 and tv1
+--]]
+--------------------------------------------------------------------------------
+do
+	local xq = {
+		{ alias = "tv3" },
+		{ alias = "cs" },
+		{ alias = "how" },
+		{ alias = "tv2" },
+		{ alias = "jol" },
+		{ alias = "exo" },
+		{ alias = "hw" },
+		{ alias = "tv1" },
+	}
+	function rmod.r2(csBoost, useInq, minHPInq, preInq)
+		csBoost = csBoost or 0
+		minHPInq = minHPInq or 3
+		preInq = preInq or 5
 	
-	-- get gcd
-	gcdStart, gcdDuration = GetSpellCooldown(cleanseSpellName)
-	if gcdStart > 0 then
-		gcd = gcdStart + gcdDuration - ctime
-	else
-		gcd = 0
-	end
+		pq = xq
 	
-	-- update cooldowns
-	for i = 1, numSpells do
-		v = pq[i]
+		local ctime, gcd, gcdStart, gcdDuration, v
+		ctime = GetTime()
 		
-		v.cdStart, v.cdDuration = GetSpellCooldown(v.name)
-		if not v.cdDuration then return end -- try to solve respec issues
-		
-		if v.cdStart > 0 then
-			v.cd = v.cdStart + v.cdDuration - ctime
+		-- get gcd
+		gcdStart, gcdDuration = GetSpellCooldown(spells.tv.name)
+		if gcdStart > 0 then
+			gcd = gcdStart + gcdDuration - ctime
 		else
-			v.cd = 0
+			gcd = 0
 		end
 		
-		-- ds gcd fix?
-		-- todo: check
-		if v.cd < gcd then v.cd = gcd end
-		
-		-- how check
-		if v.alias == "how" then
-			if not IsUsableSpell(v.name) then v.cd = 100 end
-		-- art of war for exorcism check
-		elseif v.alias == "exo" then
-			if UnitBuff("player", taowSpellName) == nil then v.cd = 100 end
-		end
-		
-		-- adjust to gcd
-		v.cd = v.cd - gcd
-	end
+		-- adjust for inq and tv
+		-- holy balls
+		local hp = UnitPower("player", SPELL_POWER_HOLY_POWER)
+		local HoL = UnitBuff("player", spellHandOfLight)
 	
-	GetSkills()
-	return true
-end
-
-
---------------------------------------------------------------------------------
--- mod.PresetFunctions
---------------------------------------------------------------------------------
--- update layout
-function mod.PresetFrame_UpdateLayout()
-	local opt = db.presetFrame
-
-	-- preset frame
-	local frame = presetFrame
-		
-	frame:SetWidth(opt.width)
-	frame:SetHeight(opt.height)
-	frame:ClearAllPoints()
-	frame:SetPoint(opt.point, "UIParent", opt.relativePoint, opt.x, opt.y)
-	
-	frame:SetBackdropColor(unpack(opt.backdropColor))
-	frame:SetBackdropBorderColor(unpack(opt.backdropBorderColor))
-	
-	frame.text:SetFont(STANDARD_TEXT_FONT, opt.fontSize)
-	frame.text:SetVertexColor(unpack(opt.fontColor))
-	
-	frame.text:SetAllPoints(frame)
-	frame.text:SetJustifyH("CENTER")
-	frame.text:SetJustifyV("MIDDLE")
-	
-	-- popup
-	local popup = presetPopup
-	popup:SetBackdropColor(unpack(opt.backdropColor))
-	popup:SetBackdropBorderColor(unpack(opt.backdropBorderColor))
-	
-	popup:SetWidth(opt.width)
-	popup:SetHeight((opt.fontSize + 7) * MAX_PRESETS + 40)
-	popup:ClearAllPoints()
-	if opt.expandDown then
-		popup:SetPoint("TOP", frame, "BOTTOM", 0, 0)
-	else
-		popup:SetPoint("BOTTOM", frame, "TOP", 0, 0)
-	end
-	
-	local button
-	for i = 1, MAX_PRESETS do
-		button = presetButtons[i]
-	
-		button:SetWidth(opt.width - 20)
-		button:SetHeight(opt.fontSize + 7)
-		button:ClearAllPoints()
-		button:SetPoint("TOPLEFT", popup, "TOPLEFT", 10, -10 - (opt.fontSize + 9) * (i - 1))
-
-		button.name:SetJustifyH("LEFT")
-		button.name:SetJustifyV("MIDDLE")
-		button.name:SetAllPoints()
-		button.name:SetVertexColor(unpack(opt.fontColor))
-		
-		button.name:SetFont(STANDARD_TEXT_FONT, opt.fontSize)
-	end
-	
-end
-
-function mod.PresetFrame_UpdateMouse()
-	if presetFrame then
-		presetFrame:EnableMouse(db.presetFrame.enableMouse)
-	end
-end
-
--- checks if the current rotation is in any of the presets and updates text
-function mod.PresetFrame_Update()
-	if not presetFrame then return end
-
-	local t = {}
-	for i = 1, #pq do
-		t[i] = pq[i].alias
-	end
-	local rotation = table.concat(t, " ")
-	
-	local preset = "no preset"
-	for i = 1, MAX_PRESETS do
-		-- bprint(rotation, " | ", db.presets[i].data)
-		if db.presets[i].data == rotation and rotation ~= "" then
-			preset = db.presets[i].name
-			break
-		end
-	end
-	
-	presetFrame.text:SetText(preset)
-	
-	-- update the buttons
-	if presetButtons then
-		local button
-		for i = 1, MAX_PRESETS do
-			button = presetButtons[i]
-			if db.presets[i].name ~= "" then
-				button.name:SetText(db.presets[i].name)
-				button:Show()
+		-- update cooldowns
+		for i = 1, #pq do
+			v = pq[i]
+			v.name = spells[v.alias].name
+			
+			v.cdStart, v.cdDuration = GetSpellCooldown(v.name)
+			if not v.cdDuration then return end -- try to solve respec issues
+			
+			if v.cdStart > 0 then
+				v.cd = v.cdStart + v.cdDuration - ctime
 			else
-				button:Hide()
+				v.cd = 0
+			end
+			
+			if v.alias == "tv1" and (hp ~= 1 or HoL) then
+				v.cd = 100
+			elseif v.alias == "tv2" and (hp ~= 2 or HoL) then
+				v.cd = 100
+			elseif v.alias == "tv3" and (hp ~= 3 and (not HoL)) then
+				v.cd = 100
+			elseif v.alias == "cs" then
+				v.cd = v.cd - csBoost
+			elseif v.alias == "how" then
+				if not IsUsableSpell(v.name) then v.cd = 100 end
+			elseif v.alias == "exo" then
+				if UnitBuff("player", taowSpellName) == nil then v.cd = 100 end
+			end
+			
+			-- adjust to gcd
+			v.cd = v.cd - gcd
+		end
+		
+		GetSkills()
+		
+		clcInfo.spew = { dq, pq }
+		
+		local inqLeft = 0
+		local name, rank, icon, count, debuffType, duration, expirationTime, caster, spellId
+		if useInq then
+			name, rank, icon, count, debuffType, duration, expirationTime = UnitBuff("player", spells.inq.name)
+			if name then 
+				inqLeft = expirationTime - ctime
 			end
 		end
-	end
-end
-
-function mod.PresetFrame_UpdateAll()
-	if presetFrame then
-		mod.PresetFrame_UpdateLayout()
-		mod.PresetFrame_UpdateMouse()
-		mod.PresetFrame_Update()
-	end
-end
-
--- load a preset
-function mod.Preset_Load(index)
-	if db.presets[index].name == "" then return end
-
-	if (not presetFrame) or (not presetFrame:IsVisible()) then
-		bprint("Loading preset:", db.presets[index].name)
-	end
-	
-	local list = { strsplit(" ", db.presets[index].data) }
-
-	local num = 0
-	for i = 1, #list do
-		if spells[list[i]] then
-			num = num + 1
-			db.fcfs[num] = list[i]
+		
+		if useInq then
+			if HoL then
+				dq[2] = dq[1]
+				if inqLeft <= preInq then
+					dq[1] = spells.inq.name
+				else
+					dq[1] = spells.tv.name
+				end
+			else
+				if inqLeft == 0 and hp >= minHPInq then
+					dq[2] = dq[1]
+					dq[1] = spells.inq.name
+				end
+			end
+		else
+			if HoL then
+				dq[2] = dq[1]
+				dq[1] = spells.tv.name
+			end
 		end
+		
+		return true
 	end
-	
-	-- none on the rest
-	if num < MAX_PRESETS then
-		for i = num + 1, MAX_PRESETS do
-			db.fcfs[i] = "none"
-		end
-	end
-	
-	-- redo queue
-	mod.UpdateFCFS()
-	mod.PresetFrame_Update()
 end
+--------------------------------------------------------------------------------
 
-function mod.PresetFrame_Init()
-	local opt = db.presetFrame
-	
-	local backdrop = {
-		bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
-		edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-		tile = true, tileSize = 16, edgeSize = 8,
-		insets = { left = 2, right = 2, top = 2, bottom = 2 }
+--------------------------------------------------------------------------------
+--[[
+test rotation r1:
+tv 3 only
+cs >>>> fillers
+--]]
+--------------------------------------------------------------------------------
+do
+	local xq = {
+		{ alias = "how" },
+		{ alias = "jol" },
+		{ alias = "exo" },
+		{ alias = "hw" },
 	}
-
-	-- frame
-	local frame = CreateFrame("Button")
-	presetFrame = frame
+	function rmod.r1(useInq, minHPInq, preInq)
+		minHPInq = minHPInq or 3
+		preInq = preInq or 5
 	
-	frame:EnableMouse(opt.enableMouse)
-	frame:SetBackdrop(backdrop)
-	frame:SetFrameStrata("FULLSCREEN_DIALOG")
+		pq = xq
 	
-	-- fontstring
-	local fs = frame:CreateFontString(nil, nil, "GameFontHighlight")
-	frame.text = fs
-	
-	-- popup frame
-	local popup = CreateFrame("Frame", nil, frame)
-	presetPopup = popup
-	
-	popup:Hide()
-	popup:SetBackdrop(backdrop)
-	popup:SetFrameStrata("FULLSCREEN_DIALOG")
-	
-	-- buttons for the popup frame
-	local button
-	presetButtons = {}
-	for i = 1, MAX_PRESETS do
-		button = CreateFrame("Button", nil, popup)
-		presetButtons[i] = button
+		local ctime, gcd, gcdStart, gcdDuration, v
+		ctime = GetTime()
 		
-		button.highlightTexture = button:CreateTexture(nil, "HIGHLIGHT")
-		button.highlightTexture:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
-		button.highlightTexture:SetBlendMode("ADD")
-		button.highlightTexture:SetAllPoints()
-		
-		button.name = button:CreateFontString(nil, nil, "GameFontHighlight")
-		button.name:SetText(db.presets[i].name)
-		
-		button:SetScript("OnClick", function()
-			mod.Preset_Load(i)
-			popup:Hide()
-		end)
-	end
-	
-	-- toggle popup on click
-	frame:SetScript("OnClick", function()
-		if popup:IsVisible() then
-			popup:Hide()
+		-- get gcd
+		gcdStart, gcdDuration = GetSpellCooldown(spells.tv.name)
+		if gcdStart > 0 then
+			gcd = gcdStart + gcdDuration - ctime
 		else
-			popup:Show()
+			gcd = 0
 		end
-	end)
 	
-	-- update the layout
-	mod.PresetFrame_UpdateAll()	
-end
-
-
-
--- toggles show and hide
-function mod.PresetFrame_Toggle()
-	-- the frame is not loaded by default, so check if init took place
-	if not presetFrame then
-		-- need to do init
-		mod.PresetFrame_Init()
-		presetFrame:Show()
-		db.presetFrame.visible = true
-		return
-	end
-
-	if presetFrame:IsVisible() then
-		presetFrame:Hide()
-		db.presetFrame.visible = false
-	else
-		presetFrame:Show()
-		db.presetFrame.visible = true
-	end
-end
-
--- save current to preset
-function mod.Preset_SaveCurrent(index)
-	local t = {}
-	for i = 1, #pq do
-		t[i] = pq[i].alias
-	end
-	local rotation = table.concat(t, " ")
-	db.presets[index].data = rotation
-	
-	mod.PresetFrame_Update()
-end
-
---------------------------------------------------------------------------------
--- Cmd line arguments
---------------------------------------------------------------------------------
--- IMPORTANT: args is an indexed table
---------------------------------------------------------------------------------
-
--- pass a full rotation from command line
--- intended to be used in macros
-local function CmdRetFCFS(args)
-	-- add args to options
-	local num = 0
-	for i, arg in ipairs(args) do
-		if spells[arg] then
-			num = num + 1
-			db.fcfs[num] = arg
+		-- update cooldowns
+		for i = 1, #pq do
+			v = pq[i]
+			v.name = spells[v.alias].name
+			
+			v.cdStart, v.cdDuration = GetSpellCooldown(v.name)
+			if not v.cdDuration then return end -- try to solve respec issues
+			
+			if v.cdStart > 0 then
+				v.cd = v.cdStart + v.cdDuration - ctime
+			else
+				v.cd = 0
+			end
+			
+			if v.alias == "how" then
+				if not IsUsableSpell(v.name) then v.cd = 100 end
+			elseif v.alias == "exo" then
+				if UnitBuff("player", taowSpellName) == nil then v.cd = 100 end
+			end
+			
+			-- adjust to gcd
+			v.cd = v.cd - gcd
+		end
+		
+		-- cs cooldown
+		-- ff = first filler
+		local cs, ff
+		gcdStart, gcdDuration = GetSpellCooldown(spells.cs.name)
+		if gcdStart > 0 then
+			cs = gcdStart + gcdDuration - ctime
 		else
-			-- inform on wrong arguments
-			bprint(arg .. " not found")
+			cs = 0
 		end
-	end
-	
-	-- none on the rest
-	if num < MAX_FCFS then
-		for i = num + 1, MAX_FCFS do
-			db.fcfs[i] = "none"
+		
+		-- adjust for inq and tv
+		-- holy balls
+		local hp = UnitPower("player", SPELL_POWER_HOLY_POWER)
+		local HoL = UnitBuff("player", spellHandOfLight)
+		
+		-- inquisition check
+		local inqLeft = 0
+		local name, rank, icon, count, debuffType, duration, expirationTime, caster, spellId
+		if useInq then
+			name, rank, icon, count, debuffType, duration, expirationTime = UnitBuff("player", spells.inq.name)
+			if name then 
+				inqLeft = expirationTime - ctime
+			end
 		end
-	end
-	
-	-- redo queue
-	mod.UpdateFCFS()
-	
-	-- update the options window
-	clcInfo:UpdateOptions()
-	
-	--[[
-	if InterfaceOptionsFrame:IsVisible() then
-		InterfaceOptionsFrame_OpenToCategory("FCFS")
-	end
-	--]]
-	
-	if presetFrame then
-		mod.PresetFrame_Update()
+		
+		-- cs bullshit
+		
+		local mcd, index = GetMinCooldown()
+		ff = pq[index].name
+		
+		-- bprint(cs, mcd)
+		if cs == 0 or cs <= gcd then
+			dq[1] = spells.cs.name
+			dq[2] = ff
+		elseif mcd < cs then
+			if cs - gcd < 1.1 then
+				dq[1] = spells.cs.name
+				dq[2] = ff
+			else
+				dq[1] = ff
+				dq[2] = spells.cs.name
+			end
+		else
+			dq[1] = spells.cs.name
+			dq[2] = ff
+		end
+
+		if useInq then
+			if HoL then
+				dq[2] = dq[1]
+				if inqLeft <= preInq then
+					dq[1] = spells.inq.name
+				else
+					dq[1] = spells.tv.name
+				end
+				
+				if hp == 3 then dq[2] = spells.tv.name end
+			else
+				if inqLeft == 0 and hp >= minHPInq then
+					dq[2] = dq[1]
+					dq[1] = spells.inq.name
+				elseif hp == 3 then
+					dq[2] = dq[1]
+					if inqLeft <= preInq then
+						dq[1] = spells.inq.name
+					else
+						dq[1] = spells.tv.name
+					end
+				end
+			end
+		else
+			if HoL then
+				dq[2] = dq[1]
+				dq[1] = spells.tv.name
+				if hp == 3 then dq[2] = spells.tv.name end
+			elseif hp == 3 then
+				dq[2] = dq[1]
+				dq[1] = spells.tv.name
+			end
+		end
+		
+		return true
 	end
 end
-
-
--- load a preset from cmd line
--- intended to be used in macros
-local function CmdRetLP(args)
-	local name = table.concat(args, " ")
-	if name == "" then return end
-	
-	for i = 1, MAX_PRESETS do
-		if name == string.lower(db.presets[i].name) then return mod.Preset_Load(i) end
-	end
-end
-
--- register for slashcmd
-clcInfo.cmdList["ret_fcfs"] = CmdRetFCFS
-clcInfo.cmdList["ret_lp"] = CmdRetLP
-
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -591,10 +408,12 @@ end
 local function ExecCleanup()
 	s2 = nil
 end
-function emod.IconRetFCFS_S1()
+function emod.IconRetFCFS_S1(rotation, ...)
 	local gotskill = false
 	if enabled then
-		gotskill = mod.RetRotation()
+		if rmod[rotation] then
+			gotskill = rmod[rotation](...)
+		end
 	end
 	
 	if s2 then UpdateS2(s2, 100) end	-- update with a big "elapsed" so it's updated on call

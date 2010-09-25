@@ -1,3 +1,8 @@
+- manual select active template
+- copy template settings ? (copy table)
+
+- make group elements for sliders buttons?
+
 - fix frame levels
 - alert system
 - an external addon that plugs into it to see what needs to be done there
