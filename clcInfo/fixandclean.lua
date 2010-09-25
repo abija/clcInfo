@@ -8,7 +8,7 @@ local function bprint(...)
 	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\fixandclean> " .. table.concat(t, " "))
 end
 
-clcInfo.__version = 16
+clcInfo.__version = 19
 
 --------------------------------------------------------------------------------
 -- TODO, make this GOOD
@@ -70,12 +70,12 @@ function clcInfo:FixSavedData()
 	
 	bprint("performing db maintenace")
 	
-	AdaptConfig("cdb", clcInfo.cdb, { classModules = {}, templates = {} })
+	AdaptConfig("cdb", clcInfo.cdb, clcInfo:GetDefault())
 	
 	-- templates
 	local x = clcInfo.cdb.templates
 	for i = 1, #x do
-		if not AdaptConfig("template" .. i, x[i], { spec = {}, grids = {}, icons = {}, bars = {}, options = {}, skinOptions = {} }) then return end
+		if not AdaptConfig("template" .. i, x[i], clcInfo.display.templates:GetDefault()) then return end
 		if not AdaptConfig("template" .. i .. ".spec", x[i].spec, { tree = 1, talent = 0, rank = 1 }) then return end
 		if not AdaptConfig("template" .. i .. ".options", x[i].options, { gridSize = 1, showWhen = "always" }) then return end
 		if not AdaptConfig("template" .. i .. ".skinOptions", x[i].skinOptions, { icons = {}, bars = {} }) then return end

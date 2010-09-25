@@ -158,17 +158,17 @@ do
 	local groupUnitList = { "player", "playerpet" }
 	-- add group
 	for i = 1, 4 do
-		groupUnitList[#groupUnitList] = "party" .. i
-		groupUnitList[#groupUnitList] = "partypet" .. i
+		groupUnitList[#groupUnitList + 1] = "party" .. i
+		groupUnitList[#groupUnitList + 1] = "partypet" .. i
 	end
 	-- add raid
 	for i = 1, 40 do
-		groupUnitList[#groupUnitList] = "raid" .. i
-		groupUnitList[#groupUnitList] = "raidpet" .. i
+		groupUnitList[#groupUnitList + 1] = "raid" .. i
+		groupUnitList[#groupUnitList + 1] = "raidpet" .. i
 	end
 	-- add bosses
 	for i = 1, 5 do
-		groupUnitList[#groupUnitList] = "boss" .. i
+		groupUnitList[#groupUnitList + 1] = "boss" .. i
 	end
 	function mod.BarSingleTargetRaidBuff(spell, showStack, timeRight)
 		local name, rank, icon, count, dispelType, duration, expires, caster

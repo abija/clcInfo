@@ -19,21 +19,24 @@ local defaults = {
 }
 
 -- create a module in the main addon
-local mod = clcInfo:RegisterClassModule(class, "global")
-local db
+local mod = clcInfo:RegisterClassModule("global")
+local tdb
 -- functions visible to exec should be attached to this
 local emod = clcInfo.env
 
 -- this function, if it exists, will be called at init
 function mod.OnInitialize()
-	db = clcInfo:RegisterClassModuleDB(class, "global", defaults)
-	mod.UpdateRuneBar()
+	tdb = clcInfo:RegisterClassModuleTDB("global", defaults)
+	if tdb then
+		mod.UpdateRuneBar()
+	end
 end
+mod.OnTemplatesUpdate = mod.OnInitialize
 
 local function MoveRuneBar()
 	RuneFrame:ClearAllPoints()
-	RuneFrame:SetScale(db.rbScale)
-	RuneFrame:SetPoint("CENTER", "UIParent", "CENTER", db.rbX, db.rbY)
+	RuneFrame:SetScale(tdb.rbScale)
+	RuneFrame:SetPoint("CENTER", "UIParent", "CENTER", tdb.rbX, tdb.rbY)
 end
 local function RestoreRuneBar()
 	if PlayerFrame then
@@ -45,7 +48,7 @@ end
 function mod.UpdateRuneBar()
 	if not RuneFrame then return end -- don't do anything if someone removed it
 	if not RuneFrame:IsVisible() then return end -- don't do anything if it's hidden by something
-	if db.moveRuneBar then
+	if tdb.moveRuneBar then
 		MoveRuneBar()
 	else
 		RestoreRuneBar()

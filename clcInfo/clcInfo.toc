@@ -5,7 +5,9 @@
 ## SavedVariablesPerCharacter: clcInfoCharDB
 ## OptionalDeps:  Ace3
 
+#@no-lib-strip@
 embeds.xml
+#@end-no-lib-strip@
 
 core.lua
 fixandclean.lua

@@ -69,9 +69,13 @@ end
 --------------------------------------------------------------------------------
 
 function mod:LoadActiveTemplate()
+	local atn = ""
+	if clcInfo.activeTemplate then atn = "Template" .. clcInfo.activeTemplateIndex end
+		
+
   -- delete the old template
   options.args.activeTemplate = {
-  	order = 1, type = "group", name = "Active Template", args = {}
+  	order = 1, type = "group", name = "Active: " .. atn, args = {}
   }  
 
   -- check if there's an active template
@@ -455,4 +459,6 @@ function mod:LoadActiveTemplate()
   
   mod.lastBarCount = 0
   mod.UpdateBarList()
+  -- info: class modules are loaded together with active template because of the data that might be template stored
+  mod:LoadClassModules()
 end

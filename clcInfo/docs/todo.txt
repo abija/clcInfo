@@ -1,3 +1,11 @@
+- class module db -> based on template not global ?
+- try a better way to structure updates for options and in general?
+
+- lib include for buttonfacade ????
+
+
+- implement that db fix for module options too ?
+
 - manual select active template
 - copy template settings ? (copy table)
 

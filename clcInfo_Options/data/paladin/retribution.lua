@@ -15,8 +15,8 @@ local mod = clcInfo_Options
 local AceRegistry = mod.AceRegistry
 local options = mod.options
 
-local baseMod = clcInfo.classModules.paladin.retribution
-local baseDB = clcInfo.cdb.classModules.paladin.retribution
+local baseMod = clcInfo.classModules.retribution
+local baseDB = clcInfo.cdb.classModules.retribution
 
 -- some lazy staic numbers
 local MAX_FCFS = 10							-- elements in fcfs
@@ -92,14 +92,7 @@ local function SaveP(info)
 end
 
 local function LoadModule()
-	-- create tables if there aren't any
-	if not options.args.classModules then 
-		options.args.classModules = { order = 50, type = "group", name = "Class Modules", args = {} }
-	end
-	options = options.args.classModules
-	
-	-- retribution options
-	options.args.retribution = {
+	options.args.classModules.args.retribution = {
 		order = 4, type = "group", childGroups = "tab", name = "Retribution",
 		args = {
 			tabGeneral = {
@@ -194,7 +187,7 @@ local function LoadModule()
 	}
 	
 	-- fcfs buttons
-	local args = options.args.retribution.args.tabFCFS.args
+	local args = options.args.classModules.args.retribution.args.tabFCFS.args
 	for i = 1, MAX_FCFS do
 		args["label" .. i] = {
 			order = i*2, type = "description", name = "", width = "double",
@@ -206,7 +199,7 @@ local function LoadModule()
 	end
 	
 	-- options for each preset
-	local args = options.args.retribution.args.tabPresets.args
+	local args = options.args.classModules.args.retribution.args.tabPresets.args
 	for i = 1, MAX_PRESETS do
 		args[tostring(i)] = {
 			order = 50 + i, type = "group", name = "Preset " .. i, args = {

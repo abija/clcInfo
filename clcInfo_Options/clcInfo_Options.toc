@@ -5,7 +5,9 @@
 ## Dependencies: clcInfo
 ## LoadOnDemand: 1
 
+#@no-lib-strip@
 embeds.xml
+#@end-no-lib-strip@
 
 core.lua
 

@@ -22,12 +22,12 @@ local defaults = {
 }
 
 -- create a module in the main addon
-local mod = clcInfo:RegisterClassModule(class, "retribution")
+local mod = clcInfo:RegisterClassModule("retribution")
 local db
 
 -- this function, if it exists, will be called at init
 function mod.OnInitialize()
-	db = clcInfo:RegisterClassModuleDB(class, "retribution", defaults)
+	db = clcInfo:RegisterClassModuleDB("retribution", defaults)
 	
 	mod:InitSpells()
 end
@@ -268,7 +268,8 @@ do
 		{ alias = "exo" },
 		{ alias = "hw" },
 	}
-	function rmod.r1(useInq, minHPInq, preInq)
+	function rmod.r1(csBoost, useInq, minHPInq, preInq)
+		csBoost = csBoost or 0
 		minHPInq = minHPInq or 3
 		preInq = preInq or 5
 	
@@ -344,7 +345,7 @@ do
 			dq[1] = spells.cs.name
 			dq[2] = ff
 		elseif mcd < cs then
-			if cs - gcd < 1.1 then
+			if cs - gcd < csBoost then
 				dq[1] = spells.cs.name
 				dq[2] = ff
 			else

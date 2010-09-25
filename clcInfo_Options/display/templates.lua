@@ -83,6 +83,21 @@ local function GetTalentList(info)
 	return specTalents[clcInfo.cdb.templates[tonumber(info[2])].spec.tree]
 end
 
+local function GetForceTemplateList()
+	local list = { [0] = "Disabled" }
+	for i = 1, #(clcInfo.cdb.templates) do
+		list[i] = "Template" .. i
+	end
+	return list
+end
+local function GetForceTemplate(info)
+	return clcInfo.cdb.options.enforceTemplate
+end
+local function SetForceTemplate(info, val)
+	clcInfo.cdb.options.enforceTemplate = val
+	clcInfo:OnTemplatesUpdate()
+end
+
 function mod:UpdateTemplateList()
 	local db = clcInfo.cdb.templates
 	local optionsTemplates = options.args.templates
@@ -153,10 +168,17 @@ function mod:LoadTemplates()
 	options.args.templates = {
 		order = 100, type = "group", name = "Templates", args = {
 			-- add template button
-			executeAdd = {
-				type = "execute",
-				name = "Add template",
+			add = {
+				order = 1, type = "execute", name = "Add template",
 				func = clcInfo.display.templates.AddTemplate,
+			},
+			_space1 = {
+				order = 2, type = "description", name = ""
+			},
+			forceTemplate = {
+				order = 3, type = "select", name = "Force template regardless of spec:", values = GetForceTemplateList,
+				get = GetForceTemplate, set = SetForceTemplate,
+				
 			},
 		},
 	}

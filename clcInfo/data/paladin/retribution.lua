@@ -51,12 +51,12 @@ end
 --------------------------------------------------------------------------------
 
 -- create a module in the main addon
-local mod = clcInfo:RegisterClassModule(class, "retribution")
+local mod = clcInfo:RegisterClassModule("retribution")
 local db
 
 -- this function, if it exists, will be called at init
 function mod.OnInitialize()
-	db = clcInfo:RegisterClassModuleDB(class, "retribution", defaults)
+	db = clcInfo:RegisterClassModuleDB("retribution", defaults)
 	mod.InitSpells()
 	mod.UpdateFCFS()
 	

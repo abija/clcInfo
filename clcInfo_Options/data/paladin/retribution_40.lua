@@ -20,8 +20,8 @@ local mod = clcInfo_Options
 local AceRegistry = mod.AceRegistry
 local options = mod.options
 
-local baseMod = clcInfo.classModules.paladin.retribution
-local baseDB = clcInfo.cdb.classModules.paladin.retribution
+local baseMod = clcInfo.classModules.retribution
+local baseDB = clcInfo.cdb.classModules.retribution
 
 -- some lazy staic numbers
 local MAX_FCFS = 10							-- elements in fcfs
@@ -97,14 +97,7 @@ local function SaveP(info)
 end
 
 local function LoadModule()
-	-- create tables if there aren't any
-	if not options.args.classModules then 
-		options.args.classModules = { order = 50, type = "group", name = "Class Modules", args = {} }
-	end
-	options = options.args.classModules
-	
-	-- retribution options
-	options.args.retribution = {
+	options.args.classModules.args.retribution = {
 		order = 4, type = "group", childGroups = "tab", name = "Retribution",
 		args = {
 			tabGeneral = {

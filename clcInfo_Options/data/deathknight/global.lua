@@ -15,25 +15,22 @@ local mod = clcInfo_Options
 local AceRegistry = mod.AceRegistry
 local options = mod.options
 
-local baseMod = clcInfo.classModules.deathknight.global
-local baseDB = clcInfo.cdb.classModules.deathknight.global
+local baseMod = clcInfo.classModules.global
+local baseTDB
 
 local function Get(info)
-	return baseDB[info[#info]]
+	return baseTDB[info[#info]]
 end
 
 local function Set(info, val)
-	baseDB[info[#info]] = val
+	baseTDB[info[#info]] = val
 	baseMod.UpdateRuneBar()
 end
 
-local function LoadModule()
-	-- create tables if there aren't any
-	if not options.args.classModules then 
-		options.args.classModules = { order = 50, type = "group", name = "Class Modules", args = {} }
-	end
-	options = options.args.classModules
-	options.args.global = {
+local function LoadModuleActiveTemplate()
+	baseTDB = clcInfo.activeTemplate.classModules.global
+	
+	options.args.classModules.args.global = {
 		order = 1, type = "group", childGroups = "tab", name = "Global",
 		args = {
 			tabGeneral = {
@@ -65,5 +62,5 @@ local function LoadModule()
 		},
 	}
 end
-
-mod.cmLoaders[#(mod.cmLoaders) + 1] = LoadModule
+-- these modules are loaded whenever template changes
+mod.cmLoadersActiveTemplate[#(mod.cmLoadersActiveTemplate) + 1] = LoadModuleActiveTemplate

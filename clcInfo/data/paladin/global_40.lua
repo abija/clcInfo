@@ -23,16 +23,19 @@ local defaults = {
 }
 
 -- create a module in the main addon
-local mod = clcInfo:RegisterClassModule(class, "global")
-local db
+local mod = clcInfo:RegisterClassModule("global")
+local db -- ! it's a tdb, change if needed
 -- functions visible to exec should be attached to this
 local emod = clcInfo.env
 
 -- this function, if it exists, will be called at init
 function mod.OnInitialize()
-	db = clcInfo:RegisterClassModuleDB(class, "global", defaults)
-	mod.UpdatePPBar()
+	db = clcInfo:RegisterClassModuleTDB("global", defaults)
+	if db then
+		mod.UpdatePPBar()
+	end
 end
+mod.OnTemplatesUpdate = mod.OnInitialize
 
 local function MovePPBar()
 	PaladinPowerBar:ClearAllPoints()

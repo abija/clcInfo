@@ -75,11 +75,9 @@ function clcInfo:OnInitialize()
 	if not self:FixSavedData() then return end
 	
 	-- init the class modules
-	for c in pairs(clcInfo.classModules) do
-		for s in pairs(clcInfo.classModules[c]) do
-			if clcInfo.classModules[c][s].OnInitialize then
-				clcInfo.classModules[c][s].OnInitialize()
-			end
+	for k in pairs(clcInfo.classModules) do
+		if clcInfo.classModules[k].OnInitialize then
+			clcInfo.classModules[k].OnInitialize()
 		end
 	end
 	
@@ -129,6 +127,13 @@ function clcInfo:OnTemplatesUpdate()
 	
 	self:ChangeShowWhen()
 	
+	-- call OnTemplatesUpdate on all class modules
+	if clcInfo.activeTemplate then
+		for k, v in pairs(clcInfo.classModules) do
+			if v.OnTemplatesUpdate then v.OnTemplatesUpdate() end
+		end
+	end
+	
 	-- change active 
 	if clcInfo_Options then
 		clcInfo_Options:LoadActiveTemplate()
@@ -138,36 +143,48 @@ function clcInfo:OnTemplatesUpdate()
 end
 
 
-function clcInfo:RegisterClassModule(class, name)
-	class = string.lower(class)
+function clcInfo:RegisterClassModule(name)
 	name = string.lower(name)
-	if not clcInfo.classModules[class] then clcInfo.classModules[class] = {} end
-	clcInfo.classModules[class][name] = {}
-	return clcInfo.classModules[class][name]
+	clcInfo.classModules[name] = {}
+	return clcInfo.classModules[name]
 end
 
-function clcInfo:RegisterClassModuleDB(class, name, defaults)
-	class = string.lower(class)
+function clcInfo:RegisterClassModuleDB(name, defaults)
 	name = string.lower(name)
 	defaults = defaults or {}
-	if not clcInfo.cdb.classModules[class] then clcInfo.cdb.classModules[class] = {} end
-	if not clcInfo.cdb.classModules[class][name] then  clcInfo.cdb.classModules[class][name] = defaults end
-	return clcInfo.cdb.classModules[class][name]
+	if not clcInfo.cdb.classModules[name] then  clcInfo.cdb.classModules[name] = defaults end
+	return clcInfo.cdb.classModules[name]
+end
+
+-- this one is template based
+function clcInfo:RegisterClassModuleTDB(name, defaults)
+	name = string.lower(name)
+	defaults = defaults or {}
+	if not clcInfo.activeTemplate then return end
+	if not clcInfo.activeTemplate.classModules[name] then clcInfo.activeTemplate.classModules[name] = defaults end
+	return clcInfo.activeTemplate.classModules[name]
+end
+
+function clcInfo:GetDefault()
+	local data = {
+		options = {
+			enforceTemplate = 0,
+		},
+		classModules = {},
+		templates = {},
+	}
+	return data
 end
 
 function clcInfo:ReadSavedData()
 	-- global defaults
 	if not clcInfoDB then
-		clcInfoDB = {
-		}
+		clcInfoDB = {}
 	end
 
 	-- char defaults
 	if not clcInfoCharDB then
-		clcInfoCharDB = {
-			classModules = {},
-			templates = {},				
-		}
+		clcInfoCharDB = clcInfo:GetDefault()
 		table.insert(clcInfoCharDB.templates, clcInfo.display.templates:GetDefault())
 	end
 

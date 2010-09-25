@@ -17,12 +17,26 @@ end
 -- look if activeTalents are found in any of the saved templates
 function mod:FindTemplate()
 	local db = clcInfo.cdb.templates
+	local ef = clcInfo.cdb.options.enforceTemplate
+	
+	-- check if a template isn't forced
+	if ef then
+		if not db[ef] then
+			-- forced but doesn't exist, tough luck
+			ef = 0
+		else
+			clcInfo.activeTemplateIndex = ef
+			clcInfo.activeTemplate = db[ef]
+			return
+		end
+	end
+	
 	clcInfo.activeTemplate = nil
 	clcInfo.activeTemplateIndex = 0
 	for k, data in ipairs(db) do
 		if IsActiveTemplate(data.spec) then
 			-- found, reference the table in a var
-			clcInfo.activeTemplate = clcInfo.cdb.templates[k]
+			clcInfo.activeTemplate = db[k]
 			clcInfo.activeTemplateIndex = k
 			return true
 		end
@@ -33,6 +47,7 @@ end
 -- add a template
 function mod:GetDefault()
 	return {
+		classModules = {},
 		spec = { tree = 1, talent = 0, rank = 1 },
 		grids = {},
 		icons = {},
@@ -49,6 +64,7 @@ function mod:GetDefault()
 end
 function mod:AddTemplate()
 	table.insert(clcInfo.cdb.templates, mod:GetDefault())
+	clcInfo:OnTemplatesUpdate()
 	if clcInfo_Options then
 		clcInfo_Options:UpdateTemplateList()
 	end
