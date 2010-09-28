@@ -263,9 +263,9 @@ cs >>>> fillers
 --------------------------------------------------------------------------------
 do
 	local xq = {
+		{ alias = "exo" },
 		{ alias = "how" },
 		{ alias = "jol" },
-		{ alias = "exo" },
 		{ alias = "hw" },
 	}
 	function rmod.r1(csBoost, useInq, minHPInq, preInq)
@@ -424,7 +424,7 @@ function emod.IconRetFCFS_S1(rotation, ...)
 end
 function emod.IconRetFCFS_S2()
 	-- remove this button's OnUpdate
-	s2 = emod.cIcon
+	s2 = emod.___e
 	s2.externalUpdate = true
 	UpdateS2 = s2:GetScript("OnUpdate")
 	s2:SetScript("OnUpdate", nil)

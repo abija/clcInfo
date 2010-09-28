@@ -603,7 +603,7 @@ function emod.IconRetFCFS_S1()
 end
 function emod.IconRetFCFS_S2()
 	-- remove this button's OnUpdate
-	s2 = emod.cIcon
+	s2 = emod.___e
 	s2.externalUpdate = true
 	UpdateS2 = s2:GetScript("OnUpdate")
 	s2:SetScript("OnUpdate", nil)

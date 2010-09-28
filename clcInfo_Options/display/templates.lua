@@ -38,6 +38,7 @@ StaticPopupDialogs["CLCINFO_CONFIRM_DELETE_TEMPLATE"] = {
 		local db = clcInfo.cdb.templates
 		if db[selectedForDelete] then 				
 			table.remove(db, selectedForDelete)
+			clcInfo:OnTemplatesUpdate()
 			mod:UpdateTemplateList()
 		end
 	end,

@@ -16,6 +16,8 @@ display\activeTemplate.lua
 display\grids.lua
 display\icons.lua
 display\bars.lua
+display\micons.lua
+display\mbars.lua
 
 data\global.lua
 data\custom.lua

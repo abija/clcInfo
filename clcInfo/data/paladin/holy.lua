@@ -46,7 +46,7 @@ do
 						if timeRight then
 							timeRight = tostring(math.floor(value + 0.5))
 						end
-						return true, icon, 0, duration, value, "normal", name, "", timeRight
+						return true, icon, 0, duration, value, "normal", UnitName(groupUnitList[i]), "", timeRight
 					end
 					j = j + 1
 					name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitBuff(groupUnitList[i], j)

@@ -8,7 +8,7 @@ local function bprint(...)
 	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\fixandclean> " .. table.concat(t, " "))
 end
 
-clcInfo.__version = 19
+clcInfo.__version = 21
 
 --------------------------------------------------------------------------------
 -- TODO, make this GOOD
@@ -78,24 +78,31 @@ function clcInfo:FixSavedData()
 		if not AdaptConfig("template" .. i, x[i], clcInfo.display.templates:GetDefault()) then return end
 		if not AdaptConfig("template" .. i .. ".spec", x[i].spec, { tree = 1, talent = 0, rank = 1 }) then return end
 		if not AdaptConfig("template" .. i .. ".options", x[i].options, { gridSize = 1, showWhen = "always" }) then return end
-		if not AdaptConfig("template" .. i .. ".skinOptions", x[i].skinOptions, { icons = {}, bars = {} }) then return end
+		
+		if not AdaptConfig("template" .. i .. ".skinOptions", x[i].skinOptions, { icons = {}, bars = {}, mbars = {} }) then return end		
 		if not AdaptConfig("template" .. i .. ".skinOptions.icons", x[i].skinOptions.icons, clcInfo.display.icons:GetDefaultSkin()) then return end
 		if not AdaptConfig("template" .. i .. ".skinOptions.bars", x[i].skinOptions.bars, clcInfo.display.bars:GetDefaultSkin()) then return end
+		if not AdaptConfig("template" .. i .. ".skinOptions.mbars", x[i].skinOptions.mbars, clcInfo.display.mbars:GetDefaultSkin()) then return end
 		
 		-- grids
 		local y = x[i].grids
 		for j =1, #y do
-			if not AdaptConfig("template" .. i .. ".grid" .. j, y[j], clcInfo.display.grids:GetDefault()) then return end
+			if not AdaptConfig("template" .. i .. ".grid" .. j, y[j], clcInfo.display.grids.GetDefault()) then return end
 		end
 		-- icons
 		local y = x[i].icons
 		for j =1, #y do
-			if not AdaptConfig("template" .. i .. ".icons" .. j, y[j], clcInfo.display.icons:GetDefault()) then return end
+			if not AdaptConfig("template" .. i .. ".icons" .. j, y[j], clcInfo.display.icons.GetDefault()) then return end
 		end
 		-- bars
 		local y = x[i].bars
 		for j =1, #y do
-			if not AdaptConfig("template" .. i .. ".bars" .. j, y[j], clcInfo.display.bars:GetDefault()) then return end
+			if not AdaptConfig("template" .. i .. ".bars" .. j, y[j], clcInfo.display.bars.GetDefault()) then return end
+		end
+		-- mbars
+		local y = x[i].mbars
+		for j =1, #y do
+			if not AdaptConfig("template" .. i .. ".bars" .. j, y[j], clcInfo.display.mbars.GetDefault()) then return end
 		end
 	end
 	
@@ -103,19 +110,3 @@ function clcInfo:FixSavedData()
 	return true
 end
 --------------------------------------------------------------------------------
-
---[[ db structure
-templates = {
-	spec = { tree = 1, talent = 0, rank = 1 },
-	options = { gridSize = 1, showWhen = "always" },
-	skinOptions = {
-		icons = {},
-		bars = {},
-	},
-	grids = {},
-	icons = {},
-	bars = {},
-},
-classModules = {
-},
---]]

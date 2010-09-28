@@ -119,6 +119,7 @@ function mod:UpdateBarList()
 		optionsBars.args[tostring(i)] = {
 			type = "group",
 			name = "Bar" .. i,
+			order = i,
 			childGroups = "tab",
 			args = {
 				tabGeneral = {

@@ -1,12 +1,10 @@
-- class module db -> based on template not global ?
+- enabled/ranged improved?
+- on class modules, make sure spells are checked since spec might not be guaranteed due to enforce (get tv cd on holy template etc)
+
 - try a better way to structure updates for options and in general?
-
-- lib include for buttonfacade ????
-
 
 - implement that db fix for module options too ?
 
-- manual select active template
 - copy template settings ? (copy table)
 
 - make group elements for sliders buttons?
@@ -19,7 +17,6 @@
 
 - deleting object is backwards (should be done by the mod not the object)
 	
-- active template skinning options moved to respective elements global
 - way to copy settings from bar advanced (even between templates/chars)
 - gradients, flash for bars
 - vertical bars? :p
@@ -28,22 +25,13 @@
 
 - function to cleanup unused vars from db somehow
 
-- modify the way unlock shows for icons
-- better stack display?
-
-
-
+- better stack display for icons
 - more accurate lbf support for icons
 - better default skin?
 
--- modify the way grids are moved / saved ?
-
 
 - bprint system is retarded, fix !!!
-
-!!! some better way to handle stack font string
-
-!!!!!!! add option to run stuff after return
+- add option to run stuff after return
 
 
 aditional forms of display to keep in mind:
@@ -52,15 +40,13 @@ aditional forms of display to keep in mind:
 - sliding bars
 - eventually have needed clcbpt features work?
 
-!!! make sure that cIcon is the one we want, check for threading problems
-
-
--- make a system based on addon version to fix the db at first run after a new version comes out?
-
--- for icons, make that buff/spell combo into a function
+! make sure that cIcon is the one we want, check for threading problems
 
 
 
 data types:
 - list of auras
 - list of stuff in general?
+
+
+- combat log tracker for shit like PS?

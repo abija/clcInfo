@@ -123,6 +123,7 @@ function mod:UpdateIconList()
 		optionsIcons.args[tostring(i)] = {
 			type = "group",
 			name = "Icon" .. i,
+			order = i,
 			childGroups = "tab",
 			args = {
 				-- general

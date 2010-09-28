@@ -8,7 +8,7 @@ end
 
 -- clcInfo = LibStub("AceAddon-3.0"):NewAddon("clcInfo", "AceConsole-3.0")
 clcInfo = {}
-clcInfo.display = { templates = {}, grids = {}, icons = {}, bars = {} }
+clcInfo.display = { templates = {}, grids = {}, icons = {}, bars = {}, mbars = {}, micons = {} }
 
 clcInfo.classModules = {}
 
@@ -116,6 +116,7 @@ function clcInfo:OnTemplatesUpdate()
 	clcInfo.display.templates:FindTemplate()
 	
 	-- clear stuff
+	self.display.mbars:ClearMBars()
 	self.display.icons:ClearIcons()
 	self.display.bars:ClearBars()
 	self.display.grids:ClearGrids()
@@ -124,6 +125,7 @@ function clcInfo:OnTemplatesUpdate()
 	self.display.grids:InitGrids()
 	self.display.icons:InitIcons()
 	self.display.bars:InitBars()
+	self.display.mbars:InitMBars()
 	
 	self:ChangeShowWhen()
 	

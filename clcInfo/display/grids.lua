@@ -119,7 +119,16 @@ function prototype:UpdateElements()
 		end
 	end
 	
+	-- update bars
 	il = clcInfo.display.bars.active
+	for i = 1, #il do
+		if il[i].db.gridId == self.index then
+			il[i]:UpdateLayout()
+		end
+	end
+	
+	-- update mbars
+	il = clcInfo.display.mbars.active
 	for i = 1, #il do
 		if il[i].db.gridId == self.index then
 			il[i]:UpdateLayout()
@@ -207,7 +216,8 @@ function mod:GetDefault()
     -- skin settings, so that we use grid skin when in a grid
     skinOptions = {
     	icons = clcInfo.display.icons:GetDefaultSkin(),
-    	bars = clcInfo.display.bars:GetDefaultSkin()
+    	bars = clcInfo.display.bars:GetDefaultSkin(),
+    	mbars = clcInfo.display.mbars:GetDefaultSkin(),
     },
 	}
 end

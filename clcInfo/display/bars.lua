@@ -38,7 +38,7 @@ local function OnUpdate(self, elapsed)
 		self.elapsed = 0
 		
 		-- expose the object
-		clcInfo.env.cBar = self
+		clcInfo.env.___e = self
 		
 		-- mode is either "normal" or "reversed" which refer to elapsed based bars or unspecified
 		local visible, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight, alpha, svc, r, g, b, a = self.exec()
@@ -80,7 +80,31 @@ local function OnUpdate(self, elapsed)
 	self:FakeShow()
 end
 
+local function OnDragStop(self)
+	self:StopMovingOrSizing()
 
+	local g
+	if self.db.gridId > 0 then
+		g = clcInfo.display.grids.active[self.db.gridId]
+	end
+	if g then
+		-- column
+		self.db.gridX = 1 + floor((self:GetLeft() - g:GetLeft()) / (g.db.cellWidth + g.db.spacingX))
+		-- row
+		self.db.gridY = 1 + floor((self:GetBottom() - g:GetBottom()) / (g.db.cellHeight + g.db.spacingY))
+	else
+		self.db.gridId = 0
+		self.db.x = self:GetLeft()
+		self.db.y = self:GetBottom()
+		
+		local gs = clcInfo.activeTemplate.options.gridSize
+		self.db.x = self.db.x - self.db.x % gs
+		self.db.y = self.db.y - self.db.y % gs
+	end
+
+	self:UpdateLayout()
+  clcInfo:UpdateOptions() -- update the data in options also
+end
 
 function prototype:Init()
 	-- create a child frame that holds all the elements and it's hidden/shown instead of main one that has update function
@@ -131,19 +155,7 @@ function prototype:Init()
 	self:SetScript("OnDragStart", function()
       self:StartMoving()
   end)
-	self:SetScript("OnDragStop", function()
-		self:StopMovingOrSizing()
-		self.db.x = self:GetLeft()
-		self.db.y = self:GetBottom()
-		
-		local gs = clcInfo.activeTemplate.options.gridSize
-		self.db.x = self.db.x - self.db.x % gs
-		self.db.y = self.db.y - self.db.y % gs
-		
-		self:UpdateLayout()
-    -- update the data in options also
-    clcInfo:UpdateOptions()
-	end)
+	self:SetScript("OnDragStop", OnDragStop)
 end
 
 -- shows and enables control of the frame
@@ -621,7 +633,7 @@ function mod.GetDefaultSkin()
 		textRightColor					= {1, 1, 1, 1},
 	}
 end
-function mod:GetDefault()
+function mod.GetDefault()
 	local x = (UIParent:GetWidth() - 130) / 2 * UIParent:GetScale()
 	local y = (UIParent:GetHeight() - 15) / 2 * UIParent:GetScale()
 	
@@ -645,11 +657,11 @@ function mod:GetDefault()
 		
 		skinSource = "Template",	-- template, grid, self
 		ownColors	= false,
-		skin = mod:GetDefaultSkin(),
+		skin = mod.GetDefaultSkin(),
 	}
 end
 function mod:AddBar(gridId)
-	local data = mod:GetDefault()
+	local data = mod.GetDefault()
 	gridId = gridId or 0
 	data.gridId = gridId
 	if gridId > 0 then data.skinSource = "Grid" end

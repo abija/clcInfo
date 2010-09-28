@@ -36,7 +36,7 @@ local function OnUpdate(self, elapsed)
 	self.elapsed = 0
 	
 	-- expose the object
-	clcInfo.env.cIcon = self
+	clcInfo.env.___e = self
 	
 	-- needed vars to cover all posibilities
 	-- visible
@@ -65,10 +65,8 @@ local function OnUpdate(self, elapsed)
 		if self.lastReversed ~= reversed then
 			if reversed then
 				e:SetReverse(true)
-				e:SetDrawEdge(true)
 			else
 				e:SetReverse(false)
-				e:SetDrawEdge(false)
 			end
 			self.lastReversed = reversed
 		end
@@ -106,7 +104,31 @@ local function OnUpdate(self, elapsed)
 	self:FakeShow()
 end
 
+local function OnDragStop(self)
+	self:StopMovingOrSizing()
 
+	local g
+	if self.db.gridId > 0 then
+		g = clcInfo.display.grids.active[self.db.gridId]
+	end
+	if g then
+		-- column
+		self.db.gridX = 1 + floor((self:GetLeft() - g:GetLeft()) / (g.db.cellWidth + g.db.spacingX))
+		-- row
+		self.db.gridY = 1 + floor((self:GetBottom() - g:GetBottom()) / (g.db.cellHeight + g.db.spacingY))
+	else
+		self.db.gridId = 0
+		self.db.x = self:GetLeft()
+		self.db.y = self:GetBottom()
+		
+		local gs = clcInfo.activeTemplate.options.gridSize
+		self.db.x = self.db.x - self.db.x % gs
+		self.db.y = self.db.y - self.db.y % gs
+	end
+
+	self:UpdateLayout()
+  clcInfo:UpdateOptions() -- update the data in options also
+end
 
 function prototype:Init()
 	-- create a child frame that holds all the elements and it's hidden/shown instead of main one that has update function
@@ -161,19 +183,7 @@ function prototype:Init()
 	self:SetScript("OnDragStart", function()
       self:StartMoving()
   end)
-	self:SetScript("OnDragStop", function()
-		self:StopMovingOrSizing()
-		self.db.x = self:GetLeft()
-		self.db.y = self:GetBottom()
-		
-		local gs = clcInfo.activeTemplate.options.gridSize
-		self.db.x = self.db.x - self.db.x % gs
-		self.db.y = self.db.y - self.db.y % gs
-		
-		self:UpdateLayout()
-    -- update the data in options also
-    clcInfo:UpdateOptions()
-	end)
+	self:SetScript("OnDragStop", OnDragStop)
 end
 
 --[[

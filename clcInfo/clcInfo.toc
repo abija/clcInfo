@@ -16,9 +16,13 @@ display\templates.lua
 display\grids.lua
 display\icons.lua
 display\bars.lua
+display\micons.lua
+display\mbars.lua
 
 data\global_icon.lua
 data\global_bar.lua
+data\global_micon.lua
+data\global_mbar.lua
 data\custom.lua
 
 data\paladin\global.lua

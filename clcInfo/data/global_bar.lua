@@ -139,10 +139,12 @@ end
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
--- experimental stuff below
+-- EXPERIMENTAL
 --------------------------------------------------------------------------------
 
+
 --[[
+BarSingleTargetRaidBuff(spell, showStack, timeRight)
 --------------------------------------------------------------------------------
 intended to be used with beacon of light, earth shield, etc
 buff, cast by you, that can be active on only one target at same time
@@ -188,7 +190,7 @@ do
 					if timeRight then
 						timeRight = tostring(math.floor(value + 0.5))
 					end
-					return true, icon, 0, duration, value, "normal", name, "", timeRight
+					return true, icon, 0, duration, value, "normal", UnitName(groupUnitList[i]), "", timeRight
 				end
 			end
 		end

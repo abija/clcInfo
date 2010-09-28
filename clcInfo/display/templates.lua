@@ -52,13 +52,16 @@ function mod:GetDefault()
 		grids = {},
 		icons = {},
 		bars = {},
+		mbars = {},
+		micons = {},
 		options = {
 			gridSize = 1,
 			showWhen = "always",
 		},
 		skinOptions = {
-    	icons = clcInfo.display.icons:GetDefaultSkin(),
-    	bars = clcInfo.display.bars:GetDefaultSkin()
+    	icons = clcInfo.display.icons.GetDefaultSkin(),
+    	bars = clcInfo.display.bars.GetDefaultSkin(),
+    	mbars = clcInfo.display.mbars.GetDefaultSkin()
     },
 	}
 end
@@ -74,18 +77,21 @@ function mod:LockElements()
 	clcInfo.display.grids:LockAll()
 	clcInfo.display.icons:LockAll()
 	clcInfo.display.bars:LockAll()
+	clcInfo.display.mbars:LockAll()
 end
 
 function mod:UnlockElements()
 	clcInfo.display.grids:UnlockAll()
 	clcInfo.display.icons:UnlockAll()
 	clcInfo.display.bars:UnlockAll()
+	clcInfo.display.mbars:UnlockAll()
 end
 
 function mod:UpdateElementsLayout()
 	clcInfo.display.grids:UpdateAll()
 	clcInfo.display.icons:UpdateLayoutAll()
 	clcInfo.display.bars:UpdateLayoutAll()
+	clcInfo.display.mbars:UpdateLayoutAll()
 end
 
 -- TODO, optimize the callback handling ?
