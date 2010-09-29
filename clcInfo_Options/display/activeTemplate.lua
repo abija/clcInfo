@@ -29,8 +29,10 @@ local function AddBar()
 	clcInfo.display.bars:AddBar()
 	mod.UpdateBarList()
 end
-
---------------------------------------------------------------------------------
+local function AddMBar()
+	clcInfo.display.mbars:AddMBar()
+	mod.UpdateMBarList()
+end
 
 -- set/get for skin icons
 -- info: activeTemplate skins icons selectType skinType
@@ -429,6 +431,13 @@ function mod:LoadActiveTemplate()
   			addBar = { order = 1, type = "execute", name = "Add Bar", func = AddBar },
   		},
   	},
+  	
+  	mbars = {
+  		order = 400, type = "group", name = "Multi Bars",
+  		args = {
+  			addBar = { order = 1, type = "execute", name = "Add MBar", func = AddMBar },
+  		},
+  	},
   }
   
   -- if we have lbf then add it to options
@@ -459,6 +468,11 @@ function mod:LoadActiveTemplate()
   
   mod.lastBarCount = 0
   mod.UpdateBarList()
+  
+  mod.lastMBarCount = 0
+  mod.UpdateMBarList()
+  
+  
   -- info: class modules are loaded together with active template because of the data that might be template stored
   mod:LoadClassModules()
 end
