@@ -167,6 +167,19 @@ function mod:UpdateMBarList()
 								},
 							},
 						},
+						bars = {
+							order = 4, type = "group", inline = true, name = "Bars",
+							args = {
+								growth = {
+									order = 1, type = "select", values = { up = "up", down = "down" }, name = "Direction",
+									get = Get, set = Set,
+								},
+								spacing = {
+									order = 2, type = "range", min = -10, max = 50, step = 1, name = "Spacing",
+									get = Get, set = Set,
+								},
+							},
+						},
 					},
 				},
 			

@@ -1,3 +1,5 @@
+- ace3-lsm libs 
+
 - enabled/ranged improved?
 - on class modules, make sure spells are checked since spec might not be guaranteed due to enforce (get tv cd on holy template etc)
 

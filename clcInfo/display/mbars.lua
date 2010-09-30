@@ -38,26 +38,6 @@ local db
 -- bar object
 --------------------------------------------------------------------------------
 
-function barPrototype:OnUpdateQuick(t)
-	-- TODO, fix somehow
-	self:Show()
-end
-
--- 1      2  3  4  5  6        7         8         9      10    11        12          13
--- alpha, r, g, b, a, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight = unpack(t)
-function barPrototype:OnUpdate(t)
-	if not t then self:Hide() return end
-	if t[0] then self:SetAlpha(t[0]) end
-	if t[1] then self.bar:SetStatusBarColor(t[1], t[2], t[3], t[4]) end
-	self.icon:SetTexture(t[6])
-	self.bar:SetMinMaxValues(t[7], t[8])
-	self.bar:SetValue(t[9])
-	self.textLeft:SetText(t[11])
-	self.textCenter:SetText(t[12])
-	self.textRight:SetText(t[13])
-	self:Show()
-end
-
 function barPrototype:Init()
 	self.bd = {}
 	
@@ -260,6 +240,7 @@ function barPrototype:UpdateLayout(i, skin)
 	self:SetWidth(opt.width)
 	self:SetHeight(opt.height)	
 	
+	self:ClearAllPoints()
 	if opt.growth == "up" then
 		self:SetPoint("BOTTOMLEFT", self.parent, "BOTTOMLEFT", 0, (i - 1) * (opt.height + opt.spacing))
 	else
@@ -275,11 +256,21 @@ function barPrototype:UpdateLayout(i, skin)
 	-- reset alpha
 	self:SetAlpha(1)
 	
+	-- fix text width/height
+	self.textLeft:SetWidth(self.bar:GetWidth() * 0.8)
+	self.textLeft:SetHeight(self.bar:GetHeight())
+	self.textCenter:SetWidth(self.bar:GetWidth())
+	self.textCenter:SetHeight(self.bar:GetHeight())
+	self.textRight:SetWidth(self.bar:GetWidth() * 0.3)
+	self.textCenter:SetHeight(self.bar:GetHeight())
+	
 	-- own colors to make it easier to configure
 	if opt.ownColors then
-		self.bar:SetStatusBarColor(unpack(opt.barColor))
-		self.barFrame:SetBackdropColor(unpack(opt.barBgColor))
+		self.bar:SetStatusBarColor(unpack(opt.skin.barColor))
+		self.barFrame:SetBackdropColor(unpack(opt.skin.barBgColor))
 	end
+	
+	self.r, self.g, self.b, self.a = self.bar:GetStatusBarColor()
 end
 
 --------------------------------------------------------------------------------
@@ -289,6 +280,35 @@ end
 --------------------------------------------------------------------------------
 -- mbar object
 --------------------------------------------------------------------------------
+
+function prototype:___AddBar(alpha, r, g, b, a, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight)
+	self.___dc = self.___dc + 1
+	
+	local bar
+	if self.___dc > #self.___c then
+		bar = self:New()
+	else
+		bar = self.___c[self.___dc]
+	end
+
+	bar:SetAlpha(alpha or 1)
+	if r then bar.bar:SetStatusBarColor(r, g, b, a)
+	else bar.bar:SetStatusBarColor(bar.r, bar.g, bar.b, bar.a) end
+	
+	bar.icon:SetTexture(texture)
+	bar.bar:SetMinMaxValues(minValue, maxValue)
+	bar.bar:SetValue(value)
+	bar.textLeft:SetText(textLeft)
+	bar.textCenter:SetText(textCenter)
+	bar.textRight:SetText(textRight)
+	bar:Show()
+	
+	-- save important stuff for quick updates
+	bar.value = value
+	bar.mode = mode
+end
+
+
 -- on update is used on the mbar object
 local function OnUpdate(self, elapsed)
 	self.elapsed = self.elapsed + elapsed
@@ -304,27 +324,26 @@ local function OnUpdate(self, elapsed)
 		-- update data
 		self.exec()
 		
-		if self.___dc > self.___cc then
-			-- need more bars
-			local n = self.___cc + 1
-			for i = n, self.___dc do
-				self:New()
-			end
-		elseif self.___dc < self.___cc then
+		
+		if self.___dc < #self.___c then
 			-- hide the extra bars
-			for i = self.___dc + 1, self.___cc do
-				self.___c[i]:OnUpdate(nil)
+			for i = self.___dc + 1, #self.___c do
+				self.___c[i]:Hide()
 			end
 		end
 		
-		-- display 
-		for i = 1, self.___dc do
-			self.___c[i]:OnUpdate(self.___dt[i])
-		end
 	else
-		-- display 
+		-- quick update display 
+		local bar
 		for i = 1, self.___dc do
-			self.___c[i]:OnUpdateQuick(self.___dt[i])
+			bar = self.___c[i]
+			if bar.mode == "normal" then
+					bar.value = bar.value - elapsed
+			elseif bar.mode == "reversed" then
+				bar.value = bar.value + elapsed
+			end
+			
+			bar.bar:SetValue(bar.value)	
 		end
 	end
 end
@@ -372,12 +391,8 @@ function prototype:Init()
 	self:Show()
 	self:SetScript("OnUpdate", OnUpdate)
 	
-	-- need a label
-	
-	self.___dt = {}			-- data table
 	self.___dc = 0			-- data count
 	self.___c = {}			-- children
-	self.___cc = 0			-- children count
 
 	-- move and config
   self:EnableMouse(false)
@@ -399,7 +414,8 @@ function prototype:Unlock()
   
   -- show first bar
   -- alpha, r, g, b, a, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight
- 	self.___c[1]:OnUpdate({ nil, nil, nil, nil, nil, "Interface\\Icons\\ABILITY_SEAL", 1, 100, 50, nil, "left", "center", "right" })
+  self.___dc = 0
+ 	self:___AddBar(nil, nil, nil, nil, nil, "Interface\\Icons\\ABILITY_SEAL", 1, 100, 50, nil, "left", "center", "right")
 end
 
 -- disables control of the frame
@@ -488,8 +504,8 @@ function prototype:UpdateExec()
   	self.ExecCleanup = nil
   end
   
-  -- update colors for bars
-  self:UpdateBarsLayout()
+  -- release the bars
+  self:ReleaseBars()
 end
 
 -- caaaaaaaaaaaaaaaaaaareful
@@ -514,28 +530,30 @@ function prototype:New()
 	
 	bar.parent = self
 	
-	self.___cc = self.___cc + 1
-	self.___c[self.___cc] = bar
+	self.___c[#self.___c + 1] = bar
 	
-	bar:UpdateLayout(self.___cc, self.skin)
+	bar:UpdateLayout(#self.___c, self.skin)
+	
+	return bar
 end
 
 function prototype:ReleaseBars()
 	local bar
-	for i = 1, self.___cc do
+	local b = #self.___c
+	for i = 1, b do
 		bar = table.remove(self.___c)
 		bar:Hide()
 		table.insert(mod.cacheBars, bar)
 	end
 end
 function prototype:UpdateBarsLayout()
-	for i = 1, self.___cc do
+	for i = 1, #self.___c do
 		self.___c[i]:UpdateLayout(i, self.skin)
 	end
 end
 -- set children bars state
 function prototype:HideBars()
-	for i = 1, self.___cc do
+	for i = 1, #self.___c do
 		self.___c[i]:Hide()
 	end
 end
@@ -571,8 +589,6 @@ function mod:New(index)
 	mbar:UpdateLayout()
 	mbar:UpdateExec()
 	
-	-- add one bar to the list, for unlock
-	mbar:New()
 	if self.unlock then
   	mbar:Unlock()
   end

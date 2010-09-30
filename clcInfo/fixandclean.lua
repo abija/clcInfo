@@ -8,7 +8,7 @@ local function bprint(...)
 	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\fixandclean> " .. table.concat(t, " "))
 end
 
-clcInfo.__version = 21
+clcInfo.__version = 22
 
 --------------------------------------------------------------------------------
 -- TODO, make this GOOD

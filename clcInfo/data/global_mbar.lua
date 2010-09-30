@@ -33,7 +33,5 @@ end
 -- garbage but less cpu apparently
 function mod.AddMBar(alpha, r, g, b, a, visible, ...)
 	if (alpha ~= nil and alpha == 0) or not visible then return end
-	local e = mod.___e
-	e.___dc = e.___dc + 1
-	e.___dt[e.___dc] = { alpha, r, g, b, a, ... }
+	mod.___e:___AddBar(alpha, r, g, b, a, ...)
 end
