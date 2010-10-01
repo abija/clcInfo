@@ -1,0 +1,10 @@
+clcInfo
+	.templates
+	.display
+		.grids
+		.icons
+		.bars
+		.micons
+		.mbars
+	.classModules
+	

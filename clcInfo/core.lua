@@ -8,7 +8,8 @@ end
 
 -- clcInfo = LibStub("AceAddon-3.0"):NewAddon("clcInfo", "AceConsole-3.0")
 clcInfo = {}
-clcInfo.display = { templates = {}, grids = {}, icons = {}, bars = {}, mbars = {}, micons = {} }
+clcInfo.display = {}
+clcInfo.templates = {}
 
 clcInfo.classModules = {}
 
@@ -68,7 +69,10 @@ end
 
 
 
-
+function clcInfo:RegisterDisplayModule(m)
+	clcInfo.display[m] = {}
+	return clcInfo.display[m]
+end
 
 function clcInfo:OnInitialize()
 	self:ReadSavedData()
@@ -113,21 +117,21 @@ function clcInfo:TalentCheck()
 end
 
 function clcInfo:OnTemplatesUpdate()
-	clcInfo.display.templates:FindTemplate()
+	clcInfo.templates:FindTemplate()
 	
-	-- clear stuff
-	self.display.mbars:ClearMBars()
-	self.display.mbars:ClearMIcons()
-	self.display.bars:ClearBars()
-	self.display.icons:ClearIcons()
-	self.display.grids:ClearGrids()
+	-- clear elements
+	for k in pairs(clcInfo.display) do
+		if self.display[k].ClearElements then
+			self.display[k]:ClearElements()
+		end
+	end
 	
-	-- init stuff
-	self.display.grids:InitGrids()
-	self.display.icons:InitIcons()
-	self.display.bars:InitBars()
-	self.display.icons:InitMIcons()
-	self.display.mbars:InitMBars()
+	-- init elements
+	for k in pairs(clcInfo.display) do
+		if self.display[k].InitElements then
+			self.display[k]:InitElements()
+		end
+	end
 	
 	self:ChangeShowWhen()
 	
@@ -189,7 +193,7 @@ function clcInfo:ReadSavedData()
 	-- char defaults
 	if not clcInfoCharDB then
 		clcInfoCharDB = clcInfo:GetDefault()
-		table.insert(clcInfoCharDB.templates, clcInfo.display.templates:GetDefault())
+		table.insert(clcInfoCharDB.templates, clcInfo.templates:GetDefault())
 	end
 
 	clcInfo.db = clcInfoDB	

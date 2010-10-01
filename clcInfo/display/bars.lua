@@ -10,7 +10,11 @@ end
 local prototype = CreateFrame("Frame")
 prototype:Hide()
 
-local mod = clcInfo.display.bars
+local mod = clcInfo:RegisterDisplayModule("bars")
+-- special options
+mod.hasSkinOptions = true
+
+
 -- active objects
 mod.active = {}				
 -- cache of objects, to not make unnecesary frames
@@ -208,14 +212,12 @@ end
 
 
 -- display the elements according to the settings
-local function TryGridPositioning(self, skin)
-	if self.db.gridId <= 0 then return false end
+-- display the elements according to the settings
+local function TryGridPositioning(self)
+	if self.db.gridId <= 0 then return end
 	
 	local f = clcInfo.display.grids.active[self.db.gridId]
-	if not f then 
-		self.db.gridId = 0
-		return false
-	end
+	if not f then return end
 	
 	local g = f.db
 	
@@ -233,6 +235,7 @@ local function TryGridPositioning(self, skin)
 		
 	return true
 end
+
 
 -- for lazy/normal? people
 local function SimpleSkin(self, skin)
@@ -461,7 +464,7 @@ function prototype:UpdateExec()
 	self.exec, err = loadstring(self.db.exec)
 	-- apply DoNothing if we have an error
 	if not self.exec then
-		self.exec = loadstring("return DoNothing()")
+		self.exec = loadstring("")
 		bprint("code error:", err)
 		bprint("in:", self.db.exec)
 	end
@@ -492,8 +495,8 @@ function prototype:Delete()
 	-- delete the db entry
 	-- rebuild frames
 	table.remove(db, self.index)
-	mod:ClearBars()
-	mod:InitBars()
+	mod:ClearElements()
+	mod:InitElements()
 end
 
 ---------------------------------------------------------------------------------
@@ -536,7 +539,7 @@ function mod:New(index)
 end
 
 -- send all active bars to cache
-function mod:ClearBars()
+function mod:ClearElements()
 	local bar
 	for i = 1, getn(self.active) do
 		-- remove from active
@@ -557,7 +560,7 @@ end
 
 -- read data from config and create the bars
 -- IMPORTANT, always make sure you call clear first
-function mod:InitBars()
+function mod:InitElements()
 	if not clcInfo.activeTemplate then return end
 
 	db = clcInfo.activeTemplate.bars
@@ -646,7 +649,7 @@ function mod.GetDefault()
     relativePoint = "BOTTOMLEFT",
 		width = 200,
 		height = 20,
-		exec = "return DoNothing()",
+		exec = "",
 		ups = 5,
 		gridId = 0,
 		gridX = 1,	-- column
@@ -659,7 +662,7 @@ function mod.GetDefault()
 		skin = mod.GetDefaultSkin(),
 	}
 end
-function mod:AddBar(gridId)
+function mod:Add(gridId)
 	local data = mod.GetDefault()
 	gridId = gridId or 0
 	data.gridId = gridId
@@ -673,21 +676,21 @@ end
 
 -- TODO!
 -- make sure cached bars are locked
-function mod:LockAll()
+function mod:LockElements()
 	for i = 1, getn(self.active) do
 		self.active[i]:Lock()
 	end
 	self.unlock = false
 end
 
-function mod:UnlockAll()
+function mod:UnlockElements()
 	for i = 1, getn(self.active) do
 		self.active[i]:Unlock()
 	end
 	self.unlock = true
 end
 
-function mod:UpdateLayoutAll()
+function mod:UpdateElementsLayout()
 	for i = 1, getn(self.active) do
 		self.active[i]:UpdateLayout()
 	end

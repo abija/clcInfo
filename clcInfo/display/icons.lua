@@ -13,7 +13,11 @@ local lbf = clcInfo.lbf
 local prototype = CreateFrame("Frame")
 prototype:Hide()
 
-local mod = clcInfo.display.icons
+local mod = clcInfo:RegisterDisplayModule("icons")
+-- special options
+mod.hasSkinOptions = true
+
+
 -- active objects
 mod.active = {}				
 -- cache of objects, to not make unnecesary frames
@@ -63,11 +67,7 @@ local function OnUpdate(self, elapsed)
 	if (enable == 1) and duration and duration > 0 then
 		-- direction
 		if self.lastReversed ~= reversed then
-			if reversed then
-				e:SetReverse(true)
-			else
-				e:SetReverse(false)
-			end
+			e:SetReverse(reversed)
 			self.lastReversed = reversed
 		end
 		e:SetCooldown(start, duration)
@@ -77,7 +77,7 @@ local function OnUpdate(self, elapsed)
 	end
 	
 	-- stack
-	local e = self.elements.stack
+	e = self.elements.stack
 	if count then
 		e:SetText(count)
 		e:Show()
@@ -135,16 +135,18 @@ function prototype:Init()
 	self.elements = CreateFrame("Frame", nil, self)
 
 	-- todo create only what's needed
-	self.elements.texBackground = self.elements:CreateTexture(nil, "BACKGROUND")
 	self.elements.texMain = self.elements:CreateTexture(nil, "BORDER")
 	self.elements.texMain:SetAllPoints()
-	self.elements.texNormal = self.elements:CreateTexture(nil, "ARTWORK")
-	self.elements.texGloss = self.elements:CreateTexture(nil, "OVERLAY")
 	-- cooldown
 	self.elements.cooldown = CreateFrame("Cooldown", nil, self.elements)
 	self.elements.cooldown:SetAllPoints(self.elements)
 	-- stack (make a special frame so it's on top of cooldown)
 	local stackFrame = CreateFrame("Frame", nil, self.elements)
+	
+	-- normal and gloss on top of cooldown
+	self.elements.texNormal = stackFrame:CreateTexture(nil, "ARTWORK")
+	self.elements.texGloss = stackFrame:CreateTexture(nil, "OVERLAY")
+	
 	self.elements.stack = stackFrame:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
 	self.elements.stack:SetJustifyH("RIGHT")
 	-- self.elements.stack:SetFrameLevel(self.elements.cooldown:GetFrameLevel() + 1)
@@ -268,22 +270,8 @@ function prototype:ApplyMySkin()
 	
 	t = self.elements.texGloss
 	t:Hide()
-	--[[
-	t:SetTexture("Interface\\AddOns\\clcInfo\\textures\\IconGloss")
-	t:ClearAllPoints()
-	t:SetWidth(scalex * 40)
-	t:SetHeight(scaley * 40)
-	t:SetPoint("CENTER", self.elements)
-	t:Show()
-	--]]
 	
 	self.elements.cooldown:SetAllPoints(self.elements)
-	--[[
-	self.elements.stack:ClearAllPoints()
-	self.elements.stack:SetWidth(scalex * 16)
-	self.elements.stack:SetWidth(scaley * 16)
-	self.elements.stack:SetPoint("BOTTOMRIGHT", self.elements, "BOTTOMRIGHT", -1, 1)
-	--]]
 end
 
 --[[
@@ -291,20 +279,18 @@ UpdateLayout()
   apply settings
 --]]
 -- find a way to translate the positions between on grid and not on grid?
+-- display the elements according to the settings
 local function TryGridPositioning(self)
-	if self.db.gridId <= 0 then return false end
+	if self.db.gridId <= 0 then return end
 	
 	local f = clcInfo.display.grids.active[self.db.gridId]
-	if not f then 
-		self.db.gridId = 0
-		return false
-	end
+	if not f then return end
 	
 	local g = f.db
 	
 	-- size
 	self.db.width = g.cellWidth * self.db.sizeX + g.spacingX * (self.db.sizeX - 1) 
-	self.db.height = g.cellHeight* self.db.sizeY + g.spacingY * (self.db.sizeY - 1)
+	self.db.height = g.cellHeight * self.db.sizeY + g.spacingY * (self.db.sizeY - 1)
 	self:ClearAllPoints()
 	self:SetWidth(self.db.width)
 	self:SetHeight(self.db.height)
@@ -316,6 +302,7 @@ local function TryGridPositioning(self)
 		
 	return true
 end
+
 function prototype:UpdateLayout()	
 	-- check if it's attached to some grid
 	local onGrid = TryGridPositioning(self)
@@ -368,7 +355,7 @@ function prototype:UpdateExec()
 	self.exec, err = loadstring(self.db.exec)
 	-- apply DoNothing if we have an error
 	if not self.exec then
-		self.exec = loadstring("return DoNothing()")
+		self.exec = loadstring("")
 		bprint("code error:", err)
 		bprint("in:", self.db.exec)
 	end
@@ -401,8 +388,8 @@ function prototype:Delete()
 	-- delete the db entry
 	-- rebuild frames
 	table.remove(db, self.index)
-	mod:ClearIcons()
-	mod:InitIcons()
+	mod:ClearElements()
+	mod:InitElements()
 end
 
 ---------------------------------------------------------------------------------
@@ -445,7 +432,7 @@ function mod:New(index)
 end
 
 -- send all active icons to cache
-function mod:ClearIcons()
+function mod:ClearElements()
 	local icon
 	for i = 1, getn(self.active) do
 		-- remove from active
@@ -466,7 +453,7 @@ end
 
 -- read data from config and create the icons
 -- IMPORTANT, always make sure you call clear first
-function mod:InitIcons()
+function mod:InitElements()
 	if not clcInfo.activeTemplate then return end
 
 	db = clcInfo.activeTemplate.icons
@@ -496,7 +483,7 @@ function mod:GetDefault()
     relativePoint = "BOTTOMLEFT",
 		width = 30,
 		height = 30,
-		exec = "return DoNothing()",
+		exec = "",
 		ups = 5,
 		gridId = 0,
 		gridX = 1,	-- column
@@ -508,7 +495,7 @@ function mod:GetDefault()
 		skin = mod:GetDefaultSkin(),
 	}
 end
-function mod:AddIcon(gridId)
+function mod:Add(gridId)
 	local data = mod:GetDefault()
 	gridId = gridId or 0
 	data.gridId = gridId
@@ -522,21 +509,21 @@ end
 
 -- TODO!
 -- make sure cached icons are locked
-function mod:LockAll()
+function mod:LockElements()
 	for i = 1, getn(self.active) do
 		self.active[i]:Lock()
 	end
 	self.unlock = false
 end
 
-function mod:UnlockAll()
+function mod:UnlockElements()
 	for i = 1, getn(self.active) do
 		self.active[i]:Unlock()
 	end
 	self.unlock = true
 end
 
-function mod:UpdateLayoutAll()
+function mod:UpdateElementsLayout()
 	for i = 1, getn(self.active) do
 		self.active[i]:UpdateLayout()
 	end

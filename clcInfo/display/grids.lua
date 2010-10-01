@@ -25,7 +25,7 @@ end
 local prototype = CreateFrame("Frame")
 prototype:Hide()
 
-local mod = clcInfo.display.grids
+local mod = clcInfo:RegisterDisplayModule("grids")
 mod.active = {}				
 mod.cache = {}
 
@@ -62,11 +62,11 @@ function prototype:Init()
 	
 	self:Hide()
 	
-	self:Update()
+	self:UpdateLayout()
 end
 
 -- update display according to options
-function prototype:Update()
+function prototype:UpdateLayout()
 	local g = self.db
 	
 	-- make sure we have at least 1 cell at least 1x1
@@ -80,7 +80,7 @@ function prototype:Update()
 	self:SetHeight(g.cellsY * g.cellHeight + (g.cellsY - 1) * g.spacingY)
 	self:SetPoint(g.point, "UIParent", g.relativePoint, g.x, g.y)	
 	
-	self:UpdateElements()
+	self:UpdateChildren()
 end
 
 --[[
@@ -104,19 +104,18 @@ function prototype:Delete()
 	-- delete the db entry
 	table.remove(db, self.index)
 	-- rebuild frames
-	mod:ClearGrids()
-	mod:InitGrids()
+	mod:ClearElements()
+	mod:InitElements()
 end
 
--- TODO!
--- this should not be hardcoded, implement some sort of register system?
-function prototype:UpdateElements()
-	local elements = { "icons", "bars", "micons", "mbars" }
-	for k, v in pairs(elements) do
-		local il = clcInfo.display[v].active
-		for i = 1, #il do
-			if il[i].db.gridId == self.index then
-				il[i]:UpdateLayout()
+function prototype:UpdateChildren()
+	for k in pairs(clcInfo.display) do
+		if k ~= "grids" then
+			local il = clcInfo.display[k].active
+			for i = 1, #il do
+				if il[i].db.gridId == self.index then
+					il[i]:UpdateLayout()
+				end
 			end
 		end
 	end
@@ -148,7 +147,7 @@ function mod:New(index)
 	-- change the text of the label here since it's done only now
 	grid.label:SetText("Grid" .. grid.index)
 	
-	grid:Update()
+	grid:UpdateLayout()
 	if self.unlock then
 		grid:Unlock()
 	end
@@ -156,7 +155,7 @@ end
 
 
 -- send all active grids to cache
-function mod:ClearGrids()
+function mod:ClearElements()
 	local grid
 	for i = 1, getn(self.active) do
 		-- remove from active
@@ -172,7 +171,7 @@ end
 
 -- read data from config and create the grids
 -- IMPORTANT, always make sure you call clear first
-function mod:InitGrids()
+function mod:InitElements()
 	if not clcInfo.activeTemplate then return end
 
 	db = clcInfo.activeTemplate.grids
@@ -184,7 +183,7 @@ function mod:InitGrids()
 end
 
 function mod:GetDefault()
-	return {
+	local t = {
 		-- cell size
 		cellWidth = 30,
 		cellHeight = 30,
@@ -200,14 +199,18 @@ function mod:GetDefault()
 		point = "CENTER",
     relativePoint = "CENTER",
     -- skin settings, so that we use grid skin when in a grid
-    skinOptions = {
-    	icons = clcInfo.display.icons:GetDefaultSkin(),
-    	bars = clcInfo.display.bars:GetDefaultSkin(),
-    	mbars = clcInfo.display.mbars:GetDefaultSkin(),
-    },
+    skinOptions = {}
 	}
+	
+	for k, v in pairs(clcInfo.display) do
+		if v.hasSkinOptions then
+			t.skinOptions[k] = clcInfo.display[k]:GetDefaultSkin()
+		end
+	end
+	
+	return t
 end
-function mod:AddGrid()
+function mod:Add()
 	local data = mod:GetDefault()
 		
 	-- must be called after init
@@ -218,22 +221,22 @@ end
 
 -- TODO!
 -- make sure cached grids are locked ?
-function mod:LockAll()
+function mod:LockElements()
 	for i = 1, getn(self.active) do
 		self.active[i]:Lock()
 	end
 	self.unlock = false
 end
 
-function mod:UnlockAll()
+function mod:UnlockElements()
 	for i = 1, getn(self.active) do
 		self.active[i]:Unlock()
 	end
 	self.unlock = true
 end
 
-function mod:UpdateAll()
+function mod:UpdateElementsLayout()
 	for i = 1, getn(self.active) do
-		self.active[i]:Update()
+		self.active[i]:UpdateLayout()
 	end
 end

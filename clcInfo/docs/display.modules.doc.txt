@@ -1,0 +1,11 @@
+mod = clcInfo:RegisterDisplayModule(name)
+
+mod:InitElements
+mod:ClearElements
+mod:LockElements
+mod:UnlockElements
+mod:UpdateElementsLayout
+mod:GetDefault
+mod:GetDefaultSkin
+
+mod.hasSkinOptions

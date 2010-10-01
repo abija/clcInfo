@@ -10,9 +10,8 @@ embeds.xml
 #@end-no-lib-strip@
 
 core.lua
-fixandclean.lua
+templates.lua
 
-display\templates.lua
 display\grids.lua
 display\icons.lua
 display\bars.lua
@@ -38,3 +37,6 @@ data\paladin\global_40.lua
 data\paladin\retribution_40.lua
 data\paladin\protection_40.lua
 data\paladin\holy_40.lua
+
+
+fixandclean.lua

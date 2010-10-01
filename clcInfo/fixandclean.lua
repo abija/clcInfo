@@ -8,7 +8,7 @@ local function bprint(...)
 	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\fixandclean> " .. table.concat(t, " "))
 end
 
-clcInfo.__version = 23
+clcInfo.__version = 30
 
 --------------------------------------------------------------------------------
 -- TODO, make this GOOD
@@ -72,43 +72,30 @@ function clcInfo:FixSavedData()
 	
 	AdaptConfig("cdb", clcInfo.cdb, clcInfo:GetDefault())
 	
+	-- skined elements
+	local ts = {}
+	for k, v in pairs(clcInfo.display) do
+		if v.hasSkinOptions then ts[k] = {} end
+	end
+	
 	-- templates
 	local x = clcInfo.cdb.templates
 	for i = 1, #x do
-		if not AdaptConfig("template" .. i, x[i], clcInfo.display.templates:GetDefault()) then return end
+		if not AdaptConfig("template" .. i, x[i], clcInfo.templates:GetDefault()) then return end
 		if not AdaptConfig("template" .. i .. ".spec", x[i].spec, { tree = 1, talent = 0, rank = 1 }) then return end
 		if not AdaptConfig("template" .. i .. ".options", x[i].options, { gridSize = 1, showWhen = "always" }) then return end
 		
-		if not AdaptConfig("template" .. i .. ".skinOptions", x[i].skinOptions, { icons = {}, bars = {}, mbars = {}, micons = {} }) then return end		
-		if not AdaptConfig("template" .. i .. ".skinOptions.icons", x[i].skinOptions.icons, clcInfo.display.icons:GetDefaultSkin()) then return end
-		if not AdaptConfig("template" .. i .. ".skinOptions.bars", x[i].skinOptions.bars, clcInfo.display.bars:GetDefaultSkin()) then return end
-		if not AdaptConfig("template" .. i .. ".skinOptions.micons", x[i].skinOptions.micons, clcInfo.display.micons:GetDefaultSkin()) then return end
-		if not AdaptConfig("template" .. i .. ".skinOptions.mbars", x[i].skinOptions.mbars, clcInfo.display.mbars:GetDefaultSkin()) then return end
+		if not AdaptConfig("template" .. i .. ".skinOptions", x[i].skinOptions, ts) then return end
+		for k in pairs(ts) do
+			if not AdaptConfig("template" .. i .. ".skinOptions." .. k, x[i].skinOptions[k], clcInfo.display[k]:GetDefaultSkin()) then return end
+		end
 		
-		-- grids
-		local y = x[i].grids
-		for j =1, #y do
-			if not AdaptConfig("template" .. i .. ".grid" .. j, y[j], clcInfo.display.grids.GetDefault()) then return end
-		end
-		-- icons
-		local y = x[i].icons
-		for j =1, #y do
-			if not AdaptConfig("template" .. i .. ".icons" .. j, y[j], clcInfo.display.icons.GetDefault()) then return end
-		end
-		-- bars
-		local y = x[i].bars
-		for j =1, #y do
-			if not AdaptConfig("template" .. i .. ".bars" .. j, y[j], clcInfo.display.bars.GetDefault()) then return end
-		end
-		-- micons
-		local y = x[i].micons
-		for j =1, #y do
-			if not AdaptConfig("template" .. i .. ".micons" .. j, y[j], clcInfo.display.micons.GetDefault()) then return end
-		end
-		-- mbars
-		local y = x[i].mbars
-		for j =1, #y do
-			if not AdaptConfig("template" .. i .. ".bars" .. j, y[j], clcInfo.display.mbars.GetDefault()) then return end
+		-- display elements
+		for k in pairs(clcInfo.display) do
+			local y = x[i][k]
+			for j = 1, #y do
+				if not AdaptConfig("template" .. i .. "." .. k .. j, y[j], clcInfo.display[k].GetDefault()) then return end
+			end	
 		end
 	end
 	

@@ -32,6 +32,8 @@ StaticPopupDialogs["CLCINFO_CONFIRM_DELETE_MBAR"] = {
 	exclusive = 1,
 }
 
+local directionValues = { up = "up", down = "down" }
+
 -- info:
 -- 	1 activeTemplate
 -- 	2 mbars
@@ -167,11 +169,11 @@ function mod:UpdateMBarList()
 								},
 							},
 						},
-						bars = {
+						children = {
 							order = 4, type = "group", inline = true, name = "Bars",
 							args = {
 								growth = {
-									order = 1, type = "select", values = { up = "up", down = "down" }, name = "Direction",
+									order = 1, type = "select", values = directionValues, name = "Direction",
 									get = Get, set = Set,
 								},
 								spacing = {

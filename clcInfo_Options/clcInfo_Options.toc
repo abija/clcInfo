@@ -10,9 +10,9 @@ embeds.xml
 #@end-no-lib-strip@
 
 core.lua
+templates.lua
+activeTemplate.lua
 
-display\templates.lua
-display\activeTemplate.lua
 display\grids.lua
 display\icons.lua
 display\bars.lua
