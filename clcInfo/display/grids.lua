@@ -111,27 +111,13 @@ end
 -- TODO!
 -- this should not be hardcoded, implement some sort of register system?
 function prototype:UpdateElements()
-	-- update icons
-	local il = clcInfo.display.icons.active
-	for i = 1, #il do
-		if il[i].db.gridId == self.index then
-			il[i]:UpdateLayout()
-		end
-	end
-	
-	-- update bars
-	il = clcInfo.display.bars.active
-	for i = 1, #il do
-		if il[i].db.gridId == self.index then
-			il[i]:UpdateLayout()
-		end
-	end
-	
-	-- update mbars
-	il = clcInfo.display.mbars.active
-	for i = 1, #il do
-		if il[i].db.gridId == self.index then
-			il[i]:UpdateLayout()
+	local elements = { "icons", "bars", "micons", "mbars" }
+	for k, v in pairs(elements) do
+		local il = clcInfo.display[v].active
+		for i = 1, #il do
+			if il[i].db.gridId == self.index then
+				il[i]:UpdateLayout()
+			end
 		end
 	end
 end

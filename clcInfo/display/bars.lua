@@ -289,9 +289,8 @@ local function SimpleSkin(self, skin)
 end
 
 -- plenty of options
-local function AdvancedSkin(self)
+local function AdvancedSkin(self, skin)
 	local opt = self.db
-	local skin = opt.skin
 	local ex = self.elements
 	
 	-- full backdrop

@@ -123,7 +123,7 @@ do
 				else alpha = a2
 				end
 				
-				mod.___e:___AddBar(alpha, nil, nil, nil, nil, sovSpellTexture, 0, v[2], value, "normal", v[1], "", tr)
+				mod.___e:___AddBar(nil, alpha, nil, nil, nil, nil, sovSpellTexture, 0, v[2], value, "normal", v[1], "", tr)
 			end
 		end
 	end

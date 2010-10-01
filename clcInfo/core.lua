@@ -117,14 +117,16 @@ function clcInfo:OnTemplatesUpdate()
 	
 	-- clear stuff
 	self.display.mbars:ClearMBars()
-	self.display.icons:ClearIcons()
+	self.display.mbars:ClearMIcons()
 	self.display.bars:ClearBars()
+	self.display.icons:ClearIcons()
 	self.display.grids:ClearGrids()
 	
 	-- init stuff
 	self.display.grids:InitGrids()
 	self.display.icons:InitIcons()
 	self.display.bars:InitBars()
+	self.display.icons:InitMIcons()
 	self.display.mbars:InitMBars()
 	
 	self:ChangeShowWhen()

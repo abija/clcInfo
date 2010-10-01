@@ -118,9 +118,8 @@ local function SimpleSkin(self, skin)
 end
 
 -- plenty of options
-local function AdvancedSkin(self)
+local function AdvancedSkin(self, skin)
 	local opt = self.parent.db
-	local skin = opt.skin
 	
 	-- full backdrop
 	if skin.bd then
@@ -281,7 +280,7 @@ end
 -- mbar object
 --------------------------------------------------------------------------------
 
-function prototype:___AddBar(alpha, r, g, b, a, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight)
+function prototype:___AddBar(id, alpha, r, g, b, a, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight)
 	self.___dc = self.___dc + 1
 	
 	local bar
@@ -415,7 +414,7 @@ function prototype:Unlock()
   -- show first bar
   -- alpha, r, g, b, a, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight
   self.___dc = 0
- 	self:___AddBar(nil, nil, nil, nil, nil, "Interface\\Icons\\ABILITY_SEAL", 1, 100, 50, nil, "left", "center", "right")
+ 	self:___AddBar(nil, nil, nil, nil, nil, nil, "Interface\\Icons\\ABILITY_SEAL", 1, 100, 50, nil, "left", "center", "right")
 end
 
 -- disables control of the frame
@@ -469,9 +468,9 @@ function prototype:UpdateLayout()
 	
 	local skin
 	if onGrid and self.db.skinSource == "Grid" then
-		skin = clcInfo.display.grids.active[self.db.gridId].db.skinOptions.bars
+		skin = clcInfo.display.grids.active[self.db.gridId].db.skinOptions.mbars
 	elseif self.db.skinSource == "Template" then
-		skin = clcInfo.activeTemplate.skinOptions.bars
+		skin = clcInfo.activeTemplate.skinOptions.mbars
 	else
 		skin = self.db.skin
 	end

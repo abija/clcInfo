@@ -8,7 +8,7 @@ local function bprint(...)
 	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\fixandclean> " .. table.concat(t, " "))
 end
 
-clcInfo.__version = 22
+clcInfo.__version = 23
 
 --------------------------------------------------------------------------------
 -- TODO, make this GOOD
@@ -79,9 +79,10 @@ function clcInfo:FixSavedData()
 		if not AdaptConfig("template" .. i .. ".spec", x[i].spec, { tree = 1, talent = 0, rank = 1 }) then return end
 		if not AdaptConfig("template" .. i .. ".options", x[i].options, { gridSize = 1, showWhen = "always" }) then return end
 		
-		if not AdaptConfig("template" .. i .. ".skinOptions", x[i].skinOptions, { icons = {}, bars = {}, mbars = {} }) then return end		
+		if not AdaptConfig("template" .. i .. ".skinOptions", x[i].skinOptions, { icons = {}, bars = {}, mbars = {}, micons = {} }) then return end		
 		if not AdaptConfig("template" .. i .. ".skinOptions.icons", x[i].skinOptions.icons, clcInfo.display.icons:GetDefaultSkin()) then return end
 		if not AdaptConfig("template" .. i .. ".skinOptions.bars", x[i].skinOptions.bars, clcInfo.display.bars:GetDefaultSkin()) then return end
+		if not AdaptConfig("template" .. i .. ".skinOptions.micons", x[i].skinOptions.micons, clcInfo.display.micons:GetDefaultSkin()) then return end
 		if not AdaptConfig("template" .. i .. ".skinOptions.mbars", x[i].skinOptions.mbars, clcInfo.display.mbars:GetDefaultSkin()) then return end
 		
 		-- grids
@@ -98,6 +99,11 @@ function clcInfo:FixSavedData()
 		local y = x[i].bars
 		for j =1, #y do
 			if not AdaptConfig("template" .. i .. ".bars" .. j, y[j], clcInfo.display.bars.GetDefault()) then return end
+		end
+		-- micons
+		local y = x[i].micons
+		for j =1, #y do
+			if not AdaptConfig("template" .. i .. ".micons" .. j, y[j], clcInfo.display.micons.GetDefault()) then return end
 		end
 		-- mbars
 		local y = x[i].mbars

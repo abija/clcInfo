@@ -31,7 +31,7 @@ end
 --]]
 
 -- garbage but less cpu apparently
-function mod.AddMBar(alpha, r, g, b, a, visible, ...)
+function mod.AddMBar(id, alpha, r, g, b, a, visible, ...)
 	if (alpha ~= nil and alpha == 0) or not visible then return end
-	mod.___e:___AddBar(alpha, r, g, b, a, ...)
+	mod.___e:___AddBar(id, alpha, r, g, b, a, ...)
 end
