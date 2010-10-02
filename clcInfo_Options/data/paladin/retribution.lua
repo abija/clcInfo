@@ -2,14 +2,6 @@
 local _, class = UnitClass("player")
 if class ~= "PALADIN" then return end
 
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo_Options\\data\\paladin\\retribution> " .. table.concat(t, " "))
-end
-
 -- exposed vars
 local mod = clcInfo_Options
 local AceRegistry = mod.AceRegistry
@@ -116,7 +108,7 @@ local function LoadModule()
 				order = 3, type = "group", name = "Presets", args = {
 					____info = {
 						order = 1, type = "description",
-						name = "This is a rudimentary presets module. Works only for retribution. It allows you to save current FCFS to a preset and to load it from there. You can also load the preset with |cffffff00/clcretlp preset name|cffffffff.\n"					
+						name = "This is a rudimentary presets module. Works only for retribution. It allows you to save current FCFS to a preset and to load it from there. You can also load the preset with |cffffff00/clcInfo ret_lp preset_name|cffffffff.\n"					
 					},
 					____presetFrameToggle = {
 						order = 10, type = "description",

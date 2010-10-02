@@ -1,42 +1,30 @@
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\display\\bars> " .. table.concat(t, " "))
-end
+local mod = clcInfo:RegisterDisplayModule("bars") -- register the module
 
 -- base frame object
-local prototype = CreateFrame("Frame")
-prototype:Hide()
-
-local mod = clcInfo:RegisterDisplayModule("bars")
--- special options
 mod.hasSkinOptions = true
 
+local prototype = CreateFrame("Frame")  -- base frame object
+prototype:Hide()
 
--- active objects
-mod.active = {}				
--- cache of objects, to not make unnecesary frames
--- delete frame == hide and send to cache
-mod.cache = {}				
 
-local LSM = clcInfo.LSM
+mod.active = {}  -- active objects
+mod.cache = {}  -- cache of objects, to not make unnecesary frames
 
-local db
+local LSM = clcInfo.LSM  -- lsm
+
+local db  -- option
 
 ---------------------------------------------------------------------------------
 -- bar prototype
 ---------------------------------------------------------------------------------
 
--- TODO!
--- OPTIMIZE! OPTIMIZE! OPTIMIZE! OPTIMIZE! OPTIMIZE!
+-- to get proper animation for timers bars should update on each call
+-- throttle exec calls and use some data from there to do some quick updates if possible
 local function OnUpdate(self, elapsed)
 	self.elapsed = self.elapsed + elapsed
-	-- manual set updates per second for dev testing
-	-- if self.elapsed < 0.2 then
 
 	local bar = self.elements.bar
+	
 	if self.elapsed >= self.freq then
 		-- this is were exec requests are done
 		self.elapsed = 0
@@ -44,18 +32,17 @@ local function OnUpdate(self, elapsed)
 		-- expose the object
 		clcInfo.env.___e = self
 		
-		-- mode is either "normal" or "reversed" which refer to elapsed based bars or unspecified
 		local visible, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight, alpha, svc, r, g, b, a = self.exec()
+		
+		-- not visibile -> save info for the quick updates and hide elements
 		self.visible = visible
 		if not visible then self:FakeHide() return end
 		
+		-- data used for quick updates
 		self.mode = mode
 		self.value = value
 		
-		textLeft = textLeft or ""
-		textCenter = textCenter or ""
-		righText = textRight or ""
-		
+		-- set the text
 		self.elements.textLeft:SetText(textLeft)
 		self.elements.textCenter:SetText(textCenter)
 		self.elements.textRight:SetText(textRight)
@@ -70,9 +57,9 @@ local function OnUpdate(self, elapsed)
 	else
 		-- on timer based bars, regardless if we update info or not, the bar still needs to progress
 		-- on custom bars, probably will just skip
-		-- STIL NOT DECIDED !!!
 		if not self.visible then self:FakeHide() return end
 		
+		-- mode is either "normal" or "reversed" which refer to elapsed based bars or unspecified
 		if self.mode == "normal" then
 			self.value = self.value - elapsed
 		elseif self.mode == "reversed" then
@@ -81,9 +68,13 @@ local function OnUpdate(self, elapsed)
 		
 		bar:SetValue(self.value)	
 	end
+	
+	-- show the bar if we got there
 	self:FakeShow()
 end
 
+
+-- stuff to do when the element is dragged
 local function OnDragStop(self)
 	self:StopMovingOrSizing()
 
@@ -110,33 +101,31 @@ local function OnDragStop(self)
   clcInfo:UpdateOptions() -- update the data in options also
 end
 
+
+-- create the object
 function prototype:Init()
 	-- create a child frame that holds all the elements and it's hidden/shown instead of main one that has update function
 	self.elements = CreateFrame("Frame", nil, self)
 	local ex = self.elements
 
 	-- todo create only what's needed
-	-- backdrop that goes around bar and icon
-	-- backdrop that goes around the icon
-	-- backdrop that goes around the bar
+	
 	-- bar
-	-- icon
 	-- frame for icon backdrop
 	-- frame for bar backdrop
+	ex.bd = {}  -- backdrop that goes around bar and icon	
 	
-	ex.bd = {}
-	
-	ex.iconFrame = CreateFrame("Frame", nil, ex)
-	ex.iconBd = {}
-	ex.icon = ex.iconFrame:CreateTexture(nil, "ARTWORK")
+	ex.iconFrame = CreateFrame("Frame", nil, ex)  -- icon frame to allow backdrop
+	ex.iconBd = {}  -- backdrop that goes around the icon
+	ex.icon = ex.iconFrame:CreateTexture(nil, "ARTWORK") -- icon
 	ex.icon:SetTexture("Interface\\Icons\\ABILITY_SEAL")
 	ex.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 	
-	ex.barFrame = CreateFrame("Frame", nil, ex)
-	ex.barBd = {}
-	ex.bar = CreateFrame("StatusBar", nil, ex.barFrame)
+	ex.barFrame = CreateFrame("Frame", nil, ex)  -- frame to allow backdrop
+	ex.barBd = {}  -- backdrop that goes around the bar
+	ex.bar = CreateFrame("StatusBar", nil, ex.barFrame) -- bar
 	
-	-- TODO - look for better fonts, there are some _LEFT fonts in blizzard's lists?
+	-- texts
 	ex.textLeft = ex.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
 	ex.textLeft:SetJustifyH("LEFT")
 	ex.textCenter = ex.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
@@ -144,8 +133,11 @@ function prototype:Init()
 	ex.textRight = ex.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
 	ex.textRight:SetJustifyH("RIGHT")
 	
-	self.elapsed = 0
+	-- hide the elements
 	self:FakeHide()
+	
+	-- show and register for on update
+	self.elapsed = 0
 	self:Show()
 	self:SetScript("OnUpdate", OnUpdate)	
 	
@@ -211,8 +203,7 @@ function prototype:Lock()
 end
 
 
--- display the elements according to the settings
--- display the elements according to the settings
+-- try to position according to grid settings, return false if not possible
 local function TryGridPositioning(self)
 	if self.db.gridId <= 0 then return end
 	
@@ -237,7 +228,7 @@ local function TryGridPositioning(self)
 end
 
 
--- for lazy/normal? people
+-- a simple skin, for faster use
 local function SimpleSkin(self, skin)
 	local opt = self.db
 	local ex = self.elements
@@ -291,7 +282,7 @@ local function SimpleSkin(self, skin)
 	ex.textRight:SetVertexColor(1, 1, 1, 1)
 end
 
--- plenty of options
+-- full option skinning
 local function AdvancedSkin(self, skin)
 	local opt = self.db
 	local ex = self.elements
@@ -409,10 +400,12 @@ local function AdvancedSkin(self, skin)
 	ex.textRight:SetVertexColor(unpack(skin.textRightColor))
 end
 
+-- update the display settings
 function prototype:UpdateLayout()	
 	-- check if it's attached to some grid
 	local onGrid = TryGridPositioning(self)
 	
+	-- size and position
 	if not onGrid then
 		self:ClearAllPoints()
 		self:SetWidth(self.db.width)
@@ -420,14 +413,12 @@ function prototype:UpdateLayout()
 		self:SetPoint(self.db.point, self.db.relativeTo, self.db.relativePoint, self.db.x, self.db.y)
 	end
 	
+	-- size and position for elements
 	self.elements:ClearAllPoints()
 	self.elements:SetAllPoints(self)
 	
-	-- TODO remember to implement grid skinning
-	
-	-- at least 1 px bar
-	if self.db.width <= (self.db.height + 1) then self.db.width = self.db.height + 2 end
-	
+	-- skin options are per template, per grid or per element
+	-- check which set to use
 	local skin
 	if onGrid and self.db.skinSource == "Grid" then
 		skin = clcInfo.display.grids.active[self.db.gridId].db.skinOptions.bars
@@ -437,19 +428,21 @@ function prototype:UpdateLayout()
 		skin = self.db.skin
 	end
 	
+	-- apply the skin
 	if skin.advancedSkin then
 		AdvancedSkin(self, skin)
 	else
 		SimpleSkin(self, skin)
 	end
 	
-	-- own colors to make it easier to configure
+	-- allow to configure bar colors per bar regardless of skin settings so it's easier to configure
 	if self.db.ownColors then
 		self.elements.bar:SetStatusBarColor(unpack(self.db.skin.barColor))
 		self.elements.barFrame:SetBackdropColor(unpack(self.db.skin.barBgColor))
 	end
 end
 
+-- update the exec function and related stuff
 function prototype:UpdateExec()
 	-- updates per second
 	self.freq = 1/self.db.ups
@@ -462,18 +455,20 @@ function prototype:UpdateExec()
 	local err
 	-- exec
 	self.exec, err = loadstring(self.db.exec)
-	-- apply DoNothing if we have an error
+	-- use a blank exec if we get an error
 	if not self.exec then
 		self.exec = loadstring("")
-		bprint("code error:", err)
-		bprint("in:", self.db.exec)
+		print("code error:", err)
+		print("in:", self.db.exec)
 	end
   setfenv(self.exec, clcInfo.env)
   
-  -- reset stuff changed when update is removed
+  -- in case we update while the element is unlocked
   if self.locked then
   	self:SetScript("OnUpdate", OnUpdate)
   end
+  
+  -- perform additional cleaning if required
   self.externalUpdate = false
   if self.ExecCleanup then
   	self.ExecCleanup()
@@ -481,10 +476,13 @@ function prototype:UpdateExec()
   end
 end
 
+-- hide only the elements frame so that we still get onupdate calls
 function prototype:FakeShow()
 	self.elements:Show()
 end
 
+
+-- show the elements
 function prototype:FakeHide()
 	self.elements:Hide()
 end
@@ -504,10 +502,9 @@ end
 
 ---------------------------------------------------------------------------------
 -- module functions
--- TODO
---    fix names
---    reuse frames
 ---------------------------------------------------------------------------------
+
+-- takes a bar from cache or creates a new one, adds to active cache and updateslayout
 function mod:New(index)
 	-- see if we have stuff in cache
 	local bar = table.remove(self.cache)
@@ -515,7 +512,6 @@ function mod:New(index)
 		-- cache hit
 		bar.index = index
 		bar.db = db[index]
-		self.active[index] = bar
 		bar:Show()
 	else
 		-- cache miss
@@ -523,10 +519,10 @@ function mod:New(index)
 		setmetatable(bar, { __index = prototype })
 		bar.index = index
 		bar.db = db[index]
-		self.active[index] = bar
 		bar:SetFrameLevel(clcInfo.frameLevel + 2)
 		bar:Init()
 	end
+	self.active[index] = bar
 	
 	-- change the text of the label here since it's done only now
 	bar.label = "Bar" .. bar.index
@@ -572,7 +568,7 @@ function mod:InitElements()
 end
 
 
--- the bullcrap of skin related settings
+-- default skin options
 function mod.GetDefaultSkin()
 	return {
 		advancedSkin = false,
@@ -635,6 +631,8 @@ function mod.GetDefaultSkin()
 		textRightColor					= {1, 1, 1, 1},
 	}
 end
+
+-- default options
 function mod.GetDefault()
 	local x = (UIParent:GetWidth() - 130) / 2 * UIParent:GetScale()
 	local y = (UIParent:GetHeight() - 15) / 2 * UIParent:GetScale()
@@ -662,6 +660,9 @@ function mod.GetDefault()
 		skin = mod.GetDefaultSkin(),
 	}
 end
+
+-- add a bar element to the template
+-- if gridId is set, adds the element directly to that grid
 function mod:Add(gridId)
 	local data = mod.GetDefault()
 	gridId = gridId or 0
@@ -674,28 +675,26 @@ function mod:Add(gridId)
 end
 
 
--- TODO!
--- make sure cached bars are locked
+---------------------------------------------------------------------------------
+-- lock/unlock/update
+---------------------------------------------------------------------------------
 function mod:LockElements()
 	for i = 1, getn(self.active) do
 		self.active[i]:Lock()
 	end
 	self.unlock = false
 end
-
 function mod:UnlockElements()
 	for i = 1, getn(self.active) do
 		self.active[i]:Unlock()
 	end
 	self.unlock = true
 end
-
 function mod:UpdateElementsLayout()
 	for i = 1, getn(self.active) do
 		self.active[i]:UpdateLayout()
 	end
 end
-
 ---------------------------------------------------------------------------------
 
 

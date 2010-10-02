@@ -1,11 +1,3 @@
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\data\\global_bar> " .. table.concat(t, " "))
-end
-
 local mod = clcInfo.env
 
 --[[

@@ -1,11 +1,3 @@
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo_Options\\core> " .. table.concat(t, " "))
-end
-
 clcInfo_Options = {}
 local mod = clcInfo_Options
 local AceDialog, AceRegistry, AceGUI, SML, registered, options

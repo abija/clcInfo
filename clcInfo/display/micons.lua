@@ -1,11 +1,3 @@
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\display\\micons> " .. table.concat(t, " "))
-end
-
 -- button facade
 local lbf = clcInfo.lbf
 
@@ -179,8 +171,6 @@ function iconPrototype:UpdateLayout(i, skin)
 	else
 		self:SetPoint("TOPLEFT", self.parent, "TOPLEFT", 0, (1 - i) * (opt.height + opt.spacing))
 	end
-	
-	self.stackFrame:SetScale(opt.height / ICON_DEFAULT_HEIGHT)
 
 	if skin.skinType == "Button Facade" and lbf then
 		ApplyButtonFacadeSkin(self, skin.bfSkin, skin.bfGloss)
@@ -191,6 +181,8 @@ function iconPrototype:UpdateLayout(i, skin)
 	else
 		ApplyMySkin(self)
 	end
+	
+	self.stackFrame:SetScale(opt.height / ICON_DEFAULT_HEIGHT)
 end
 
 --------------------------------------------------------------------------------
@@ -415,8 +407,8 @@ function prototype:UpdateExec()
 	-- apply DoNothing if we have an error
 	if not self.exec then
 		self.exec = loadstring("")
-		bprint("code error:", err)
-		bprint("in:", self.db.exec)
+		print("code error:", err)
+		print("in:", self.db.exec)
 	end
   setfenv(self.exec, clcInfo.env)
   

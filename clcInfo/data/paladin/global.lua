@@ -2,14 +2,6 @@
 local _, _, _, toc = GetBuildInfo()
 if toc >= 40000 then return end
 
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\data\\paladin\\global> " .. table.concat(t, " "))
-end
-
 local emod = clcInfo.env
 
 --[[

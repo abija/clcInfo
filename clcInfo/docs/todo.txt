@@ -1,4 +1,3 @@
-
 - enabled/ranged improved?
 - on class modules, make sure spells are checked since spec might not be guaranteed due to enforce (get tv cd on holy template etc)
 
@@ -8,9 +7,6 @@
 
 - copy template settings ? (copy table)
 
-- make group elements for sliders buttons?
-
-- fix frame levels
 - alert system
 - an external addon that plugs into it to see what needs to be done there
 -- remove more static stuff to allow display plugins and other custom stuff (all interaction with main module being done through registered functions)
@@ -31,23 +27,6 @@
 - better default skin?
 
 
-- bprint system is retarded, fix !!!
-- add option to run stuff after return
+- add option to run stuff after return ?
 
-
-aditional forms of display to keep in mind:
-- sliding buttons: has a list of stuff to track, expands in 1 direction when more stuff should be displayed
-- bars
-- sliding bars
-- eventually have needed clcbpt features work?
-
-! make sure that cIcon is the one we want, check for threading problems
-
-
-
-data types:
-- list of auras
-- list of stuff in general?
-
-
-- combat log tracker for shit like PS?
+! make sure that ___e is the one we want, check for threading problems

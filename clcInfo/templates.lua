@@ -1,23 +1,17 @@
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\display\templates> " .. table.concat(t, " "))
-end
+local mod = clcInfo.templates -- the module
 
-local mod = clcInfo.templates
-
+-- check if spec matches current talent build
 local function IsActiveTemplate(spec)
 	local name, _, _, _, rank = GetTalentInfo(spec.tree, spec.talent)
 	if name and (rank == spec.rank) then return true end
 	return false
 end
 
--- look if activeTalents are found in any of the saved templates
+-- look if the build is found in any of the saved templates
+-- points activeTemplate to it and change the activeTemplateIndex
 function mod:FindTemplate()
 	local db = clcInfo.cdb.templates
-	local ef = clcInfo.cdb.options.enforceTemplate
+	local ef = clcInfo.cdb.options.enforceTemplate -- allow to force a template
 	
 	-- check if a template isn't forced
 	if ef then
@@ -31,6 +25,7 @@ function mod:FindTemplate()
 		end
 	end
 	
+	-- look through the templates
 	clcInfo.activeTemplate = nil
 	clcInfo.activeTemplateIndex = 0
 	for k, data in ipairs(db) do
@@ -44,29 +39,35 @@ function mod:FindTemplate()
 	return false
 end
 
--- add a template
+
+-- default template options
 function mod:GetDefault()
-	local v = {
+	local t = {
 		classModules = {},
 		spec = { tree = 1, talent = 0, rank = 1 },
 		options = {
 			gridSize = 1,
 			showWhen = "always",
 		},
-		skinOptions = {
-    	icons = clcInfo.display.icons.GetDefaultSkin(),
-    	bars = clcInfo.display.bars.GetDefaultSkin(),
-    	mbars = clcInfo.display.mbars.GetDefaultSkin()
-    },
+		skinOptions = {},
 	}
+	
+	-- add skin options from the module defaults
+	for k, v in pairs(clcInfo.display) do
+		if v.hasSkinOptions then
+			t.skinOptions[k] = clcInfo.display[k]:GetDefaultSkin()
+		end
+	end
 	
 	-- add display modules
 	for k in pairs(clcInfo.display) do
-		v[k] = {}
+		t[k] = {}
 	end
 	
-	return v
+	return t
 end
+
+-- add a template
 function mod:AddTemplate()
 	table.insert(clcInfo.cdb.templates, mod:GetDefault())
 	clcInfo:OnTemplatesUpdate()
@@ -75,6 +76,7 @@ function mod:AddTemplate()
 	end
 end
 
+-- call lock/unlock/update all for all modules
 function mod:LockElements()
 	for k in pairs(clcInfo.display) do
 		if clcInfo.display[k].LockElements then
@@ -82,7 +84,6 @@ function mod:LockElements()
 		end
 	end
 end
-
 function mod:UnlockElements()
 	for k in pairs(clcInfo.display) do
 		if clcInfo.display[k].UnlockElements then
@@ -90,7 +91,6 @@ function mod:UnlockElements()
 		end
 	end
 end
-
 function mod:UpdateElementsLayout()
 	for k in pairs(clcInfo.display) do
 		if clcInfo.display[k].UpdateElementsLayout then
@@ -99,14 +99,12 @@ function mod:UpdateElementsLayout()
 	end
 end
 
--- TODO, optimize the callback handling ?
+-- handle callback for lbf and lsm
+-- TODO, optimize?
 if clcInfo.lbf then
-	-- register callback
 	clcInfo.lbf:RegisterSkinCallback("clcInfo", mod.UpdateElementsLayout, mod)
 end
-
 if clcInfo.LSM then
-	-- register callback
 	clcInfo.LSM.RegisterCallback( mod, "LibSharedMedia_Registered", "UpdateElementsLayout" )
 	clcInfo.LSM.RegisterCallback( mod, "LibSharedMedia_SetGlobal", "UpdateElementsLayout" )
 end

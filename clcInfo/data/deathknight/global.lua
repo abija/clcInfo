@@ -2,14 +2,6 @@
 local _, class = UnitClass("player")
 if class ~= "DEATHKNIGHT" then return end
 
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\data\\deathknight\\global> " .. table.concat(t, " "))
-end
-
 local defaults = {
 	moveRuneBar = false,
 	-- rune bar coords

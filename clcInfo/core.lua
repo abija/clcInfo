@@ -1,56 +1,38 @@
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\core> " .. table.concat(t, " "))
-end
+clcInfo = {}	-- the addon
+clcInfo.display = {}	-- display elements go here
+clcInfo.templates = {}	-- the templates
+clcInfo.classModules = {}  -- stuff loaded per class
+clcInfo.cmdList = {}	-- list of functions registered to call from command line parameteres
 
--- clcInfo = LibStub("AceAddon-3.0"):NewAddon("clcInfo", "AceConsole-3.0")
-clcInfo = {}
-clcInfo.display = {}
-clcInfo.templates = {}
+clcInfo.activeTemplate = nil  -- points to the active template
+clcInfo.activeTemplateIndex = 0 -- index of the active template
 
-clcInfo.classModules = {}
+clcInfo.lastBuild = nil	 -- string that has talent info, used to see if talents really changed
 
--- list of functions registered to call from command line parameteres
-clcInfo.cmdList = {}
-
--- active template
-clcInfo.activeTemplate = nil
-clcInfo.activeTemplateIndex = 0
-
--- string that has talent info
-clcInfo.lastBuild = nil
-
--- spawn all elements parented in a single frame, so it's easier to hide/show them
--- the mother frame :D
-clcInfo.mf = CreateFrame("Frame", "clcInfoMF")
+clcInfo.mf = CreateFrame("Frame", "clcInfoMF")  -- all elements parented to this frame, so it's easier to hide/show them
 
 -- frame levels
 -- grid: mf + 1
 -- icons, bars: mf + 2
 clcInfo.frameLevel = clcInfo.mf:GetFrameLevel()
 
--- add all data functions in this environment and pass them to the exec calls
-clcInfo.env = setmetatable({}, {__index = _G})
+clcInfo.env = setmetatable({}, {__index = _G})  -- add all data functions in this environment and pass them to the exec calls
 
--- SharedMedia
-clcInfo.LSM = LibStub("LibSharedMedia-3.0")
+clcInfo.LSM = LibStub("LibSharedMedia-3.0")  -- SharedMedia
+clcInfo.lbf = LibStub("LibButtonFacade", true)  -- ButtonFacade
 
--- Button Facade
-clcInfo.lbf = LibStub("LibButtonFacade", true)
-
--- slash command to open options
+--------------------------------------------------------------------------------
+-- slash command handling
+--------------------------------------------------------------------------------
 SLASH_CLCINFO_OPTIONS1 = "/clcinfo"
 SlashCmdList["CLCINFO_OPTIONS"] = function(msg)
 	msg = msg and string.lower(string.trim(msg))
 
-	-- no msg -> open options
+	-- no arguments -> open options
 	if msg == "" then
 		local loaded, reason = LoadAddOn("clcInfo_Options")
 		if( not clcInfo_Options ) then
-			bprint("Failed to load configuration addon. Error returned: ", reason)
+			print("Failed to load configuration addon. Error returned: ", reason)
 			return
 		end
 		
@@ -59,6 +41,7 @@ SlashCmdList["CLCINFO_OPTIONS"] = function(msg)
 	end
 	
 	-- simple argument handling
+	-- try to pass it to the registered function if it exists
 	local args = {}
 	for v in string.gmatch(msg, "[^ ]+") do tinsert(args, v) end
 	local cmd = table.remove(args, 1)
@@ -66,14 +49,47 @@ SlashCmdList["CLCINFO_OPTIONS"] = function(msg)
 		clcInfo.cmdList[cmd](args)
 	end
 end
+--------------------------------------------------------------------------------
 
 
-
-function clcInfo:RegisterDisplayModule(m)
-	clcInfo.display[m] = {}
-	return clcInfo.display[m]
+--------------------------------------------------------------------------------
+-- register functions
+--------------------------------------------------------------------------------
+-- display modules
+function clcInfo:RegisterDisplayModule(name)
+	clcInfo.display[name] = {}
+	return clcInfo.display[name]
 end
 
+-- class modules
+function clcInfo:RegisterClassModule(name)
+	name = string.lower(name)
+	clcInfo.classModules[name] = {}
+	return clcInfo.classModules[name]
+end
+
+-- global options for class modules
+function clcInfo:RegisterClassModuleDB(name, defaults)
+	name = string.lower(name)
+	defaults = defaults or {}
+	if not clcInfo.cdb.classModules[name] then  clcInfo.cdb.classModules[name] = defaults end
+	return clcInfo.cdb.classModules[name]
+end
+
+-- per template options for class modules
+function clcInfo:RegisterClassModuleTDB(name, defaults)
+	name = string.lower(name)
+	defaults = defaults or {}
+	if not clcInfo.activeTemplate then return end
+	if not clcInfo.activeTemplate.classModules[name] then clcInfo.activeTemplate.classModules[name] = defaults end
+	return clcInfo.activeTemplate.classModules[name]
+end
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-- main initialize function
+--------------------------------------------------------------------------------
 function clcInfo:OnInitialize()
 	self:ReadSavedData()
 	if not self:FixSavedData() then return end
@@ -89,11 +105,14 @@ function clcInfo:OnInitialize()
 	self:TalentCheck()
 	
 	-- register events
-	clcInfo.eventFrame:RegisterEvent("PLAYER_TALENT_UPDATE")
-	clcInfo.eventFrame:RegisterEvent("UNIT_ENTERED_VEHICLE")
+	clcInfo.eventFrame:RegisterEvent("PLAYER_TALENT_UPDATE")  -- to monitor talent changes
+	clcInfo.eventFrame:RegisterEvent("UNIT_ENTERED_VEHICLE")  -- to hide while using vehicles
 	clcInfo.eventFrame:RegisterEvent("UNIT_EXITED_VEHICLE")
 end
+--------------------------------------------------------------------------------
 
+
+-- checks talents and updates the templates if there are changes
 function clcInfo:TalentCheck()
 	-- get current spec as a string
 	local t = {}
@@ -115,9 +134,14 @@ function clcInfo:TalentCheck()
 		clcInfo:OnTemplatesUpdate()
 	end
 end
+-- attach it to the event
+clcInfo.PLAYER_TALENT_UPDATE = clcInfo.TalentCheck
 
+
+-- looks for the first template that matches current talent build
+-- reinitializes the elements
 function clcInfo:OnTemplatesUpdate()
-	clcInfo.templates:FindTemplate()
+	clcInfo.templates:FindTemplate()  -- find first template if it exists
 	
 	-- clear elements
 	for k in pairs(clcInfo.display) do
@@ -133,46 +157,24 @@ function clcInfo:OnTemplatesUpdate()
 		end
 	end
 	
-	self:ChangeShowWhen()
+	self:ChangeShowWhen()	-- visibility option is template based
 	
-	-- call OnTemplatesUpdate on all class modules
+	-- call OnTemplatesUpdate on all class modules so they can change options if needed
 	if clcInfo.activeTemplate then
 		for k, v in pairs(clcInfo.classModules) do
 			if v.OnTemplatesUpdate then v.OnTemplatesUpdate() end
 		end
 	end
 	
-	-- change active 
+	-- change active template and update the options
 	if clcInfo_Options then
 		clcInfo_Options:LoadActiveTemplate()
 	end
-	
 	self:UpdateOptions()
 end
 
 
-function clcInfo:RegisterClassModule(name)
-	name = string.lower(name)
-	clcInfo.classModules[name] = {}
-	return clcInfo.classModules[name]
-end
-
-function clcInfo:RegisterClassModuleDB(name, defaults)
-	name = string.lower(name)
-	defaults = defaults or {}
-	if not clcInfo.cdb.classModules[name] then  clcInfo.cdb.classModules[name] = defaults end
-	return clcInfo.cdb.classModules[name]
-end
-
--- this one is template based
-function clcInfo:RegisterClassModuleTDB(name, defaults)
-	name = string.lower(name)
-	defaults = defaults or {}
-	if not clcInfo.activeTemplate then return end
-	if not clcInfo.activeTemplate.classModules[name] then clcInfo.activeTemplate.classModules[name] = defaults end
-	return clcInfo.activeTemplate.classModules[name]
-end
-
+-- defaults for the db
 function clcInfo:GetDefault()
 	local data = {
 		options = {
@@ -184,22 +186,26 @@ function clcInfo:GetDefault()
 	return data
 end
 
+
+-- read data from saved variables
 function clcInfo:ReadSavedData()
 	-- global defaults
 	if not clcInfoDB then
 		clcInfoDB = {}
 	end
+	clcInfo.db = clcInfoDB	
 
-	-- char defaults
+	-- perchar defaults
 	if not clcInfoCharDB then
 		clcInfoCharDB = clcInfo:GetDefault()
 		table.insert(clcInfoCharDB.templates, clcInfo.templates:GetDefault())
 	end
 
-	clcInfo.db = clcInfoDB	
 	clcInfo.cdb = clcInfoCharDB
 end
 
+
+-- checks if options are loaded and notifies the changes
 function clcInfo:UpdateOptions()
 	if clcInfo_Options then
 		clcInfo_Options.AceRegistry:NotifyChange("clcInfo")
@@ -207,17 +213,15 @@ function clcInfo:UpdateOptions()
 end
 
 
+--------------------------------------------------------------------------------
+-- hide/show according to combat status, target, etc
+--------------------------------------------------------------------------------
 
---------------------------------------------------------------------------------
--- handle showing and hiding elements depending on target/combat/other stuff
---------------------------------------------------------------------------------
--- IMPORTANT!!!
--- TODO!!!
--- because I'm a retard I used this function in an option Set or Get
+-- called when the setting updates
 function clcInfo.ChangeShowWhen()
 	if not clcInfo.activeTemplate then return end
 	
-	local mf = clcInfo.mf
+	local mf = clcInfo.mf  -- parent of all frames
 	
 	-- vehicle check
 	if UnitUsingVehicle("player") then
@@ -258,6 +262,7 @@ function clcInfo.ChangeShowWhen()
 	end
 end
 
+-- hide/show according to target
 function clcInfo.PLAYER_TARGET_CHANGED()
 	local show = clcInfo.activeTemplate.options.showWhen
 
@@ -274,27 +279,21 @@ function clcInfo.PLAYER_TARGET_CHANGED()
 		clcInfo.mf:Hide()
 	end
 end
+-- force target update on rezoning
 clcInfo.PLAYER_ENTERING_WORLD = clcInfo.PLAYER_TARGET_CHANGED
 
+-- for when target goes from friendly to unfriendly
 function clcInfo.UNIT_FACTION(self, event, unit)
 	if unit == "target" then
 		self.PLAYER_TARGET_CHANGED()
 	end
 end
 
--- out of combat
-function clcInfo.PLAYER_REGEN_ENABLED()
-	clcInfo.mf:Hide()
-end
--- in combat
-function clcInfo.PLAYER_REGEN_DISABLED()
-	clcInfo.mf:Show()
-end
+-- hide out of combat
+function clcInfo.PLAYER_REGEN_ENABLED() clcInfo.mf:Hide() end
+function clcInfo.PLAYER_REGEN_DISABLED() clcInfo.mf:Show() end
 
-function clcInfo.PLAYER_TALENT_UPDATE()
-	clcInfo:TalentCheck()
-end
-
+-- hide in vehicles
 function clcInfo.UNIT_ENTERED_VEHICLE(self, event, unit)
 	if unit == "player" then
 	-- vehicle check
@@ -311,14 +310,11 @@ function clcInfo.UNIT_EXITED_VEHICLE(self, event, unit)
 end
 --------------------------------------------------------------------------------
 
-
--- event frame
--- need an event that fires first time after talents are loaded and fires both at login and reloadui
--- in case this doesn't work have to do with delayed timer
+-- OnEvent dispatcher
 local function OnEvent(self, event, ...)
-	-- dispatch the event
 	if clcInfo[event] then clcInfo[event](clcInfo, event, ...) end
 end
+-- event frame
 clcInfo.eventFrame = CreateFrame("Frame")
 clcInfo.eventFrame:Hide()
 clcInfo.eventFrame:SetScript("OnEvent", function(self, event)
@@ -329,7 +325,9 @@ clcInfo.eventFrame:SetScript("OnEvent", function(self, event)
 		clcInfo:OnInitialize()
 	end
 end)
-
+-- need an event that fires first time after talents are loaded and fires both at login and reloadui
+-- in case this doesn't work have to do with delayed timer
+-- using QUEST_LOG_UPDATE atm
 clcInfo.eventFrame:RegisterEvent("QUEST_LOG_UPDATE")
 
 

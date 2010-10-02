@@ -7,14 +7,6 @@ if toc < 40000 then return end
 local _, class = UnitClass("player")
 if class ~= "PALADIN" then return end
 
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\data\\paladin\\retribution> " .. table.concat(t, " "))
-end
-
 -- default settings for this module
 --------------------------------------------------------------------------------
 local defaults = {
@@ -340,7 +332,7 @@ do
 		local mcd, index = GetMinCooldown()
 		ff = pq[index].name
 		
-		-- bprint(cs, mcd)
+		-- print(cs, mcd)
 		if cs == 0 or cs <= gcd then
 			dq[1] = spells.cs.name
 			dq[2] = ff

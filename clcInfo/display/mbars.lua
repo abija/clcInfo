@@ -1,11 +1,3 @@
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\display\\mbars> " .. table.concat(t, " "))
-end
-
 --[[
 -- general info
 -- mbar -> spawns normal bars
@@ -491,8 +483,8 @@ function prototype:UpdateExec()
 	-- apply DoNothing if we have an error
 	if not self.exec then
 		self.exec = loadstring("")
-		bprint("code error:", err)
-		bprint("in:", self.db.exec)
+		print("code error:", err)
+		print("in:", self.db.exec)
 	end
   setfenv(self.exec, clcInfo.env)
   

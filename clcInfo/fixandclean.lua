@@ -1,11 +1,6 @@
 local function bprint(...)
-	if true then return end	-- lazy full disable
-
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\fixandclean> " .. table.concat(t, " "))
+	if true then return end	-- lazy debug disable
+	print(...)
 end
 
 clcInfo.__version = 30

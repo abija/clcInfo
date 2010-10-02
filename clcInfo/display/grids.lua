@@ -1,47 +1,30 @@
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\display\\grids> " .. table.concat(t, " "))
-end
+-- grids are frame to which other elements are attached for easier positioning
+-- intended to make positioning of the elements like on a piece of science paper
 
---[[
-@info:
-	grid = frame to which display elements are attached
-	grid operations
-		- add/delete (with reusability of frames)
-		- move
-	grid settings
-		- cell width
-		- cell height
-		- spacing x
-		- spacing y
-		- positioning info relative to UIParent (x, y, point, relativePoint)
-		- skin information to apply to elements in grid
---]]
-
-
-local prototype = CreateFrame("Frame")
-prototype:Hide()
-
-local mod = clcInfo:RegisterDisplayModule("grids")
+local mod = clcInfo:RegisterDisplayModule("grids")  -- register the module
 mod.active = {}				
 mod.cache = {}
 
+local prototype = CreateFrame("Frame")  -- grid object
+prototype:Hide()
+
 local db
 
---[[
-Prototype 
--- ----------------------------------------------------------------------------
---]]
-
+--------------------------------------------------------------------------------
+-- grid object
+--------------------------------------------------------------------------------
 function prototype:Init()
 	-- black texture to display when unlocked
 	self.bg = self:CreateTexture(nil, "BACKGROUND")
 	self.bg:SetAllPoints()
 	self.bg:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Background")
 	self.bg:SetVertexColor(1, 1, 1, 1)
+	
+	-- label to display when unlocked
+	self.label = self:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+	self.label:SetPoint("BOTTOMLEFT", self, "TOPLEFT", -2, 2)
+	
+	self:Hide()
 	
   -- move and config
   self:EnableMouse(true)
@@ -56,13 +39,6 @@ function prototype:Init()
     -- update the data in options also
     clcInfo:UpdateOptions()
 	end)
-	
-	self.label = self:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
-	self.label:SetPoint("BOTTOMLEFT", self, "TOPLEFT", -2, 2)
-	
-	self:Hide()
-	
-	self:UpdateLayout()
 end
 
 -- update display according to options
@@ -75,26 +51,21 @@ function prototype:UpdateLayout()
 	if g.cellWidth < 1 then g.cellWidth = 1 end
 	if g.cellHeight < 1 then g.cellHeight = 1 end
 	
-	self:ClearAllPoints() -- TODO check if it's any difference
+	self:ClearAllPoints()
 	self:SetWidth(g.cellsX * g.cellWidth + (g.cellsX - 1) * g.spacingX)
 	self:SetHeight(g.cellsY * g.cellHeight + (g.cellsY - 1) * g.spacingY)
 	self:SetPoint(g.point, "UIParent", g.relativePoint, g.x, g.y)	
 	
+	-- update the elements attached to it
 	self:UpdateChildren()
 end
 
---[[
-Unlock()
-  enables control of the frame
---]]
+-- enables control of the object
 function prototype:Unlock()
   self:Show()
 end
 
---[[
-Lock()
-  disables control of the frame
---]]
+-- disables
 function prototype:Lock()
   self:Hide()
 end
@@ -108,6 +79,7 @@ function prototype:Delete()
 	mod:InitElements()
 end
 
+-- update the display elements attached to it
 function prototype:UpdateChildren()
 	for k in pairs(clcInfo.display) do
 		if k ~= "grids" then
@@ -120,11 +92,14 @@ function prototype:UpdateChildren()
 		end
 	end
 end
+--------------------------------------------------------------------------------
 
---[[
-Module
--- ----------------------------------------------------------------------------
---]]
+
+--------------------------------------------------------------------------------
+-- module
+--------------------------------------------------------------------------------
+
+-- creates or gets from cache and initializes
 function mod:New(index)
 	-- see if we have stuff in cache
 	local grid = table.remove(self.cache)
@@ -170,7 +145,6 @@ function mod:ClearElements()
 end
 
 -- read data from config and create the grids
--- IMPORTANT, always make sure you call clear first
 function mod:InitElements()
 	if not clcInfo.activeTemplate then return end
 
@@ -182,6 +156,8 @@ function mod:InitElements()
 	end
 end
 
+
+-- gets the default options
 function mod:GetDefault()
 	local t = {
 		-- cell size
@@ -190,9 +166,8 @@ function mod:GetDefault()
 		-- cell spacing
 		spacingX = 2,
 		spacingY = 2,
-		-- number of cells
-		cellsX = 3,
-		cellsY = 3,
+		cellsX = 3, -- columns
+		cellsY = 3, -- rows
 		-- positioning relative to UIParent, defaults to center of screen
 		x = 0,
 		y = 0,
@@ -210,6 +185,9 @@ function mod:GetDefault()
 	
 	return t
 end
+
+
+-- adds a grid to the template
 function mod:Add()
 	local data = mod:GetDefault()
 		
@@ -219,24 +197,22 @@ function mod:Add()
 end
 
 
--- TODO!
--- make sure cached grids are locked ?
+-- global lock/unlock/update
 function mod:LockElements()
 	for i = 1, getn(self.active) do
 		self.active[i]:Lock()
 	end
 	self.unlock = false
 end
-
 function mod:UnlockElements()
 	for i = 1, getn(self.active) do
 		self.active[i]:Unlock()
 	end
 	self.unlock = true
 end
-
 function mod:UpdateElementsLayout()
 	for i = 1, getn(self.active) do
 		self.active[i]:UpdateLayout()
 	end
 end
+--------------------------------------------------------------------------------

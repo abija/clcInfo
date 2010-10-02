@@ -6,14 +6,6 @@ if toc >= 40000 then return end
 local _, class = UnitClass("player")
 if class ~= "PALADIN" then return end
 
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\data\\paladin\\retribution> " .. table.concat(t, " "))
-end
-
 -- TODO, maybe fix?
 -- some lazy staic numbers
 local MAX_FCFS = 10							-- elements in fcfs
@@ -156,7 +148,7 @@ function mod.UpdateFCFS()
 	
 	-- check if people added enough spells
 	if numSpells < 2 then
-		bprint("You need at least 2 skills in the queue.")
+		print("You need at least 2 skills in the queue.")
 		-- toggle it off
 		enabled = false
 	end
@@ -165,9 +157,9 @@ function mod.UpdateFCFS()
 end
 
 function mod.DisplayFCFS()
-	bprint("Active Retribution FCFS:")
+	print("Active Retribution FCFS:")
 	for i, data in ipairs(pq) do
-		bprint(i .. " " .. data.name)
+		print(i .. " " .. data.name)
 	end
 end
 
@@ -354,7 +346,7 @@ function mod.PresetFrame_Update()
 	
 	local preset = "no preset"
 	for i = 1, MAX_PRESETS do
-		-- bprint(rotation, " | ", db.presets[i].data)
+		-- print(rotation, " | ", db.presets[i].data)
 		if db.presets[i].data == rotation and rotation ~= "" then
 			preset = db.presets[i].name
 			break
@@ -391,7 +383,7 @@ function mod.Preset_Load(index)
 	if db.presets[index].name == "" then return end
 
 	if (not presetFrame) or (not presetFrame:IsVisible()) then
-		bprint("Loading preset:", db.presets[index].name)
+		print("Loading preset:", db.presets[index].name)
 	end
 	
 	local list = { strsplit(" ", db.presets[index].data) }
@@ -531,7 +523,7 @@ local function CmdRetFCFS(args)
 			db.fcfs[num] = arg
 		else
 			-- inform on wrong arguments
-			bprint(arg .. " not found")
+			print(arg .. " not found")
 		end
 	end
 	

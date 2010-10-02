@@ -1,32 +1,20 @@
-local function bprint(...)
-	local t = {}
-	for i = 1, select("#", ...) do
-		t[i] = tostring(select(i, ...))
-	end
-	DEFAULT_CHAT_FRAME:AddMessage("clcInfo\\display\\icons> " .. table.concat(t, " "))
-end
+local mod = clcInfo:RegisterDisplayModule("icons")  -- register the module
+-- special options
+mod.hasSkinOptions = true
 
 -- button facade
 local lbf = clcInfo.lbf
 
--- base frame object
-local prototype = CreateFrame("Frame")
+local prototype = CreateFrame("Frame")  -- base frame object
 prototype:Hide()
 
-local mod = clcInfo:RegisterDisplayModule("icons")
--- special options
-mod.hasSkinOptions = true
 
-
--- active objects
-mod.active = {}				
--- cache of objects, to not make unnecesary frames
--- delete frame == hide and send to cache
-mod.cache = {}				
+mod.active = {}  -- active objects
+mod.cache = {}  -- cache of objects, to not make unnecesary frames
 
 local db
 
--- some defaults
+-- some defaults used for skinning
 local STACK_DEFAULT_WIDTH 		= 36
 local STACK_DEFAULT_HEIGHT 		= 10
 local STACK_DEFAULT_OFFSETX 	= -2
@@ -38,8 +26,7 @@ local ICON_DEFAULT_HEIGHT			= 30
 -- icon prototype
 ---------------------------------------------------------------------------------
 
--- TODO!
--- OPTIMIZE! OPTIMIZE! OPTIMIZE! OPTIMIZE! OPTIMIZE!
+-- called for each of the icons
 local function OnUpdate(self, elapsed)
 	self.elapsed = self.elapsed + elapsed
 	if self.elapsed < self.freq then return end
@@ -54,9 +41,9 @@ local function OnUpdate(self, elapsed)
 	-- visible
 	-- texture
 	-- start, duration, enable, reversed 				(cooldown)
-	-- count																			(stack)
+	-- count																		(stack)
 	-- alpha
-	-- svc, r, g, b, a                    				(svc - true if we change vertex info)
+	-- svc, r, g, b, a                    			(svc - true if we change vertex info)
 	local visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a = self.exec()
 	if not visible then self:FakeHide() return end
 	if alpha ~= nil and alpha == 0 then self:FakeHide() return end	-- hide on alpha = 0
@@ -68,7 +55,6 @@ local function OnUpdate(self, elapsed)
 		self.lastTexture = texture
 	end
 	
-	---[[
 	-- cooldown
 	reversed = not not reversed
 	local e = self.elements.cooldown
@@ -150,7 +136,7 @@ function prototype:Init()
 	self.elements.cooldown:SetAllPoints(self.elements)
 	
 	-- normal and gloss on top of cooldown
-	local skinFrame = CreateFrame("Frame", nil, self)
+	local skinFrame = CreateFrame("Frame", nil, self.elements)
 	skinFrame:SetFrameLevel(self.elements.cooldown:GetFrameLevel() + 1)
 	self.elements.texNormal = skinFrame:CreateTexture(nil, "ARTWORK")
 	self.elements.texGloss = skinFrame:CreateTexture(nil, "OVERLAY")
@@ -166,7 +152,7 @@ function prototype:Init()
 	self.elements.stack:SetPoint("RIGHT", self.elements.stackFrame, "RIGHT", 0, 0)
 	
 	-- lock and edit textures on a separate frame
-	self.toolbox = CreateFrame("Frame", nil, self)
+	self.toolbox = CreateFrame("Frame", nil, self.elements)
 	self.toolbox:Hide()
 	self.toolbox:SetFrameLevel(self.elements:GetFrameLevel() + 3)
 	
@@ -201,27 +187,20 @@ function prototype:Init()
 	self:SetScript("OnDragStop", OnDragStop)
 end
 
---[[
-Unlock()
-  enables control of the frame
---]]
+-- enables control of the frame
 function prototype:Unlock()
   self:EnableMouse(true)
   self.toolbox:Show()
 end
 
---[[
-Lock()
-  disables control of the frame
---]]
+-- disables control of the frame
 function prototype:Lock()
   self:EnableMouse(false)
   self.toolbox:Hide()
 end
 
 
--- TODO! Not only square
--- TODO! also register callback support for the skins loaded after our addon
+-- button facade helper functions
 local function BFPosition(e, p, layer, scalex, scaley)
 	e:ClearAllPoints()
 	e:SetWidth(scalex * (layer.Width or 36))
@@ -237,6 +216,7 @@ local function BFTexture(t, tx, layer, scalex, scaley)
 	t:SetVertexColor(unpack(layer.Color or { 1, 1, 1, 1 }))
 	t:SetTexCoord(unpack(layer.TexCoords or { 0, 1, 0, 1 }))
 end
+-- apply a button facade skin
 local function ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
 	skin = (lbf:GetSkins())[bfSkin]
 	if not skin then
@@ -278,6 +258,7 @@ local function ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
 	end
 end
 
+-- apply a rudimentary skin
 local function ApplyMySkin(self)
 	local t = self.elements.texNormal
 	local scalex = self.db.width / 34
@@ -300,12 +281,7 @@ local function ApplyMySkin(self)
 	self.elements.stackFrame:SetPoint("CENTER", self, "CENTER", STACK_DEFAULT_OFFSETX, STACK_DEFAULT_OFFSETY)
 end
 
---[[
-UpdateLayout()
-  apply settings
---]]
--- find a way to translate the positions between on grid and not on grid?
--- display the elements according to the settings
+-- try to position on grid
 local function TryGridPositioning(self)
 	if self.db.gridId <= 0 then return end
 	
@@ -329,6 +305,7 @@ local function TryGridPositioning(self)
 	return true
 end
 
+-- adjust the elements according to the settings
 function prototype:UpdateLayout()	
 	-- check if it's attached to some grid
 	local onGrid = TryGridPositioning(self)
@@ -343,14 +320,7 @@ function prototype:UpdateLayout()
 	self.elements:ClearAllPoints()
 	self.elements:SetAllPoints(self)
 	
-	-- stack
-	local fontFace, _, fontFlags = self.elements.stack:GetFont()
-	self.elements.stack:SetFont(fontFace, self.db.height / 2.7, fontFlags)
-	
-	self.elements.stack:ClearAllPoints()
-	self.elements.stack:SetPoint("BOTTOMRIGHT", self.elements, "BOTTOMRIGHT", 2 * self.db.width / 30, -2 * self.db.height / 30)
-	
-	-- get the grid skin if on a grid
+	-- select the skin from template/grid/self
 	local skinType, bfSkin, bfGloss, g
 	if onGrid and self.db.skinSource == "Grid" then
 		g = clcInfo.display.grids.active[self.db.gridId].db.skinOptions.icons
@@ -361,6 +331,7 @@ function prototype:UpdateLayout()
 	end
 	skinType, bfSkin, bfGloss = g.skinType, g.bfSkin, g.bfGloss
 
+	-- apply the skin
 	if skinType == "Button Facade" and lbf then
 		ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
 	elseif skinType == "BareBone" then
@@ -369,8 +340,12 @@ function prototype:UpdateLayout()
 	else
 		ApplyMySkin(self)
 	end
+	
+	-- scale the stack text
+	self.elements.stackFrame:SetScale(self.db.height / ICON_DEFAULT_HEIGHT)
 end
 
+-- update the exec function and perform cleanup
 function prototype:UpdateExec()
 	-- updates per second
 	self.freq = 1/self.db.ups
@@ -382,32 +357,27 @@ function prototype:UpdateExec()
 	-- apply DoNothing if we have an error
 	if not self.exec then
 		self.exec = loadstring("")
-		bprint("code error:", err)
-		bprint("in:", self.db.exec)
+		print("code error:", err)
+		print("in:", self.db.exec)
 	end
   setfenv(self.exec, clcInfo.env)
   
   -- reset alpha
   self.elements:SetAlpha(1)
   
-  -- reset stuff changed when update is removed
-  self:SetScript("OnUpdate", OnUpdate)
+  -- cleanup if required
   self.externalUpdate = false
   if self.ExecCleanup then
   	self.ExecCleanup()
   	self.ExecCleanup = nil
   end
+  
+  self:SetScript("OnUpdate", OnUpdate)
 end
 
-
-function prototype:FakeShow()
-	self.elements:Show()
-end
-
-function prototype:FakeHide()
-	self.elements:Hide()
-end
-
+-- show/hide only elements
+function prototype:FakeShow() self.elements:Show() end
+function prototype:FakeHide() self.elements:Hide() end
 
 -- caaaaaaaaaaaaaaaaaaareful
 function prototype:Delete()
@@ -417,16 +387,14 @@ function prototype:Delete()
 	mod:ClearElements()
 	mod:InitElements()
 end
-
 ---------------------------------------------------------------------------------
 
 
 ---------------------------------------------------------------------------------
 -- module functions
--- TODO
---    fix names
---    reuse frames
 ---------------------------------------------------------------------------------
+
+-- create or take from cache and initialize
 function mod:New(index)
 	-- see if we have stuff in cache
 	local icon = table.remove(self.cache)
@@ -478,7 +446,6 @@ function mod:ClearElements()
 end
 
 -- read data from config and create the icons
--- IMPORTANT, always make sure you call clear first
 function mod:InitElements()
 	if not clcInfo.activeTemplate then return end
 
@@ -490,6 +457,7 @@ function mod:InitElements()
 	end
 end
 
+-- default skin options
 function mod:GetDefaultSkin()
 	return {
 		skinType = "Default",
@@ -497,9 +465,11 @@ function mod:GetDefaultSkin()
 		bfGloss = 0,
 	}
 end
+
+-- default options
 function mod:GetDefault()
-	local x = (UIParent:GetWidth() - 30) / 2 * UIParent:GetScale()
-	local y = (UIParent:GetHeight() - 30) / 2 * UIParent:GetScale()
+	local x = (UIParent:GetWidth() - ICON_DEFAULT_WIDTH) / 2 * UIParent:GetScale()
+	local y = (UIParent:GetHeight() - ICON_DEFAULT_HEIGHT) / 2 * UIParent:GetScale()
 	
 	return {
 		x = x,
@@ -507,8 +477,8 @@ function mod:GetDefault()
 		point = "BOTTOMLEFT",
 		relativeTo = "UIParent",
     relativePoint = "BOTTOMLEFT",
-		width = 30,
-		height = 30,
+		width = ICON_DEFAULT_WIDTH,
+		height = ICON_DEFAULT_HEIGHT,
 		exec = "",
 		ups = 5,
 		gridId = 0,
@@ -533,28 +503,24 @@ function mod:Add(gridId)
 end
 
 
--- TODO!
--- make sure cached icons are locked
+-- global lock/unlock/update
 function mod:LockElements()
 	for i = 1, getn(self.active) do
 		self.active[i]:Lock()
 	end
 	self.unlock = false
 end
-
 function mod:UnlockElements()
 	for i = 1, getn(self.active) do
 		self.active[i]:Unlock()
 	end
 	self.unlock = true
 end
-
 function mod:UpdateElementsLayout()
 	for i = 1, getn(self.active) do
 		self.active[i]:UpdateLayout()
 	end
 end
-
 ---------------------------------------------------------------------------------
 
 
