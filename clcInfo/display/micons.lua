@@ -41,25 +41,43 @@ local LSM = clcInfo.LSM
 
 local db
 
+-- some defaults used for skinning
+local STACK_DEFAULT_WIDTH 		= 36
+local STACK_DEFAULT_HEIGHT 		= 10
+local STACK_DEFAULT_OFFSETX 	= -2
+local STACK_DEFAULT_OFFSETY 	= -11
+local ICON_DEFAULT_WIDTH 			= 30
+local ICON_DEFAULT_HEIGHT			= 30
+
 --------------------------------------------------------------------------------
 -- icon object
 --------------------------------------------------------------------------------
 
+-- todo
+-- reduce number of frames?
 function iconPrototype:Init()
 	self.texMain = self:CreateTexture(nil, "BORDER")
 	self.texMain:SetAllPoints()
 	-- cooldown
 	self.cooldown = CreateFrame("Cooldown", nil, self)
 	self.cooldown:SetAllPoints(self)
-	-- stack (make a special frame so it's on top of cooldown)
-	local stackFrame = CreateFrame("Frame", nil, self)
 	
+	-- special frame so it's on top of cooldown
+	local skinFrame = CreateFrame("Frame", nil, self)
+	skinFrame:SetFrameLevel(self.cooldown:GetFrameLevel() + 1)
 	-- normal and gloss on top of the cooldown
-	self.texNormal = stackFrame:CreateTexture(nil, "ARTWORK")
-	self.texGloss = stackFrame:CreateTexture(nil, "OVERLAY")
+	self.texNormal = skinFrame:CreateTexture(nil, "ARTWORK")
+	self.texGloss = skinFrame:CreateTexture(nil, "OVERLAY")
 	
-	self.stack = stackFrame:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+	-- put the fonts on a frame and scale it?
+	self.stackFrame = CreateFrame("Frame", nil, self)
+	self.stackFrame:SetFrameLevel(self.cooldown:GetFrameLevel() + 2)
+	self.stackFrame:SetWidth(STACK_DEFAULT_WIDTH)
+	self.stackFrame:SetHeight(STACK_DEFAULT_HEIGHT)
+	
+	self.stack = self.stackFrame:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
 	self.stack:SetJustifyH("RIGHT")
+	self.stack:SetPoint("RIGHT", self.stackFrame, "RIGHT", 0, 0)
 	
 	self:Hide()
 end
@@ -67,7 +85,7 @@ end
 local function BFPosition(e, p, layer, scalex, scaley)
 	e:ClearAllPoints()
 	e:SetWidth(scalex * (layer.Width or 36))
-	e:SetHeight(scaley * (layer.Width or 36))
+	e:SetHeight(scaley * (layer.Height or 36))
 	e:SetPoint("CENTER", p, "CENTER", scalex * (layer.OffsetX or 0), scaley * (layer.OffsetY or 0))
 end
 local function BFTexture(t, tx, layer, scalex, scaley)
@@ -108,7 +126,18 @@ function ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
 	-- rest of elements
 	local layer, e
 	-- cooldown
-	if skin["Cooldown"] then BFPosition(self.cooldown, self, skin["Cooldown"], scalex, scaley) end
+	if skin.Cooldown then BFPosition(self.cooldown, self, skin.Cooldown, scalex, scaley) end
+	
+	-- stack is scaled so use default values
+	if skin.Count then
+		self.stackFrame:SetWidth(skin.Count.Width or 36)
+		self.stackFrame:SetHeight(skin.Count.Height or 36)
+		self.stackFrame:SetPoint("CENTER", self, "CENTER", skin.Count.OffsetX or 0, skin.Count.OffsetY or 0)
+	else
+		self.stackFrame:SetWidth(STACK_DEFAULT_WIDTH)
+		self.stackFrame:SetHeight(STACK_DEFAULT_HEIGHT)
+		self.stackFrame:SetPoint("CENTER", self, "CENTER", STACK_DEFAULT_OFFSETX, STACK_DEFAULT_OFFSETY)
+	end
 end
 
 function ApplyMySkin(self)
@@ -129,6 +158,10 @@ function ApplyMySkin(self)
 	t:Hide()
 	
 	self.cooldown:SetAllPoints(self)
+	
+	self.stackFrame:SetWidth(STACK_DEFAULT_WIDTH)
+	self.stackFrame:SetHeight(STACK_DEFAULT_HEIGHT)
+	self.stackFrame:SetPoint("CENTER", self, "CENTER", STACK_DEFAULT_OFFSETX, STACK_DEFAULT_OFFSETY)
 end
 
 function iconPrototype:UpdateLayout(i, skin)
@@ -147,16 +180,12 @@ function iconPrototype:UpdateLayout(i, skin)
 		self:SetPoint("TOPLEFT", self.parent, "TOPLEFT", 0, (1 - i) * (opt.height + opt.spacing))
 	end
 	
-	-- stack
-	local fontFace, _, fontFlags = self.stack:GetFont()
-	self.stack:SetFont(fontFace, opt.height / 2.7, fontFlags)
-	
-	self.stack:ClearAllPoints()
-	self.stack:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 2 * opt.width / 30, -2 * opt.height / 30)
+	self.stackFrame:SetScale(opt.height / ICON_DEFAULT_HEIGHT)
 
 	if skin.skinType == "Button Facade" and lbf then
 		ApplyButtonFacadeSkin(self, skin.bfSkin, skin.bfGloss)
 	elseif skinType == "BareBone" then
+		ApplyMySkin(self)
 		self.texGloss:Hide()
 		self.texNormal:Hide()
 	else
@@ -529,8 +558,8 @@ mod.GetDefaultSkin = clcInfo.display.icons.GetDefaultSkin
 
 -- micon stuff
 function mod:GetDefault()
-	local x = (UIParent:GetWidth() - 30) / 2 * UIParent:GetScale()
-	local y = (UIParent:GetHeight() - 30) / 2 * UIParent:GetScale()
+	local x = (UIParent:GetWidth() - ICON_DEFAULT_WIDTH) / 2 * UIParent:GetScale()
+	local y = (UIParent:GetHeight() - ICON_DEFAULT_HEIGHT) / 2 * UIParent:GetScale()
 	
 	return {
 		growth = "up", -- up or down
@@ -541,8 +570,8 @@ function mod:GetDefault()
 		point = "BOTTOMLEFT",
 		relativeTo = "UIParent",
     relativePoint = "BOTTOMLEFT",
-		width = 30,
-		height = 30,
+		width = ICON_DEFAULT_WIDTH,
+		height = ICON_DEFAULT_HEIGHT,
 		exec = "",
 		ups = 5,
 		gridId = 0,

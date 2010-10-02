@@ -26,6 +26,14 @@ mod.cache = {}
 
 local db
 
+-- some defaults
+local STACK_DEFAULT_WIDTH 		= 36
+local STACK_DEFAULT_HEIGHT 		= 10
+local STACK_DEFAULT_OFFSETX 	= -2
+local STACK_DEFAULT_OFFSETY 	= -11
+local ICON_DEFAULT_WIDTH 			= 30
+local ICON_DEFAULT_HEIGHT			= 30
+
 ---------------------------------------------------------------------------------
 -- icon prototype
 ---------------------------------------------------------------------------------
@@ -140,22 +148,27 @@ function prototype:Init()
 	-- cooldown
 	self.elements.cooldown = CreateFrame("Cooldown", nil, self.elements)
 	self.elements.cooldown:SetAllPoints(self.elements)
-	-- stack (make a special frame so it's on top of cooldown)
-	local stackFrame = CreateFrame("Frame", nil, self.elements)
 	
 	-- normal and gloss on top of cooldown
-	self.elements.texNormal = stackFrame:CreateTexture(nil, "ARTWORK")
-	self.elements.texGloss = stackFrame:CreateTexture(nil, "OVERLAY")
+	local skinFrame = CreateFrame("Frame", nil, self)
+	skinFrame:SetFrameLevel(self.elements.cooldown:GetFrameLevel() + 1)
+	self.elements.texNormal = skinFrame:CreateTexture(nil, "ARTWORK")
+	self.elements.texGloss = skinFrame:CreateTexture(nil, "OVERLAY")
 	
-	self.elements.stack = stackFrame:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+	-- put the fonts on a frame and scale it?
+	self.elements.stackFrame = CreateFrame("Frame", nil, self.elements)
+	self.elements.stackFrame:SetFrameLevel(self.elements.cooldown:GetFrameLevel() + 2)
+	self.elements.stackFrame:SetWidth(STACK_DEFAULT_WIDTH)
+	self.elements.stackFrame:SetHeight(STACK_DEFAULT_HEIGHT)
+	
+	self.elements.stack = self.elements.stackFrame:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
 	self.elements.stack:SetJustifyH("RIGHT")
-	-- self.elements.stack:SetFrameLevel(self.elements.cooldown:GetFrameLevel() + 1)
-	
+	self.elements.stack:SetPoint("RIGHT", self.elements.stackFrame, "RIGHT", 0, 0)
 	
 	-- lock and edit textures on a separate frame
 	self.toolbox = CreateFrame("Frame", nil, self)
 	self.toolbox:Hide()
-	self.toolbox:SetFrameLevel(self.elements:GetFrameLevel() + 2)
+	self.toolbox:SetFrameLevel(self.elements:GetFrameLevel() + 3)
 	
 	self.label = self.toolbox:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
 	self.label:SetPoint("BOTTOMLEFT", self.elements.texMain, "TOPLEFT", 0, 1)
@@ -212,7 +225,7 @@ end
 local function BFPosition(e, p, layer, scalex, scaley)
 	e:ClearAllPoints()
 	e:SetWidth(scalex * (layer.Width or 36))
-	e:SetHeight(scaley * (layer.Width or 36))
+	e:SetHeight(scaley * (layer.Height or 36))
 	e:SetPoint("CENTER", p, "CENTER", scalex * (layer.OffsetX or 0), scaley * (layer.OffsetY or 0))
 end
 local function BFTexture(t, tx, layer, scalex, scaley)
@@ -224,7 +237,7 @@ local function BFTexture(t, tx, layer, scalex, scaley)
 	t:SetVertexColor(unpack(layer.Color or { 1, 1, 1, 1 }))
 	t:SetTexCoord(unpack(layer.TexCoords or { 0, 1, 0, 1 }))
 end
-function prototype:ApplyButtonFacadeSkin(bfSkin, bfGloss)
+local function ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
 	skin = (lbf:GetSkins())[bfSkin]
 	if not skin then
 		-- try with blizzard
@@ -252,11 +265,20 @@ function prototype:ApplyButtonFacadeSkin(bfSkin, bfGloss)
 	local layer, e
 	-- cooldown
 	if skin["Cooldown"] then BFPosition(self.elements.cooldown, self.elements, skin["Cooldown"], scalex, scaley) end
-	-- not stack
-	-- if skin["Count"] then BFPosition(self.elements.stack, self.elements, skin["Count"], scalex, scaley) end
+	
+	-- stack is scaled so use default values
+	if skin.Count then
+		self.elements.stackFrame:SetWidth(skin.Count.Width or 36)
+		self.elements.stackFrame:SetHeight(skin.Count.Height or 36)
+		self.elements.stackFrame:SetPoint("CENTER", self, "CENTER", skin.Count.OffsetX or 0, skin.Count.OffsetY or 0)
+	else
+		self.elements.stackFrame:SetWidth(STACK_DEFAULT_WIDTH)
+		self.elements.stackFrame:SetHeight(STACK_DEFAULT_HEIGHT)
+		self.elements.stackFrame:SetPoint("CENTER", self, "CENTER", STACK_DEFAULT_OFFSETX, STACK_DEFAULT_OFFSETY)
+	end
 end
 
-function prototype:ApplyMySkin()
+local function ApplyMySkin(self)
 	local t = self.elements.texNormal
 	local scalex = self.db.width / 34
 	local scaley = self.db.height / 34
@@ -272,6 +294,10 @@ function prototype:ApplyMySkin()
 	t:Hide()
 	
 	self.elements.cooldown:SetAllPoints(self.elements)
+	
+	self.elements.stackFrame:SetWidth(STACK_DEFAULT_WIDTH)
+	self.elements.stackFrame:SetHeight(STACK_DEFAULT_HEIGHT)
+	self.elements.stackFrame:SetPoint("CENTER", self, "CENTER", STACK_DEFAULT_OFFSETX, STACK_DEFAULT_OFFSETY)
 end
 
 --[[
@@ -336,12 +362,12 @@ function prototype:UpdateLayout()
 	skinType, bfSkin, bfGloss = g.skinType, g.bfSkin, g.bfGloss
 
 	if skinType == "Button Facade" and lbf then
-		self:ApplyButtonFacadeSkin(bfSkin, bfGloss)
+		ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
 	elseif skinType == "BareBone" then
 		self.elements.texGloss:Hide()
 		self.elements.texNormal:Hide()
 	else
-		self:ApplyMySkin()
+		ApplyMySkin(self)
 	end
 end
 

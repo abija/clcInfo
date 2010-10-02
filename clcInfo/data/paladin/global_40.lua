@@ -26,7 +26,7 @@ local defaults = {
 local mod = clcInfo:RegisterClassModule("global")
 local db -- ! it's a tdb, change if needed
 -- functions visible to exec should be attached to this
-local mod = clcInfo.env
+local emod = clcInfo.env
 
 -- this function, if it exists, will be called at init
 function mod.OnInitialize()
@@ -68,17 +68,17 @@ do
 	sovName, _, sovSpellTexture = GetSpellInfo(sovId)						-- Censure
 	
 	local function ExecCleanup()
-		mod.___e.___sovList = nil
+		emod.___e.___sovList = nil
 	end
 
-	function mod.MBarSoV(a1, a2, showStack, timeRight)
+	function emod.MBarSoV(a1, a2, showStack, timeRight)
 		-- setup the table for sov data
-		if not mod.___e.___sovList then
-			mod.___e.___sovList = {}
-			mod.___e.ExecCleanup = ExecCleanup
+		if not emod.___e.___sovList then
+			emod.___e.___sovList = {}
+			emod.___e.ExecCleanup = ExecCleanup
 		end
 		
-		local tsov = mod.___e.___sovList
+		local tsov = emod.___e.___sovList
 	
 		-- check target for sov
 		local targetGUID
@@ -123,7 +123,7 @@ do
 				else alpha = a2
 				end
 				
-				mod.___e:___AddBar(nil, alpha, nil, nil, nil, nil, sovSpellTexture, 0, v[2], value, "normal", v[1], "", tr)
+				emod.___e:___AddBar(nil, alpha, nil, nil, nil, nil, sovSpellTexture, 0, v[2], value, "normal", v[1], "", tr)
 			end
 		end
 	end

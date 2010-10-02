@@ -315,6 +315,8 @@ end
 --------------------------------------------------------------------------------
 IconAction
 --------------------------------------------------------------------------------
+expected return: visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a
+--------------------------------------------------------------------------------
 --]]
 
 function mod.IconAction(slot, checkRange, showWhen)
@@ -356,8 +358,11 @@ function mod.IconAction(slot, checkRange, showWhen)
 	elseif not isUsable then
 		return true, texture, start, duration, enable, nil, nil, nil, true, 0.3, 0.3, 0.3, 1
 	end
+	
+	local count  = GetActionCount(slot)
+	if count <= 1 then count = nil end
 
-	return true, texture, start, duration, enable, nil, nil, nil, true, 1, 1, 1, 1
+	return true, texture, start, duration, enable, nil, count, nil, true, 1, 1, 1, 1
 end
 
 --[[

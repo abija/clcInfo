@@ -54,7 +54,7 @@ end
 local function Set(info, val)
 	local obj = modGrids.active[tonumber(info[3])]
 	obj.db[info[6]] = val
-	obj:Update()
+	obj:UpdateLayout()
 end
 local function Get(info)
 	return modGrids.active[tonumber(info[3])].db[info[6]]
@@ -84,7 +84,7 @@ local function SetLocked(info, val)
 	local obj = modGrids.active[tonumber(info[3])]
 	obj.db.cellWidth = val
 	obj.db.cellHeight = val
-	obj:Update()
+	obj:UpdateLayout()
 end
 local function GetLocked(info)
 	return modGrids.active[tonumber(info[3])].db.cellWidth
@@ -98,24 +98,24 @@ local function Unlock(info)
 	modGrids.active[tonumber(info[3])]:Unlock()
 end
 
+local function AddIcon(info)
+	clcInfo.display.icons:Add(tonumber(info[3]))
+	mod:UpdateIconList()
+end
+
 local function AddMIcon(info)
 	clcInfo.display.micons:Add(tonumber(info[3]))
 	mod:UpdateMIconList()
 end
 
+local function AddBar(info)
+	clcInfo.display.bars:Add(tonumber(info[3]))
+	mod:UpdateBarList()
+end
+
 local function AddMBar(info)
 	clcInfo.display.mbars:Add(tonumber(info[3]))
-	mod:UpdateBarList()
-end
-
-local function AddMIcon(info)
-	clcInfo.display.icons:Add(tonumber(info[3]))
-	mod:UpdateIconList()
-end
-
-local function AddBar(info)
-	clcInfo.display.mbars:Add(tonumber(info[3]))
-	mod:UpdateBarList()
+	mod:UpdateMBarList()
 end
 
 

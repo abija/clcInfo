@@ -18,7 +18,10 @@ args:
 		if true, display time left on right of the bar
 --------------------------------------------------------------------------------
 expected return: visible, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight
---]]	
+--]]
+--- Bar that shows cooldown for specified spell.
+-- @param spell Name of the spell.
+-- @param timeRight If true, remaining seconds are displayed on the right side.
 function mod.BarSpell(spell, timeRight)
 	local name, _, texture = GetSpellInfo(spell)
 	if not name then return end
