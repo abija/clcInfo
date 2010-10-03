@@ -3,7 +3,7 @@ local function bprint(...)
 	print(...)
 end
 
-clcInfo.__version = 30
+clcInfo.__version = 36
 
 --------------------------------------------------------------------------------
 -- TODO, make this GOOD

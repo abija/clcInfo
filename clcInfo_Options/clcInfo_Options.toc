@@ -18,6 +18,7 @@ display\icons.lua
 display\bars.lua
 display\micons.lua
 display\mbars.lua
+display\alerts.lua
 
 data\global.lua
 data\custom.lua

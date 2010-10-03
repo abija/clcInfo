@@ -330,5 +330,3 @@ end)
 -- using QUEST_LOG_UPDATE atm
 clcInfo.eventFrame:RegisterEvent("QUEST_LOG_UPDATE")
 
-
-

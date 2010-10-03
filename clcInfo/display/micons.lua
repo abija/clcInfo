@@ -19,6 +19,7 @@ prototype:Hide()
 local mod = clcInfo:RegisterDisplayModule("micons")
 -- special options
 mod.hasSkinOptions = true
+mod.onGrid = true
 
 
 -- active objects

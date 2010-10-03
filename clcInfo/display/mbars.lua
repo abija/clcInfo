@@ -16,6 +16,7 @@ prototype:Hide()
 local mod = clcInfo:RegisterDisplayModule("mbars")
 -- special options
 mod.hasSkinOptions = true
+mod.onGrid = true
 
 
 -- active objects

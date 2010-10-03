@@ -29,9 +29,14 @@ local function AddMBar()
 	clcInfo.display.mbars:Add()
 	mod.UpdateMBarList()
 end
+local function AddAlert()
+	clcInfo.display.alerts:Add()
+	mod.UpdateAlertList()
+end
 
 --------------------------------------------------------------------------------
 -- skins
+-- TODO reduce the number of functions
 --------------------------------------------------------------------------------
 local function GetSkinTypeList()
 	local list = { ["Default"] = "Default", ["BareBone"] = "BareBone" }
@@ -749,6 +754,13 @@ function mod:LoadActiveTemplate()
   			addBar = { order = 1, type = "execute", name = "Add MBar", func = AddMBar },
   		},
   	},
+  	
+  	alerts = {
+  		order = 600, type = "group", name = "Alerts",
+  		args = {
+  			addAlert = { order = 1, type = "execute", name = "Add Alert", func = AddAlert },
+  		},
+  	},
   }
   
   -- if we have lbf then add it to options
@@ -800,6 +812,8 @@ function mod:LoadActiveTemplate()
   mod.lastMBarCount = 0
   mod.UpdateMBarList()
   
+  mod.lastAlertCount = 0
+  mod.UpdateAlertList()
   
   -- info: class modules are loaded together with active template because of the data that might be template stored
   mod:LoadClassModules()

@@ -2,6 +2,7 @@ local mod = clcInfo:RegisterDisplayModule("bars") -- register the module
 
 -- base frame object
 mod.hasSkinOptions = true
+mod.onGrid = true
 
 local prototype = CreateFrame("Frame")  -- base frame object
 prototype:Hide()

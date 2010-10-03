@@ -1,3 +1,7 @@
+- effects on the elements themselves?
+- stop updating cooldowns when not needed on icons to let omnicc flash
+
+
 - enabled/ranged improved?
 - on class modules, make sure spells are checked since spec might not be guaranteed due to enforce (get tv cd on holy template etc)
 
@@ -17,8 +21,6 @@
 - way to copy settings from bar advanced (even between templates/chars)
 - gradients, flash for bars
 - vertical bars? :p
-
-
 
 - function to cleanup unused vars from db somehow
 

@@ -1,6 +1,7 @@
 local mod = clcInfo:RegisterDisplayModule("icons")  -- register the module
 -- special options
 mod.hasSkinOptions = true
+mod.onGrid = true
 
 -- button facade
 local lbf = clcInfo.lbf

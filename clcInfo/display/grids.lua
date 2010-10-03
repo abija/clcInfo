@@ -81,8 +81,8 @@ end
 
 -- update the display elements attached to it
 function prototype:UpdateChildren()
-	for k in pairs(clcInfo.display) do
-		if k ~= "grids" then
+	for k, v in pairs(clcInfo.display) do
+		if v.onGrid then
 			local il = clcInfo.display[k].active
 			for i = 1, #il do
 				if il[i].db.gridId == self.index then
@@ -178,7 +178,7 @@ function mod:GetDefault()
 	}
 	
 	for k, v in pairs(clcInfo.display) do
-		if v.hasSkinOptions then
+		if v.onGrid and v.hasSkinOptions then
 			t.skinOptions[k] = clcInfo.display[k]:GetDefaultSkin()
 		end
 	end
