@@ -34,6 +34,8 @@ local db
 -- local bindings
 local GetTime = GetTime
 
+local modAlerts = clcInfo.display.alerts
+
 --------------------------------------------------------------------------------
 -- bar object
 --------------------------------------------------------------------------------
@@ -277,6 +279,25 @@ end
 -- mbar object
 --------------------------------------------------------------------------------
 
+-- this one is called for alerts
+function prototype:___HideBar(id)
+	-- expiration tests for when the aura is forcefully removed
+	if self.hasAlerts == 1 and self.alerts[id].expiration then
+		local a = self.alerts[id].expiration
+		if a.mode == "normal" then
+			if a.last > a.timeLeft then
+				a.last = 0
+				modAlerts:Play(a.alertIndex, a.texture, a.sound)
+			end
+		elseif a.mode == "reversed" then
+			if a.last < a.timeLeft then
+				a.last = 10000
+				modAlerts:Play(a.alertIndex, a.texture, a.sound)
+			end
+		end
+	end
+end
+
 function prototype:___AddBar(id, alpha, r, g, b, a, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight)
 	self.___dc = self.___dc + 1
 	
@@ -312,20 +333,16 @@ function prototype:___AddBar(id, alpha, r, g, b, a, texture, minValue, maxValue,
 				-- mode selection
 				if mode == "normal" then
 					if value <= a.timeLeft and a.timeLeft < a.last then
-						if clcInfo.display.alerts.active[a.alertIndex] then
-							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
-						end
-						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+						modAlerts:Play(a.alertIndex, texture, a.sound)
 					end
 				elseif mode == "reversed" then
 					if value >= a.timeLeft and a.timeLeft > a.last then
-						if clcInfo.display.alerts.active[a.alertIndex] then
-							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
-						end
-						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+						modAlerts:Play(a.alertIndex, texture, a.sound)
 					end
 				end
 				a.last = value
+				a.mode = mode
+				a.texture = texture
 			end
 			-- start alert
 			if self.alerts[id].start then
@@ -333,17 +350,11 @@ function prototype:___AddBar(id, alpha, r, g, b, a, texture, minValue, maxValue,
 				-- mode selection
 				if mode == "normal" then
 					if value > a.last then
-						if clcInfo.display.alerts.active[a.alertIndex] then
-							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
-						end
-						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+						modAlerts:Play(a.alertIndex, texture, a.sound)
 					end
 				elseif mode == "reversed" then
 					if value < a.lastReversed then
-						if clcInfo.display.alerts.active[a.alertIndex] then
-							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
-						end
-						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+						modAlerts:Play(a.alertIndex, texture, a.sound)
 					end
 				end
 				a.last = value

@@ -45,6 +45,8 @@ local ICON_DEFAULT_HEIGHT			= 30
 -- local bindings
 local GetTime = GetTime
 
+local modAlerts = clcInfo.display.alerts
+
 --------------------------------------------------------------------------------
 -- icon object
 --------------------------------------------------------------------------------
@@ -200,14 +202,23 @@ end
 -- micon object
 --------------------------------------------------------------------------------
 
+-- this should be called for alerts, when you don't add the icon
+function prototype:___HideIcon(id)
+	-- expiration alert handling
+	if self.hasAlerts == 1 and self.alerts[id].expiration then
+		local a = self.alerts[id].expiration
+		if a.last > a.timeLeft then
+			a.last = 0
+			modAlerts:Play(a.alertIndex, a.texture, a.sound)
+		end
+	end
+end
+
 -- TODO
 -- check if caching data is worth it when they change a lot
 function prototype:___AddIcon(id, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a)
 	-- another test for alpha
 	-- TODO, see if this can be done better
-	alpha = alpha or 1
-	if alpha == 0 then return end
-	
 	self.___dc = self.___dc + 1
 	
 	local icon
@@ -233,9 +244,7 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 	
 	if start ~= icon.lastStart then
 		icon.lastStart = start
-		if duration and duration > 0 then
-			CooldownFrame_SetTimer(e, start, duration, enable)
-		end
+		CooldownFrame_SetTimer(e, start, duration, enable)
 	end
 	
 	-- stack
@@ -259,7 +268,7 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 	
 	-- alpha
 	if icon.lastAlpha ~= alpha then
-		icon:SetAlpha(alpha)
+		icon:SetAlpha(alpha or 1)
 		icon.lastAlpha = alpha
 	end
 	
@@ -273,21 +282,16 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 			if self.alerts[id].expiration then
 				local a = self.alerts[id].expiration
 				if v <= a.timeLeft and a.timeLeft < a.last then
-					if clcInfo.display.alerts.active[a.alertIndex] then
-						clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
-					end
-					if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+					modAlerts:Play(a.alertIndex, texture, a.sound)
 				end
 				a.last = v
+				a.texture = texture
 			end
 			-- start alert
 			if self.alerts[id].start then
 				local a = self.alerts[id].start
 				if v ~= -1 and a.last == -1 then
-					if clcInfo.display.alerts.active[a.alertIndex] then
-						clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
-					end
-					if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+					modAlerts:Play(a.alertIndex, texture, a.sound)
 				end
 				a.last = v
 			end

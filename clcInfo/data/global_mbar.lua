@@ -2,6 +2,9 @@ local mod = clcInfo.env
 
 
 function mod.AddMBar(id, alpha, r, g, b, a, visible, ...)
-	if (alpha ~= nil and alpha == 0) or not visible then return end
-	mod.___e:___AddBar(id, alpha, r, g, b, a, ...)
+	if visible then
+		mod.___e:___AddBar(id, alpha, r, g, b, a, ...)
+	else
+		if id then mod.___e:___HideBar(id) end
+	end
 end

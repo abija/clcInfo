@@ -27,6 +27,8 @@ local ICON_DEFAULT_HEIGHT			= 30
 -- local bindings
 local GetTime = GetTime
 
+local modAlerts = clcInfo.display.alerts
+
 ---------------------------------------------------------------------------------
 -- icon prototype
 ---------------------------------------------------------------------------------
@@ -50,8 +52,20 @@ local function OnUpdate(self, elapsed)
 	-- alpha
 	-- svc, r, g, b, a                    			(svc - true if we change vertex info)
 	local visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a = self.exec()
-	alpha = alpha or 1
-	if not visible or alpha == 0 then self:FakeHide() return end -- hide when not visible or alpha == 0
+	
+	-- hide when not visible
+	if not visible then
+		-- check if expiration alert ran 
+		if self.hasAlerts == 1 and self.alerts.expiration then
+			local a = self.alerts.expiration
+			if a.last > a.timeLeft then
+				a.last = 0
+				modAlerts:Play(a.alertIndex, self.lastTexture, a.sound)
+			end
+		end
+		self:FakeHide()
+		return
+	end
 	
 	-- texture
 	if self.lastTexture ~= texture then
@@ -71,11 +85,10 @@ local function OnUpdate(self, elapsed)
 	-- TODO
 	-- check if this is working properly, don't want to miss timers
 	if start ~= self.lastStart then
+		CooldownFrame_SetTimer(e, start, duration, enable)
 		self.lastStart = start
-		if duration and duration > 0 then
-			CooldownFrame_SetTimer(e, start, duration, enable)
-		end
 	end
+	
 	
 	-- stack
 	e = self.elements.stack
@@ -97,7 +110,7 @@ local function OnUpdate(self, elapsed)
 	self.lastSVC = svc
 	
 	if self.lastAlpha ~= alpha then
-		self.elements:SetAlpha(alpha)
+		self.elements:SetAlpha(alpha or 1)
 		self.lastAlpha = alpha
 	end
 	
@@ -110,10 +123,7 @@ local function OnUpdate(self, elapsed)
 		if self.alerts.expiration then
 			local a = self.alerts.expiration
 			if v <= a.timeLeft and a.timeLeft < a.last then
-				if clcInfo.display.alerts.active[a.alertIndex] then
-					clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
-				end
-				if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+				modAlerts:Play(a.alertIndex, texture, a.sound)
 			end
 			a.last = v
 		end
@@ -121,10 +131,7 @@ local function OnUpdate(self, elapsed)
 		if self.alerts.start then
 			local a = self.alerts.start
 			if v ~= -1 and a.last == -1 then
-				if clcInfo.display.alerts.active[a.alertIndex] then
-					clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
-				end
-				if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+				modAlerts:Play(a.alertIndex, self.lastTexture, a.sound)
 			end
 			a.last = v
 		end
@@ -187,7 +194,7 @@ function prototype:Init()
 	self.elements.stack:SetPoint("RIGHT", self.elements.stackFrame, "RIGHT", 0, 0)
 	
 	-- lock and edit textures on a separate frame
-	self.toolbox = CreateFrame("Frame", nil, self.elements)
+	self.toolbox = CreateFrame("Frame", nil, self)
 	self.toolbox:Hide()
 	self.toolbox:SetFrameLevel(self.elements:GetFrameLevel() + 3)
 	

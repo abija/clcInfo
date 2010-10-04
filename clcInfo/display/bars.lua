@@ -18,6 +18,8 @@ local db  -- option
 -- local bindings
 local GetTime = GetTime
 
+local modAlerts = clcInfo.display.alerts
+
 ---------------------------------------------------------------------------------
 -- bar prototype
 ---------------------------------------------------------------------------------
@@ -42,7 +44,25 @@ local function OnUpdate(self, elapsed)
 		
 		-- not visibile -> save info for the quick updates and hide elements
 		self.visible = visible
-		if not visible then return self:FakeHide() end
+		if not visible then
+			-- test for expiration alert
+			if self.hasAlerts == 1 and self.alerts.expiration then
+				local a = self.alerts.expiration
+				if self.mode == "normal" then
+					if a.last > a.timeLeft then
+						a.last = 0
+						modAlerts:Play(a.alertIndex, self.lastTexture, a.sound)
+					end
+				elseif self.mode == "reversed" then
+					if a.last < a.timeLeft then
+						a.last = 10000
+						modAlerts:Play(a.alertIndex, self.lastTexture, a.sound)
+					end
+				end
+			end
+			self:FakeHide()
+			return 
+		end
 		
 		-- data used for quick updates
 		self.mode = mode
@@ -69,17 +89,11 @@ local function OnUpdate(self, elapsed)
 				-- mode selection
 				if mode == "normal" then
 					if value <= a.timeLeft and a.timeLeft < a.last then
-						if clcInfo.display.alerts.active[a.alertIndex] then
-							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
-						end
-						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+						modAlerts:Play(a.alertIndex, texture, a.sound)
 					end
 				elseif mode == "reversed" then
 					if value >= a.timeLeft and a.timeLeft > a.last then
-						if clcInfo.display.alerts.active[a.alertIndex] then
-							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
-						end
-						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+						modAlerts:Play(a.alertIndex, texture, a.sound)
 					end
 				end
 				a.last = value
@@ -89,17 +103,11 @@ local function OnUpdate(self, elapsed)
 				local a = self.alerts.start
 				if mode == "normal" then
 					if value > a.last then
-						if clcInfo.display.alerts.active[a.alertIndex] then
-							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
-						end
-						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+						modAlerts:Play(a.alertIndex, texture, a.sound)
 					end
 				elseif mode == "reversed" then
 					if value < a.lastReversed then
-						if clcInfo.display.alerts.active[a.alertIndex] then
-							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
-						end
-						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+						modAlerts:Play(a.alertIndex, texture, a.sound)
 					end
 				end
 				a.last = value

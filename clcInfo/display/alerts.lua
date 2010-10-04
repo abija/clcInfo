@@ -8,6 +8,8 @@ prototype:Hide()
 
 local db
 
+local LSM = clcInfo.LSM
+
 --------------------------------------------------------------------------------
 -- alert object
 --------------------------------------------------------------------------------
@@ -76,7 +78,7 @@ function prototype:Init()
 	tempshit:SetDuration(0.05)
 	
   -- move and config
-  self:EnableMouse(true)
+  self:EnableMouse(false)
 	self:SetMovable(true)
 	self:RegisterForDrag("LeftButton")
 	self:SetScript("OnDragStart", function()
@@ -133,12 +135,14 @@ function prototype:Unlock()
   -- hide main icon and show bg and label
   self.bg:Show()
   self.label:Show()
+  self:EnableMouse(true)
 end
 
 -- disables
 function prototype:Lock()
   self.bg:Hide()
   self.label:Hide()
+  self:EnableMouse(false)
 end
 
 -- caaaaaaaaaaaaaaaaaaareful
@@ -212,6 +216,13 @@ function mod:InitElements()
 	for index in ipairs(db) do
 		self:New(index)
 	end
+end
+
+function mod:Play(index, texture, sound)
+	if self.active[index] then
+		self.active[index]:StartAnim(texture)
+	end
+	if sound then PlaySoundFile(LSM:Fetch("sound", sound)) end
 end
 
 

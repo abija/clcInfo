@@ -12,12 +12,12 @@ embeds.xml
 core.lua
 templates.lua
 
+display\alerts.lua
 display\grids.lua
 display\icons.lua
 display\bars.lua
 display\micons.lua
 display\mbars.lua
-display\alerts.lua
 
 data\global_icon.lua
 data\global_bar.lua
