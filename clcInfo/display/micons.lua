@@ -42,6 +42,9 @@ local STACK_DEFAULT_OFFSETY 	= -11
 local ICON_DEFAULT_WIDTH 			= 30
 local ICON_DEFAULT_HEIGHT			= 30
 
+-- local bindings
+local GetTime = GetTime
+
 --------------------------------------------------------------------------------
 -- icon object
 --------------------------------------------------------------------------------
@@ -71,6 +74,9 @@ function iconPrototype:Init()
 	self.stack = self.stackFrame:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
 	self.stack:SetJustifyH("RIGHT")
 	self.stack:SetPoint("RIGHT", self.stackFrame, "RIGHT", 0, 0)
+	
+	-- helpful vars
+	self.lastReversed = -1
 	
 	self:Hide()
 end
@@ -199,7 +205,8 @@ end
 function prototype:___AddIcon(id, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a)
 	-- another test for alpha
 	-- TODO, see if this can be done better
-	if alpha ~= nil and alpha == 0 then return end
+	alpha = alpha or 1
+	if alpha == 0 then return end
 	
 	self.___dc = self.___dc + 1
 	
@@ -211,17 +218,24 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 	end
 	
 	-- texture
-	icon.texMain:SetTexture(texture)
+	if icon.lastTexture ~= texture then
+		icon.texMain:SetTexture(texture)
+		icon.lastTexture = texture
+	end
 	
 	-- cooldown
 	local e = icon.cooldown
-	if (enable == 1) and duration and duration > 0 then
-		-- direction
+	reversed = reversed or false
+	if icon.lastReversed ~= reversed then
 		e:SetReverse(reversed)
-		e:SetCooldown(start, duration)
-		e:Show()
-	else
-		e:Hide()
+		icon.lastReversed = reversed
+	end
+	
+	if start ~= icon.lastStart then
+		icon.lastStart = start
+		if duration and duration > 0 then
+			CooldownFrame_SetTimer(e, start, duration, enable)
+		end
 	end
 	
 	-- stack
@@ -237,11 +251,17 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 	if svc then
 		icon.texMain:SetVertexColor(r, g, b, a)
 	else
-		icon.texMain:SetVertexColor(1, 1, 1, 1)
+		if icon.lastSCV then
+			icon.texMain:SetVertexColor(1, 1, 1, 1)
+		end
 	end
+	icon.lastSVC = svc
 	
 	-- alpha
-	icon:SetAlpha(alpha or 1)
+	if icon.lastAlpha ~= alpha then
+		icon:SetAlpha(alpha)
+		icon.lastAlpha = alpha
+	end
 	
 	icon:Show()
 end

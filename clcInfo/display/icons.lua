@@ -23,6 +23,9 @@ local STACK_DEFAULT_OFFSETY 	= -11
 local ICON_DEFAULT_WIDTH 			= 30
 local ICON_DEFAULT_HEIGHT			= 30
 
+-- local bindings
+local GetTime = GetTime
+
 ---------------------------------------------------------------------------------
 -- icon prototype
 ---------------------------------------------------------------------------------
@@ -46,29 +49,31 @@ local function OnUpdate(self, elapsed)
 	-- alpha
 	-- svc, r, g, b, a                    			(svc - true if we change vertex info)
 	local visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a = self.exec()
-	if not visible then self:FakeHide() return end
-	if alpha ~= nil and alpha == 0 then self:FakeHide() return end	-- hide on alpha = 0
+	alpha = alpha or 1
+	if not visible or alpha == 0 then self:FakeHide() return end -- hide when not visible or alpha == 0
 	
 	-- texture
-	if texture ~= self.lastTexture then
+	if self.lastTexture ~= texture then
 		self.elements.texMain:SetTexture(texture)
 		self.lockTex:SetTexture(texture)
 		self.lastTexture = texture
 	end
 	
 	-- cooldown
-	reversed = not not reversed
 	local e = self.elements.cooldown
-	if (enable == 1) and duration and duration > 0 then
-		-- direction
-		if self.lastReversed ~= reversed then
-			e:SetReverse(reversed)
-			self.lastReversed = reversed
+	reversed = reversed or false
+	if self.lastReversed ~= reversed then
+		e:SetReverse(reversed)
+		self.lastReversed = reversed
+	end
+	
+	-- TODO
+	-- check if this is working properly, don't want to miss timers
+	if start ~= self.lastStart then
+		self.lastStart = start
+		if duration and duration > 0 then
+			CooldownFrame_SetTimer(e, start, duration, enable)
 		end
-		e:SetCooldown(start, duration)
-		e:Show()
-	else
-		e:Hide()
 	end
 	
 	-- stack
@@ -81,7 +86,6 @@ local function OnUpdate(self, elapsed)
 	end
 	
 	-- SetVertexColor
-	svc = not not svc
 	if svc then
 		self.elements.texMain:SetVertexColor(r, g, b, a)
 	else
@@ -91,9 +95,9 @@ local function OnUpdate(self, elapsed)
 	end
 	self.lastSVC = svc
 	
-	-- alpha
-	if alpha ~= nil then
+	if self.lastAlpha ~= alpha then
 		self.elements:SetAlpha(alpha)
+		self.lastAlpha = alpha
 	end
 
 	self:FakeShow()
@@ -171,12 +175,6 @@ function prototype:Init()
 	self:FakeHide()
 	self:Show()
 	self:SetScript("OnUpdate", OnUpdate)	
-	
-	-- last vars
-	self.lastTexture = nil
-	self.lastReversed = false
-	self.lastSVC = false	-- set vertex color
-	
 
   -- move and config
   self:EnableMouse(false)

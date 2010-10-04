@@ -1,5 +1,6 @@
 - effects on the elements themselves?
 - stop updating cooldowns when not needed on icons to let omnicc flash
+- the nil issue....
 
 
 - enabled/ranged improved?
