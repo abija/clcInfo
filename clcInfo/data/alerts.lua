@@ -69,6 +69,9 @@ function mod.AddAlertBarStart(alertIndex, sound)
 	e.alerts.start = {
 		alertIndex = alertIndex,
 		sound = sound,
+		
+		last = 0,
+		lastReversed = 1000000, -- some really big number
 	}
 end
 --------------------------------------------------------------------------------

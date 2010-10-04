@@ -42,11 +42,7 @@ local function OnUpdate(self, elapsed)
 		
 		-- not visibile -> save info for the quick updates and hide elements
 		self.visible = visible
-		if not visible then
-			self.lastVisible = false -- used to trigger start alerts
-			self:FakeHide()
-			return
-		end
+		if not visible then return self:FakeHide() end
 		
 		-- data used for quick updates
 		self.mode = mode
@@ -91,16 +87,24 @@ local function OnUpdate(self, elapsed)
 			-- start alert
 			if self.alerts.start then
 				local a = self.alerts.start
-				if not self.lastVisible then
-					if clcInfo.display.alerts.active[a.alertIndex] then
-						clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+				if mode == "normal" then
+					if value > a.last then
+						if clcInfo.display.alerts.active[a.alertIndex] then
+							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+						end
+						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
 					end
-					if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+				elseif mode == "reversed" then
+					if value < a.lastReversed then
+						if clcInfo.display.alerts.active[a.alertIndex] then
+							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+						end
+						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+					end
 				end
+				a.last = value
 			end
 		end
-		
-		self.lastVisible = true
 	else
 		-- on timer based bars, regardless if we update info or not, the bar still needs to progress
 		-- on custom bars, probably will just skip

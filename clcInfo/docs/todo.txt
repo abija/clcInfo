@@ -3,6 +3,7 @@
 - the nil issue....
 
 - type of alert to trigger when stuff is removed
+- implement a way to add alerts for random stuff?
 
 
 - enabled/ranged improved?

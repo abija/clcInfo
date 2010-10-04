@@ -16,9 +16,7 @@ local baseMod = clcInfo.classModules.retribution
 local baseDB = clcInfo.cdb.classModules.retribution
 
 -- some lazy staic numbers
-local MAX_FCFS = 10							-- elements in fcfs
-local MAX_PRESETS = 10					-- number of presets
-
+local MAX_FILLERS = 5	
 
 --[[
 classModules
@@ -35,19 +33,19 @@ local function Set(info, val)
 	baseDB[info[#info]] = val
 end
 
-local function GetFCFS(info)
+local function GetFiller(info)
 	local i = tonumber(info[#info])
-	return baseDB.fcfs[i]
+	return baseDB.fillers[i]
 end
 
-local function SetFCFS(info, val)
+local function SetFiller(info, val)
 	local i = tonumber(info[#info])
-	baseDB.fcfs[i] = val
-	baseMod:UpdateFCFS()
+	baseDB.fillers[i] = val
+	baseMod:UpdateFillers()
 end
 
 local function GetSpellChoice()
-	local spells = baseMod.spells
+	local spells = baseMod.fillers
 	local sc = { none = "None" }
 	for alias, data in pairs(spells) do
 		sc[alias] = data.name
@@ -106,8 +104,21 @@ local function LoadModule()
 					},
 				},
 			},
+			tabFillers = { order = 2, type = "group", name = "Filler Order", args = {} },
 		},
 	}
+	
+	-- filler selection
+	local args = options.args.classModules.args.retribution.args.tabFillers.args
+	for i = 1, MAX_FILLERS do
+		args["label" .. i] = {
+			order = i*2, type = "description", name = "", width = "double",
+		}
+		args[tostring(i)] = {
+			order = i*2 - 1, type = "select", name = tostring(i), 
+			get = GetFiller, set = SetFiller, values = GetSpellChoice,
+		}
+	end
 	
 end
 mod.cmLoaders[#(mod.cmLoaders) + 1] = LoadModule
