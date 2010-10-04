@@ -1,5 +1,7 @@
 local mod = clcInfo.env
 
+local GetTime = GetTime
+
 --[[
 BarSpell
 --------------------------------------------------------------------------------
@@ -24,11 +26,12 @@ function mod.BarSpell(spell, timeRight)
 	local start, duration, enable = GetSpellCooldown(spell)
 	
 	if duration and duration > 1.5 then -- avoid GCD
+		local v = duration + start - GetTime()
 		if timeRight then
-			timeRight = tostring(math.floor(value + 0.5))
+			timeRight = tostring(math.floor(v + 0.5))
 		end
 		
-		return true, texture, 0, duration, duration - (GetTime() - start), "normal", name, nil, timeRight
+		return true, texture, 0, duration, v, "normal", name, nil, timeRight
 	end
 end
 

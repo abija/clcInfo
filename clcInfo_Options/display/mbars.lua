@@ -105,6 +105,12 @@ local function GetGridList()
 	return list
 end
 
+
+-- sound donothing control
+local sound = "None"
+local function GetSound() return sound end
+local function SetSound(info, val) sound = val end
+
 function mod:UpdateMBarList()
 	local db = modMBars.active
 	local optionsMBars = options.args.activeTemplate.args.mbars
@@ -543,6 +549,19 @@ function mod:UpdateMBarList()
 								ups = {
 									type = "range", min = 1, max = 100, step = 1, name = "", 
 									get = Get, set = SetExec,
+								},
+							},
+						},
+						alerts = {
+							order = 3, type = "group", inline = true, name = "Alerts",
+							args = {
+								execAlert = {
+									order = 1, type = "input", multiline = true, name = "", width = "full",
+									get = Get, set = SetExec,
+								},
+								_x1 = {
+									order = 2, type = 'select', dialogControl = 'LSM30_Sound', name = 'List of available sounds',
+									values = LSM:HashTable("sound"), get = GetSound, set = SetSound,
 								},
 							},
 						},

@@ -263,6 +263,37 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 		icon.lastAlpha = alpha
 	end
 	
+	-- alert handling
+	if id and self.hasAlerts == 1 then
+		if self.alerts[id] then
+			local v 
+			if duration and duration > 0 then v = duration + start - GetTime()
+			else v = -1 end
+			-- expiration alert
+			if self.alerts[id].expiration then
+				local a = self.alerts[id].expiration
+				if v <= a.timeLeft and a.timeLeft < a.last then
+					if clcInfo.display.alerts.active[a.alertIndex] then
+						clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+					end
+					if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+				end
+				a.last = v
+			end
+			-- start alert
+			if self.alerts[id].start then
+				local a = self.alerts[id].start
+				if v ~= -1 and a.last == -1 then
+					if clcInfo.display.alerts.active[a.alertIndex] then
+						clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+					end
+					if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+				end
+				a.last = v
+			end
+		end
+	end
+	
 	icon:Show()
 end
 
@@ -333,7 +364,6 @@ function prototype:Init()
 
 	self.elapsed = 0
 	self:Show()
-	self:SetScript("OnUpdate", OnUpdate)
 	
 	self.___dc = 0			-- data count
 	self.___c = {}			-- children
@@ -439,8 +469,27 @@ function prototype:UpdateExec()
   	self.ExecCleanup = nil
   end
   
+  -- handle alert exec
+   
+  -- defaults
+  self.alerts = {}
+  self.hasAlerts = 0
+  
+  -- execute the code
+  local f, err = loadstring(self.db.execAlert or "")
+  if f then
+  	setfenv(f, clcInfo.env)
+  	clcInfo.env.___e = self
+  	f()
+  else
+  	print("alert code error:", err)
+  	print("in:", self.db.execAlert)
+  end
+  
   -- release the icons
   self:ReleaseIcons()
+  
+  self:SetScript("OnUpdate", OnUpdate)
 end
 
 -- caaaaaaaaaaaaaaaaaaareful
@@ -586,6 +635,7 @@ function mod:GetDefault()
 		width = ICON_DEFAULT_WIDTH,
 		height = ICON_DEFAULT_HEIGHT,
 		exec = "",
+		execAlert = "",
 		ups = 5,
 		gridId = 0,
 		gridX = 1,	-- column

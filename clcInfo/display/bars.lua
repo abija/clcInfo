@@ -24,6 +24,8 @@ local GetTime = GetTime
 
 -- to get proper animation for timers bars should update on each call
 -- throttle exec calls and use some data from there to do some quick updates if possible
+-- TODO check code
+-- TODO move alerts to special functions?
 local function OnUpdate(self, elapsed)
 	self.elapsed = self.elapsed + elapsed
 
@@ -40,7 +42,11 @@ local function OnUpdate(self, elapsed)
 		
 		-- not visibile -> save info for the quick updates and hide elements
 		self.visible = visible
-		if not visible then self:FakeHide() return end
+		if not visible then
+			self.lastVisible = false -- used to trigger start alerts
+			self:FakeHide()
+			return
+		end
 		
 		-- data used for quick updates
 		self.mode = mode
@@ -58,6 +64,43 @@ local function OnUpdate(self, elapsed)
 	
 		bar:SetMinMaxValues(minValue, maxValue)
 		bar:SetValue(value)
+		
+		-- alert handling
+		if self.hasAlerts == 1 then
+			-- expiration alert
+			if self.alerts.expiration then
+				local a = self.alerts.expiration
+				-- mode selection
+				if mode == "normal" then
+					if value <= a.timeLeft and a.timeLeft < a.last then
+						if clcInfo.display.alerts.active[a.alertIndex] then
+							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+						end
+						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+					end
+				elseif mode == "reversed" then
+					if value >= a.timeLeft and a.timeLeft > a.last then
+						if clcInfo.display.alerts.active[a.alertIndex] then
+							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+						end
+						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+					end
+				end
+				a.last = value
+			end
+			-- start alert
+			if self.alerts.start then
+				local a = self.alerts.start
+				if not self.lastVisible then
+					if clcInfo.display.alerts.active[a.alertIndex] then
+						clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+					end
+					if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+				end
+			end
+		end
+		
+		self.lastVisible = true
 	else
 		-- on timer based bars, regardless if we update info or not, the bar still needs to progress
 		-- on custom bars, probably will just skip
@@ -467,16 +510,33 @@ function prototype:UpdateExec()
 	end
   setfenv(self.exec, clcInfo.env)
   
-  -- in case we update while the element is unlocked
-  if self.locked then
-  	self:SetScript("OnUpdate", OnUpdate)
-  end
-  
   -- perform additional cleaning if required
   self.externalUpdate = false
   if self.ExecCleanup then
   	self.ExecCleanup()
   	self.ExecCleanup = nil
+  end
+  
+  -- handle alert exec
+  
+  -- defaults
+  self.alerts = {}
+  self.hasAlerts = 0
+  
+  -- execute the code
+  local f, err = loadstring(self.db.execAlert or "")
+  if f then
+  	setfenv(f, clcInfo.env)
+  	clcInfo.env.___e = self
+  	f()
+  else
+  	print("alert code error:", err)
+  	print("in:", self.db.execAlert)
+  end
+  
+  -- in case we update while the element is unlocked
+  if self.locked then
+  	self:SetScript("OnUpdate", OnUpdate)
   end
 end
 
@@ -652,6 +712,7 @@ function mod.GetDefault()
 		width = 200,
 		height = 20,
 		exec = "",
+		alertExec = "",
 		ups = 5,
 		gridId = 0,
 		gridX = 1,	-- column

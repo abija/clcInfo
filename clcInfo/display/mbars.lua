@@ -302,6 +302,54 @@ function prototype:___AddBar(id, alpha, r, g, b, a, texture, minValue, maxValue,
 	-- save important stuff for quick updates
 	bar.value = value
 	bar.mode = mode
+	
+	-- alert handling
+	if id and self.hasAlerts == 1 then
+		if self.alerts[id] then
+			-- expiration alert
+			if self.alerts[id].expiration then
+				local a = self.alerts[id].expiration
+				-- mode selection
+				if mode == "normal" then
+					if value <= a.timeLeft and a.timeLeft < a.last then
+						if clcInfo.display.alerts.active[a.alertIndex] then
+							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+						end
+						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+					end
+				elseif mode == "reversed" then
+					if value >= a.timeLeft and a.timeLeft > a.last then
+						if clcInfo.display.alerts.active[a.alertIndex] then
+							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+						end
+						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+					end
+				end
+				a.last = value
+			end
+			-- start alert
+			if self.alerts[id].start then
+				local a = self.alerts[id].start
+				-- mode selection
+				if mode == "normal" then
+					if value > a.last then
+						if clcInfo.display.alerts.active[a.alertIndex] then
+							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+						end
+						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+					end
+				elseif mode == "reversed" then
+					if value < a.lastReversed then
+						if clcInfo.display.alerts.active[a.alertIndex] then
+							clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+						end
+						if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+					end
+				end
+				a.last = value
+			end
+		end
+	end
 end
 
 
@@ -385,7 +433,6 @@ function prototype:Init()
 
 	self.elapsed = 0
 	self:Show()
-	self:SetScript("OnUpdate", OnUpdate)
 	
 	self.___dc = 0			-- data count
 	self.___c = {}			-- children
@@ -498,8 +545,27 @@ function prototype:UpdateExec()
   	self.ExecCleanup = nil
   end
   
+  -- handle alert exec
+   
+  -- defaults
+  self.alerts = {}
+  self.hasAlerts = 0
+  
+  -- execute the code
+  local f, err = loadstring(self.db.execAlert or "")
+  if f then
+  	setfenv(f, clcInfo.env)
+  	clcInfo.env.___e = self
+  	f()
+  else
+  	print("alert code error:", err)
+  	print("in:", self.db.execAlert)
+  end
+  
   -- release the bars
   self:ReleaseBars()
+  
+  self:SetScript("OnUpdate", OnUpdate)
 end
 
 -- caaaaaaaaaaaaaaaaaaareful
@@ -646,6 +712,7 @@ function mod:GetDefault()
 		width = 200,
 		height = 20,
 		exec = "",
+		alertExec = "",
 		ups = 5,
 		gridId = 0,
 		gridX = 1,	-- column

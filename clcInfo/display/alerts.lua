@@ -130,7 +130,6 @@ end
 -- enables control of the object
 function prototype:Unlock()
   self:StopAnim()  -- stop if in an animation
-  self.tex:Hide()
   -- hide main icon and show bg and label
   self.bg:Show()
   self.label:Show()
@@ -138,7 +137,6 @@ end
 
 -- disables
 function prototype:Lock()
-	self.tex:Show()
   self.bg:Hide()
   self.label:Hide()
 end

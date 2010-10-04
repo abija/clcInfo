@@ -5,6 +5,8 @@ local options = mod.options
 
 local modIcons = clcInfo.display.icons
 
+local LSM = clcInfo.LSM
+
 -- static popup to make sure
 local deleteObj = nil
 StaticPopupDialogs["CLCINFO_CONFIRM_DELETE_ICON"] = {
@@ -91,6 +93,11 @@ local function GetGridList()
 	end
 	return list
 end
+
+-- sound donothing control
+local sound = "None"
+local function GetSound() return sound end
+local function SetSound(info, val) sound = val end
 
 -- set/get for skin icons
 local function SetSkinIcons(info, val)
@@ -260,6 +267,19 @@ function mod:UpdateIconList()
 								ups = {
 									type = "range", min = 1, max = 100, step = 1, name = "", 
 									get = Get, set = SetExec,
+								},
+							},
+						},
+						alerts = {
+							order = 3, type = "group", inline = true, name = "Alerts",
+							args = {
+								execAlert = {
+									order = 1, type = "input", multiline = true, name = "", width = "full",
+									get = Get, set = SetExec,
+								},
+								_x1 = {
+									order = 2, type = 'select', dialogControl = 'LSM30_Sound', name = 'List of available sounds',
+									values = LSM:HashTable("sound"), get = GetSound, set = SetSound,
 								},
 							},
 						},

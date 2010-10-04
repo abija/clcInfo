@@ -5,6 +5,7 @@ mod.onGrid = true
 
 -- button facade
 local lbf = clcInfo.lbf
+local LSM = clcInfo.LSM
 
 local prototype = CreateFrame("Frame")  -- base frame object
 prototype:Hide()
@@ -98,6 +99,35 @@ local function OnUpdate(self, elapsed)
 	if self.lastAlpha ~= alpha then
 		self.elements:SetAlpha(alpha)
 		self.lastAlpha = alpha
+	end
+	
+	-- alert handling
+	if self.hasAlerts == 1 then
+		local v 
+		if duration and duration > 0 then v = duration + start - GetTime()
+		else v = -1 end
+		-- expiration alert
+		if self.alerts.expiration then
+			local a = self.alerts.expiration
+			if v <= a.timeLeft and a.timeLeft < a.last then
+				if clcInfo.display.alerts.active[a.alertIndex] then
+					clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+				end
+				if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+			end
+			a.last = v
+		end
+		-- start alert
+		if self.alerts.start then
+			local a = self.alerts.start
+			if v ~= -1 and a.last == -1 then
+				if clcInfo.display.alerts.active[a.alertIndex] then
+					clcInfo.display.alerts.active[a.alertIndex]:StartAnim(texture) 
+				end
+				if a.sound then PlaySoundFile(LSM:Fetch("sound", a.sound)) end
+			end
+			a.last = v
+		end
 	end
 
 	self:FakeShow()
@@ -371,6 +401,23 @@ function prototype:UpdateExec()
   	self.ExecCleanup = nil
   end
   
+  -- handle alert exec
+  
+  -- defaults
+  self.alerts = {}
+  self.hasAlerts = 0
+  
+  -- execute the code
+  local f, err = loadstring(self.db.execAlert or "")
+  if f then
+  	setfenv(f, clcInfo.env)
+  	clcInfo.env.___e = self
+  	f()
+  else
+  	print("alert code error:", err)
+  	print("in:", self.db.execAlert)
+  end
+  
   self:SetScript("OnUpdate", OnUpdate)
 end
 
@@ -479,6 +526,7 @@ function mod:GetDefault()
 		width = ICON_DEFAULT_WIDTH,
 		height = ICON_DEFAULT_HEIGHT,
 		exec = "",
+		alertExec = "",
 		ups = 5,
 		gridId = 0,
 		gridX = 1,	-- column
