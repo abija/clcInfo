@@ -36,3 +36,10 @@
 - add option to run stuff after return ?
 
 ! make sure that ___e is the one we want, check for threading problems
+
+
+
+- retribution
+----------------------------------------------
+- presets?
+- sort a proper way to fix db whenever is needed

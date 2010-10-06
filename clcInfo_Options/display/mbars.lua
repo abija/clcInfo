@@ -105,11 +105,15 @@ local function GetGridList()
 	return list
 end
 
-
 -- sound donothing control
 local sound = "None"
 local function GetSound() return sound end
 local function SetSound(info, val) sound = val end
+-- used to change error strings
+local function GetErrExec(info) return modMBars.active[tonumber(info[3])].errExec or "" end
+local function GetErrExecAlert(info) return modMBars.active[tonumber(info[3])].errExecAlert or "" end
+
+
 
 function mod:UpdateMBarList()
 	local db = modMBars.active
@@ -538,9 +542,10 @@ function mod:UpdateMBarList()
 							order = 1, type = "group", inline = true, name = "Code",
 							args = {
 								exec = {
-									type = "input", multiline = true, name = "", width = "full",
+									order = 1, type = "input", multiline = true, name = "", width = "full",
 									get = Get, set = SetExec,
 								},
+								err = { order = 2, type = "description", name = GetErrExec },
 							},
 						},
 						ups = {
@@ -559,8 +564,9 @@ function mod:UpdateMBarList()
 									order = 1, type = "input", multiline = true, name = "", width = "full",
 									get = Get, set = SetExec,
 								},
+								err = { order = 2, type = "description", name = GetErrExecAlert },
 								_x1 = {
-									order = 2, type = 'select', dialogControl = 'LSM30_Sound', name = 'List of available sounds',
+									order = 3, type = 'select', dialogControl = 'LSM30_Sound', name = 'List of available sounds',
 									values = LSM:HashTable("sound"), get = GetSound, set = SetSound,
 								},
 							},

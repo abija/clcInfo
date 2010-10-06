@@ -26,6 +26,7 @@ local ICON_DEFAULT_HEIGHT			= 30
 
 -- local bindings
 local GetTime = GetTime
+local pcall = pcall
 
 local modAlerts = clcInfo.display.alerts
 
@@ -44,14 +45,24 @@ local function OnUpdate(self, elapsed)
 	-- expose the object
 	clcInfo.env.___e = self
 	
-	-- needed vars to cover all posibilities
 	-- visible
 	-- texture
 	-- start, duration, enable, reversed 				(cooldown)
 	-- count																		(stack)
 	-- alpha
 	-- svc, r, g, b, a                    			(svc - true if we change vertex info)
-	local visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a = self.exec()
+	local status, visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a = pcall(self.exec)
+	if not status then
+		-- display the first error met into the behavior tab
+		-- also announce the user we got an error
+		if self.errExec == "" then
+			print("clcInfo.Icon" .. self.index ..":", visible)
+			self.errExec = visible
+			clcInfo:UpdateOptions() -- request update of the tab
+		end
+		-- stop execution directly?
+		visible = false
+	end
 	
 	-- hide when not visible
 	if not visible then
@@ -386,6 +397,10 @@ function prototype:UpdateExec()
 	-- updates per second
 	self.freq = 1/self.db.ups
 	self.elapsed = 100 -- force instant update
+	
+	-- clear error codes
+	self.errExec = ""
+	self.errExecAlert = ""
 
 	local err
 	-- exec
@@ -419,7 +434,8 @@ function prototype:UpdateExec()
   if f then
   	setfenv(f, clcInfo.env)
   	clcInfo.env.___e = self
-  	f()
+  	local status, err = pcall(f)
+  	if not status then self.errExecAlert = err end
   else
   	print("alert code error:", err)
   	print("in:", self.db.execAlert)

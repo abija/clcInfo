@@ -94,11 +94,6 @@ local function GetGridList()
 	return list
 end
 
--- sound donothing control
-local sound = "None"
-local function GetSound() return sound end
-local function SetSound(info, val) sound = val end
-
 -- set/get for skin icons
 local function SetSkinIcons(info, val)
 	local obj = modIcons.active[tonumber(info[3])]
@@ -113,6 +108,16 @@ local function GetSkinTypeList()
 	if clcInfo.lbf then list["Button Facade"] = "Button Facade" end
 	return list
 end
+
+-- sound donothing control
+local sound = "None"
+local function GetSound() return sound end
+local function SetSound(info, val) sound = val end
+-- used to change error strings
+local function GetErrExec(info) return modIcons.active[tonumber(info[3])].errExec or "" end
+local function GetErrExecAlert(info) return modIcons.active[tonumber(info[3])].errExecAlert or "" end
+
+
 
 function mod:UpdateIconList()
 	local db = modIcons.active
@@ -256,9 +261,10 @@ function mod:UpdateIconList()
 							order = 1, type = "group", inline = true, name = "Code",
 							args = {
 								exec = {
-									type = "input", multiline = true, name = "", width = "full",
+									order = 1, type = "input", multiline = true, name = "", width = "full",
 									get = Get, set = SetExec,
 								},
+								err = { order = 2, type = "description", name = GetErrExec },
 							},
 						},
 						ups = {
@@ -277,8 +283,9 @@ function mod:UpdateIconList()
 									order = 1, type = "input", multiline = true, name = "", width = "full",
 									get = Get, set = SetExec,
 								},
-								_x1 = {
-									order = 2, type = 'select', dialogControl = 'LSM30_Sound', name = 'List of available sounds',
+								err = { order = 2, type = "description", name = GetErrExecAlert },
+								soundList = {
+									order = 3, type = 'select', dialogControl = 'LSM30_Sound', name = 'List of available sounds',
 									values = LSM:HashTable("sound"), get = GetSound, set = SetSound,
 								},
 							},

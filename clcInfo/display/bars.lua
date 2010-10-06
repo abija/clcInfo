@@ -17,6 +17,7 @@ local db  -- option
 
 -- local bindings
 local GetTime = GetTime
+local pcall = pcall
 
 local modAlerts = clcInfo.display.alerts
 
@@ -40,7 +41,18 @@ local function OnUpdate(self, elapsed)
 		-- expose the object
 		clcInfo.env.___e = self
 		
-		local visible, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight, alpha, svc, r, g, b, a = self.exec()
+		local status, visible, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight, alpha, svc, r, g, b, a = pcall(self.exec)
+		if not status then
+			-- display the first error met into the behavior tab
+			-- also announce the user we got an error
+			if self.errExec == "" then
+				print("clcInfo.Bar" .. self.index ..":", visible)
+				self.errExec = visible
+				clcInfo:UpdateOptions() -- request update of the tab
+			end
+			-- stop execution directly ?
+			visible = false
+		end
 		
 		-- not visibile -> save info for the quick updates and hide elements
 		self.visible = visible
@@ -511,6 +523,10 @@ function prototype:UpdateExec()
 	self.mode = nil
 	self.value = 0
 	
+	-- clear error codes
+	self.errExec = ""
+	self.errExecAlert = ""
+	
 	local err
 	-- exec
 	self.exec, err = loadstring(self.db.exec)
@@ -540,7 +556,8 @@ function prototype:UpdateExec()
   if f then
   	setfenv(f, clcInfo.env)
   	clcInfo.env.___e = self
-  	f()
+  	local status, err = pcall(f)
+  	if not status then self.errExecAlert = err end
   else
   	print("alert code error:", err)
   	print("in:", self.db.execAlert)

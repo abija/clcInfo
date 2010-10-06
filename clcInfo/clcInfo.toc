@@ -3,7 +3,6 @@
 ## Author: clc
 ## SavedVariables: clcInfoDB
 ## SavedVariablesPerCharacter: clcInfoCharDB
-## OptionalDeps:  Ace3
 
 #@no-lib-strip@
 embeds.xml

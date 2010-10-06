@@ -44,6 +44,7 @@ local ICON_DEFAULT_HEIGHT			= 30
 
 -- local bindings
 local GetTime = GetTime
+local pcall = pcall
 
 local modAlerts = clcInfo.display.alerts
 
@@ -316,8 +317,16 @@ local function OnUpdate(self, elapsed)
 	self.___dc = 0
 	
 	-- update data
-	self.exec()
-	
+	local status, err = pcall(self.exec)
+	if not status then
+		-- display the first error met into the behavior tab
+		-- also announce the user we got an error
+		if self.errExec == "" then
+			print("clcInfo.MIcon" .. self.index ..":", err)
+			self.errExec = err
+			clcInfo:UpdateOptions() -- request update of the tab
+		end
+	end
 	
 	if self.___dc < #self.___c then
 		-- hide the extra icons
@@ -456,6 +465,10 @@ function prototype:UpdateExec()
 	self.freq = 1/self.db.ups
 	self.elapsed = 100 --> force instant update
 	
+	-- clear error codes
+	self.errExec = ""
+	self.errExecAlert = ""
+	
 	local err
 	-- exec
 	self.exec, err = loadstring(self.db.exec)
@@ -484,7 +497,8 @@ function prototype:UpdateExec()
   if f then
   	setfenv(f, clcInfo.env)
   	clcInfo.env.___e = self
-  	f()
+  	local status, err = pcall(f)
+  	if not status then self.errExecAlert = err end
   else
   	print("alert code error:", err)
   	print("in:", self.db.execAlert)
