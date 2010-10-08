@@ -57,6 +57,7 @@ local spells = {
 	cons 	= { id = 26573 	},		-- consecration
 	exo 	= { id = 879 		},		-- exorcism
 	hw		= { id = 2812  	},		-- holy wrath
+	cls 	= { id = 4987		},		-- cleanse
 }
 
 local fillers = { exo = {}, how = {}, j = {}, hw = {} }
@@ -173,134 +174,218 @@ end
 --[[
 test rotation:
 tv 3 only
-cs >>>> fillers
+cs < filler + csBoost -> cs
 --]]
 --------------------------------------------------------------------------------
 
-function mod.RetRotation(csBoost, useInq, minHPInq, preInq)
+function mod.RetRotation(csBoost, useInq, preInq)
 	csBoost = csBoost or 0
 	minHPInq = minHPInq or 3
 	preInq = preInq or 5
 
-	local ctime, gcd, gcdStart, gcdDuration, v
+	local ctime, cdStart, cdDuration, cs, gcd
 	ctime = GetTime()
 	
-	-- get gcd
-	gcdStart, gcdDuration = GetSpellCooldown(spells.tv.name)
-	if not gcdDuration then return end -- problem with the spell
-	
-	if gcdStart > 0 then
-		gcd = gcdStart + gcdDuration - ctime
-	else
-		gcd = 0
-	end
-
-	-- update cooldowns
-	for i = 1, #pq do
-		v = pq[i]
-		v.name = spells[v.alias].name
-		
-		v.cdStart, v.cdDuration = GetSpellCooldown(v.name)
-		if not v.cdDuration then return end -- try to solve respec issues
-		
-		if v.cdStart > 0 then
-			v.cd = v.cdStart + v.cdDuration - ctime
-		else
-			v.cd = 0
-		end
-		
-		if v.alias == "how" then
-			if not IsUsableSpell(v.name) then v.cd = 100 end
-		elseif v.alias == "exo" then
-			if UnitBuff("player", taowSpellName) == nil then v.cd = 100 end
-		end
-		
-		-- adjust to gcd
-		v.cd = v.cd - gcd
-	end
-	
-	-- cs cooldown
-	-- ff = first filler
-	local cs, ff
-	gcdStart, gcdDuration = GetSpellCooldown(spells.cs.name)
-	if gcdStart > 0 then
-		cs = gcdStart + gcdDuration - ctime
-	else
-		cs = 0
-	end
-	
-	-- adjust for inq and tv
-	-- holy balls
+	-- get HP, HoL
 	local hp = UnitPower("player", SPELL_POWER_HOLY_POWER)
-	local HoL = UnitBuff("player", spellHandOfLight)
+	local hol = UnitBuff("player", spellHandOfLight) or false
 	
-	-- inquisition check
-	local inqLeft = 0
-	local name, rank, icon, count, debuffType, duration, expirationTime, caster, spellId
+	if hp == 3 and hol then
+		-- got lucky, double tv
+		dq[1] = spells.tv.name
+		dq[2] = spells.tv.name
+	else
+		-- didn't get lucky, find out cs + filler cooldowns
+		
+		-- gcd
+		cdStart, cdDuration = GetSpellCooldown(spells.cls.name)
+		if cdStart > 0 then
+			gcd = cdStart + cdDuration - ctime
+		else
+			gcd = 0
+		end
+		
+		-- cs
+		cdStart, cdDuration = GetSpellCooldown(spells.cs.name)
+		if cdStart > 0 then
+			cs = cdStart + cdDuration - ctime
+		else
+			cs = 0
+		end
+		cs = cs - gcd - csBoost
+		
+		if hp == 3 or hol then
+			-- tv + x
+			dq[1] = spells.tv.name
+			
+			-- everything now is delayed by 1.5s
+			cs = cs - 1.5  -- adjust cs
+			
+			-- test maybe we don't need to check rest of cooldowns
+			if cs <= 0 then
+				-- got lucky, tv + cs
+				dq[2] = spells.cs.name
+			else
+				-- get cooldowns for fillers
+				local v, cd, index
+				
+				for i = 1, #pq do
+					v = pq[i]
+					v.name = spells[v.alias].name
+					
+					cdStart, cdDuration = GetSpellCooldown(v.name)
+					if cdStart > 0 then
+						v.cd = cdStart + cdDuration - ctime - 1.5 - gcd
+					else
+						v.cd = 0
+					end
+					
+					if v.alias == "how" then
+						if not IsUsableSpell(v.name) then v.cd = 100 end
+					elseif v.alias == "exo" then
+						if UnitBuff("player", taowSpellName) == nil then v.cd = 100 end
+					end
+					
+					-- clamp so sorting is proper
+					if v.cd < 0 then v.cd = 0 end
+				end
+				
+				-- sort cooldowns once, get min cd and the index in the table
+				index = 1
+				cd = pq[1].cd
+				for i = 1, #pq do
+					v = pq[i]
+					if (v.cd < cd) or ((v.cd == cd) and (i < index)) then
+						index = i
+						cd = v.cd
+					end
+				end
+				
+				-- test vs cs
+				if cs <= cd then
+					-- tv + cs
+					dq[2] = spells.cs.name
+				else
+					-- tv + f1
+					dq[2] = pq[index].name
+				end
+			end
+		else
+			-- no tv -> it's either cs + filler or 2 fillers
+			-- TODO : is 2 fillers even viable at low haste?
+			
+			-- get cooldowns for fillers
+			local v, cd, index
+			
+			for i = 1, #pq do
+				v = pq[i]
+				v.name = spells[v.alias].name
+				
+				cdStart, cdDuration = GetSpellCooldown(v.name)
+				if cdStart > 0 then
+					v.cd = cdStart + cdDuration - ctime - gcd
+				else
+					v.cd = 0
+				end
+				
+				if v.alias == "how" then
+					if not IsUsableSpell(v.name) then v.cd = 100 end
+				elseif v.alias == "exo" then
+					if UnitBuff("player", taowSpellName) == nil then v.cd = 100 end
+				end
+				
+				-- clamp so sorting is proper
+				if v.cd < 0 then v.cd = 0 end
+			end
+			
+			-- sort cooldowns once, get min cd and the index in the table
+			index = 1
+			cd = pq[1].cd
+			for i = 1, #pq do
+				v = pq[i]
+				if (v.cd < cd) or ((v.cd == cd) and (i < index)) then
+					index = i
+					cd = v.cd
+				end
+			end
+			
+			-- test vs cs
+			if cs <= cd then
+				-- cs + f1
+				dq[1] = spells.cs.name
+				if hp == 2 then
+					-- 3 hp ability
+					dq[2] = spells.tv.name
+				else
+					dq[2] = pq[index].name
+				end
+			else
+				-- f1 + cs or f2
+				dq[1] = pq[index].name
+				
+				-- delay everything by 1.5 now
+				-- todo: take haste into account here, since s1 might be a spell
+				cs = cs - 1.5
+				
+				-- one more hope with cs
+				if cs <= 0 then
+					-- f1 + cs
+					dq[2] = spells.cs.name
+				else
+					-- worst case scenario possible
+					pq[index].cd = 1000 -- delay last used skill a lot
+					
+					-- get new clamped cooldowns
+					for i = 1, #pq do
+						v.cd = v.cd - 1.5
+						if v.cd < 0 then v.cd = 0 end
+					end
+					
+					-- get min again
+					index = 1
+					cd = pq[1].cd
+					for i = 1, #pq do
+						v = pq[i]
+						if (v.cd < cd) or ((v.cd == cd) and (i < index)) then
+							index = i
+							cd = v.cd
+						end
+					end
+						
+					-- test vs cs
+					if cs <= cd then
+						-- f1 + cs
+						dq[2] = spells.cs.name
+					else
+						-- f1 + f2
+						dq[2] = pq[index].name
+					end
+				end
+			end
+			
+		end
+	end
+	
+	-- inquisition, if active and needed -> change first tv in dq1 or dq2 with inquisition
 	if useInq then
-		name, rank, icon, count, debuffType, duration, expirationTime = UnitBuff("player", spells.inq.name)
+		local inqLeft = 0
+		local name, rank, icon, count, debuffType, duration, expirationTime = UnitBuff("player", spells.inq.name)
 		if name then 
 			inqLeft = expirationTime - ctime
 		end
-	end
-	
-	-- cs tests
-	
-	local mcd, index = GetMinCooldown()
-	ff = pq[index].name
-	
-	-- print(cs, mcd)
-	if cs == 0 or cs <= gcd then
-		dq[1] = spells.cs.name
-		if hp == 2 then dq[2] = spells.tv.name else dq[2] = ff end
-	elseif mcd < cs then
-		if cs - gcd < csBoost then
-			dq[1] = spells.cs.name
-			if hp == 2 then dq[2] = spells.tv.name else dq[2] = ff end
-		else
-			dq[1] = ff
-			dq[2] = spells.cs.name
-		end
-	else
-		dq[1] = spells.cs.name
-		if hp == 2 then dq[2] = spells.tv.name else dq[2] = ff end
-	end
-
-	if useInq then
-		if HoL then
-			dq[2] = dq[1]
-			if inqLeft <= preInq then
+		
+		-- test time for 2nd skill
+		-- check for spell gcd?
+		if (inqLeft - 1.5) <= preInq then
+			if (dq[1] == spells.tv.name) and (inqLeft <= preInq) then
 				dq[1] = spells.inq.name
-			else
-				dq[1] = spells.tv.name
-			end
-			
-			if hp == 3 then dq[2] = spells.tv.name end
-		else
-			if inqLeft == 0 and hp >= minHPInq then
-				dq[2] = dq[1]
-				dq[1] = spells.inq.name
-			elseif hp == 3 then
-				dq[2] = dq[1]
-				if inqLeft <= preInq then
-					dq[1] = spells.inq.name
-				else
-					dq[1] = spells.tv.name
-				end
+			elseif (dq[2] == spells.tv.name) and ((inqLeft - 1.5) <= preInq) then
+				dq[2] = spells.inq.name
 			end
 		end
-	else
-		if HoL then
-			dq[2] = dq[1]
-			dq[1] = spells.tv.name
-			if hp == 3 then dq[2] = spells.tv.name end
-		elseif hp == 3 then
-			dq[2] = dq[1]
-			dq[1] = spells.tv.name
-		end
 	end
 	
-	return true
+	return true	-- if not true, addon does nothing
 end
 --------------------------------------------------------------------------------
 

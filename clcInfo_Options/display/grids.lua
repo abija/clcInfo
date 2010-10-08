@@ -311,7 +311,7 @@ function mod:UpdateGridList()
 									args = {
 										iconAlign = {
 											order = 1, type = "select", name = "Icon Alignment",
-											values = { ["left"] = "Left", ["right"] = "Right", ["hidden"] = "hidden" },
+											values = { ["left"] = "Left", ["right"] = "Right", ["hidden"] = "Hidden" },
 											get = GetSkin, set = SetSkin,
 										},
 										iconSpacing = {
@@ -345,7 +345,7 @@ function mod:UpdateGridList()
 								},
 								
 								fontCenter = {
-									order = 8, type = "group", inline = true, name = "Center Text",
+									order = 9, type = "group", inline = true, name = "Center Text",
 									args = {
 										textCenterFont = {
 											order = 1, type = 'select', dialogControl = 'LSM30_Font', name = 'Font',
@@ -364,7 +364,7 @@ function mod:UpdateGridList()
 								},
 								
 								fontRight = {
-									order = 9, type = "group", inline = true, name = "Right Text",
+									order = 10, type = "group", inline = true, name = "Right Text",
 									args = {
 										textRightFont = {
 											order = 1, type = 'select', dialogControl = 'LSM30_Font', name = 'Font',
@@ -586,7 +586,7 @@ function mod:UpdateGridList()
 									args = {
 										iconAlign = {
 											order = 1, type = "select", name = "Icon Alignment",
-											values = { ["left"] = "Left", ["right"] = "Right", ["hidden"] = "hidden" },
+											values = { ["left"] = "Left", ["right"] = "Right", ["hidden"] = "Hidden" },
 											get = GetSkin, set = SetSkin,
 										},
 										iconSpacing = {
@@ -620,7 +620,7 @@ function mod:UpdateGridList()
 								},
 								
 								fontCenter = {
-									order = 8, type = "group", inline = true, name = "Center Text",
+									order = 9, type = "group", inline = true, name = "Center Text",
 									args = {
 										textCenterFont = {
 											order = 1, type = 'select', dialogControl = 'LSM30_Font', name = 'Font',
@@ -639,7 +639,7 @@ function mod:UpdateGridList()
 								},
 								
 								fontRight = {
-									order = 9, type = "group", inline = true, name = "Right Text",
+									order = 10, type = "group", inline = true, name = "Right Text",
 									args = {
 										textRightFont = {
 											order = 1, type = 'select', dialogControl = 'LSM30_Font', name = 'Font',

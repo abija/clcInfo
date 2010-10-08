@@ -48,6 +48,7 @@ function mod:GetDefault()
 		options = {
 			gridSize = 1,
 			showWhen = "always",
+			strata = "MEDIUM",
 		},
 		skinOptions = {},
 	}

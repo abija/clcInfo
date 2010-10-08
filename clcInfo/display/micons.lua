@@ -143,6 +143,8 @@ function ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
 end
 
 function ApplyMySkin(self)
+	self.texMain:SetTexCoord(0, 1, 0, 1)
+
 	local opt = self.parent.db
 
 	local t = self.texNormal
@@ -184,9 +186,8 @@ function iconPrototype:UpdateLayout(i, skin)
 
 	if skin.skinType == "Button Facade" and lbf then
 		ApplyButtonFacadeSkin(self, skin.bfSkin, skin.bfGloss)
-	elseif skinType == "BareBone" then
+	elseif skin.skinType == "BareBone" then
 		ApplyMySkin(self)
-		self.texGloss:Hide()
 		self.texNormal:Hide()
 	else
 		ApplyMySkin(self)

@@ -49,7 +49,7 @@ function mod:Open()
 		Init()
 		
 		LibStub("AceConfig-3.0"):RegisterOptionsTable("clcInfo", options)
-		AceDialog:SetDefaultSize("clcInfo", 810, 600)
+		AceDialog:SetDefaultSize("clcInfo", 830, 600)
 		registered = true
 	end
 	

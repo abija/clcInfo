@@ -307,6 +307,8 @@ end
 
 -- apply a rudimentary skin
 local function ApplyMySkin(self)
+	self.elements.texMain:SetTexCoord(0, 1, 0, 1)
+
 	local t = self.elements.texNormal
 	local scalex = self.db.width / 34
 	local scaley = self.db.height / 34
@@ -382,7 +384,7 @@ function prototype:UpdateLayout()
 	if skinType == "Button Facade" and lbf then
 		ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
 	elseif skinType == "BareBone" then
-		self.elements.texGloss:Hide()
+		ApplyMySkin(self)
 		self.elements.texNormal:Hide()
 	else
 		ApplyMySkin(self)

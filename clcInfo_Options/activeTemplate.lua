@@ -90,7 +90,33 @@ end
 local function GetSkinMBarsColor(info)
 	return unpack(db.skinOptions.mbars[info[5]])
 end
+
+-- stratalevels
+local strataLevels = {
+	"BACKGROUND",
+	"LOW",
+	"MEDIUM",
+	"HIGH",
+	"DIALOG",
+	"FULLSCREEN",
+	"FULLSCREEN_DIALOG",
+	"TOOLTIP",
+}
+local function GetStrata(info)
+	for i = 1, #strataLevels do
+		if strataLevels[i] == db.options.strata then
+			return i
+		end
+	end
+end
+
+local function SetStrata(info, val)
+	db.options.strata = strataLevels[val]
+	clcInfo.mf:SetFrameStrata(db.options.strata)
+end
+
 --------------------------------------------------------------------------------
+-- TODO: remove the inline functions from the tables
 --------------------------------------------------------------------------------
 
 function mod:LoadActiveTemplate()
@@ -127,11 +153,11 @@ function mod:LoadActiveTemplate()
   			},
   		},
   	},
-  	show = {
-  		order = 20, type = "group", inline = true, name = "Show",
+  	visibility = {
+  		order = 20, type = "group", inline = true, name = "Visibility",
   		args = {
   			showWhen = {
-  				order = 1, type = "select", name = "",
+  				order = 1, type = "select", name = "Show",
   				values = { always = "Always", combat = "In Combat", valid = "Valid Target", boss = "Boss" },
   				get = function(info) return db.options.showWhen end,
   				set = function(info, val)
@@ -139,8 +165,13 @@ function mod:LoadActiveTemplate()
   					clcInfo:ChangeShowWhen()
   				end
   			},
+  			strata = {
+  				order = 2, type = "select", name = "Strata", values = strataLevels,
+  				get = GetStrata, set = SetStrata,
+  			}
   		},
   	},
+  	
   	skins = {
 			order = 30, type = "group", name = "Skin", childGroups = "tab",
 			args = {
@@ -268,7 +299,7 @@ function mod:LoadActiveTemplate()
 						},
 						
 						fontCenter = {
-							order = 8, type = "group", inline = true, name = "Center Text",
+							order = 9, type = "group", inline = true, name = "Center Text",
 							args = {
 								textCenterFont = {
 									order = 1, type = 'select', dialogControl = 'LSM30_Font', name = 'Font',
@@ -287,7 +318,7 @@ function mod:LoadActiveTemplate()
 						},
 						
 						fontRight = {
-							order = 9, type = "group", inline = true, name = "Right Text",
+							order = 10, type = "group", inline = true, name = "Right Text",
 							args = {
 								textRightFont = {
 									order = 1, type = 'select', dialogControl = 'LSM30_Font', name = 'Font',
@@ -540,7 +571,7 @@ function mod:LoadActiveTemplate()
 						},
 						
 						fontCenter = {
-							order = 8, type = "group", inline = true, name = "Center Text",
+							order = 9, type = "group", inline = true, name = "Center Text",
 							args = {
 								textCenterFont = {
 									order = 1, type = 'select', dialogControl = 'LSM30_Font', name = 'Font',
@@ -559,7 +590,7 @@ function mod:LoadActiveTemplate()
 						},
 						
 						fontRight = {
-							order = 9, type = "group", inline = true, name = "Right Text",
+							order = 10, type = "group", inline = true, name = "Right Text",
 							args = {
 								textRightFont = {
 									order = 1, type = 'select', dialogControl = 'LSM30_Font', name = 'Font',

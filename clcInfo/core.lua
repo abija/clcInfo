@@ -159,11 +159,14 @@ function clcInfo:OnTemplatesUpdate()
 	
 	self:ChangeShowWhen()	-- visibility option is template based
 	
-	-- call OnTemplatesUpdate on all class modules so they can change options if needed
 	if clcInfo.activeTemplate then
+		-- call OnTemplatesUpdate on all class modules so they can change options if needed
 		for k, v in pairs(clcInfo.classModules) do
 			if v.OnTemplatesUpdate then v.OnTemplatesUpdate() end
 		end
+		
+		-- strata of mother frame
+		clcInfo.mf:SetFrameStrata(clcInfo.activeTemplate.options.strata)
 	end
 	
 	-- change active template and update the options

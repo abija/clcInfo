@@ -240,7 +240,11 @@ function barPrototype:UpdateLayout(i, skin)
 	self:SetHeight(opt.height)	
 	
 	self:ClearAllPoints()
-	if opt.growth == "up" then
+	if opt.growth == "left" then
+		self:SetPoint("BOTTOMRIGHT", self.parent, "BOTTOMRIGHT", (1 - i) * (opt.width + opt.spacing), 0)
+	elseif opt.growth == "right" then
+		self:SetPoint("BOTTOMLEFT", self.parent, "BOTTOMLEFT", (i - 1) * (opt.width + opt.spacing), 0)
+	elseif opt.growth == "up" then
 		self:SetPoint("BOTTOMLEFT", self.parent, "BOTTOMLEFT", 0, (i - 1) * (opt.height + opt.spacing))
 	else
 		self:SetPoint("TOPLEFT", self.parent, "TOPLEFT", 0, (1 - i) * (opt.height + opt.spacing))
