@@ -167,6 +167,8 @@ function clcInfo:OnTemplatesUpdate()
 		
 		-- strata of mother frame
 		clcInfo.mf:SetFrameStrata(clcInfo.activeTemplate.options.strata)
+		-- alpha
+		clcInfo.mf:SetAlpha(clcInfo.activeTemplate.options.alpha)
 	end
 	
 	-- change active template and update the options

@@ -60,7 +60,7 @@ local spells = {
 	cls 	= { id = 4987		},		-- cleanse
 }
 
-local fillers = { exo = {}, how = {}, j = {}, hw = {} }
+local fillers = { exo = {}, how = {}, j = {}, hw = {}, cons = {} }
 
 -- expose for options
 mod.fillers = fillers

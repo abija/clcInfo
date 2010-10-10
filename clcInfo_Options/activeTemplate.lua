@@ -109,10 +109,17 @@ local function GetStrata(info)
 		end
 	end
 end
-
 local function SetStrata(info, val)
 	db.options.strata = strataLevels[val]
 	clcInfo.mf:SetFrameStrata(db.options.strata)
+end
+
+local function GetAlpha(info)
+	return db.options.alpha
+end
+local function SetAlpha(info, val)
+	db.options.alpha = val
+	clcInfo.mf:SetAlpha(val)
 end
 
 --------------------------------------------------------------------------------
@@ -168,7 +175,11 @@ function mod:LoadActiveTemplate()
   			strata = {
   				order = 2, type = "select", name = "Strata", values = strataLevels,
   				get = GetStrata, set = SetStrata,
-  			}
+  			},
+  			alpha = {
+  				order = 3, type = "range", min = 0, max = 1, step = 0.01, name = "Alpha",
+  				get = GetAlpha, set = SetAlpha,
+  			},
   		},
   	},
   	

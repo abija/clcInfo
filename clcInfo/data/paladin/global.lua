@@ -34,24 +34,19 @@ do
 		local targetGUID
 		if UnitExists("target") then
 			targetGUID = UnitGUID("target")
-			local j = 1
-			local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitDebuff("target", j)
-			while name do
-				if name == sovName and caster == "player" then
-					-- found it
-					if count > 1 and showStack then 
-						if showStack == "before" then
-							name = string.format("(%s) %s", count, UnitName("target"))
-						else
-							name = string.format("%s (%s)", UnitName("target"), count)
-						end
+			local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitDebuff("target", sovName, nil, "PLAYER")
+			if name then
+			-- found it
+				if count > 0 and showStack then 
+					if showStack == "before" then
+						name = string.format("(%s) %s", count, UnitName("target"))
 					else
-						name = UnitName("target")
+						name = string.format("%s (%s)", UnitName("target"), count)
 					end
-					tsov[targetGUID] = { name, duration, expires }
+				else
+					name = UnitName("target")
 				end
-				j = j + 1
-				name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitDebuff("target", j)
+				tsov[targetGUID] = { name, duration, expires }
 			end
 		end
 		
