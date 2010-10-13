@@ -2,6 +2,8 @@ local mod = clcInfo.env
 
 function mod.DoNothing() return end
 
+local GetTime = GetTime
+
 --[[
 IconAura
 --------------------------------------------------------------------------------
@@ -213,6 +215,7 @@ expected return: visible, texture, start, duration, enable, reversed, count, alp
 --------------------------------------------------------------------------------
 --]]
 local icdList = {}
+clcInfo.icdList = icdList
 function mod.IconICD(spell, icd, alpha1, alpha2, alpha3)
 	-- look for the buff
 	local i = 1
@@ -244,7 +247,78 @@ function mod.IconICD(spell, icd, alpha1, alpha2, alpha3)
 		-- check if it's on cooldown
 		expires = icdList[spell].expires
 		duration = icdList[spell].duration
-		if GetTime() < (expires + icd - duration) then
+		
+		local x = GetTime() - expires
+		-- update the info after cooldown frame does it's small animation, hides cooldown frame otherwise during next cooldown
+		if x < 0.5 then
+			return true, icon, expires - duration, duration, 1, nil, nil, alpha2
+		end
+		
+		x = x + duration - icd
+		if x <= 0 then
+			-- on cooldown
+			return true, icon, expires, icd - duration, 1, nil, nil, alpha3
+		end
+	end
+	
+	-- must be ready to proc
+	return true, icon, 0, 0, 0, nil, nil, alpha1
+end
+
+--------------------------------------------------------------------------------
+-- special case for items with multiple procs on same icd like dbw
+-- ... is the list of buff ids to check
+--------------------------------------------------------------------------------
+local micdList = {}
+clcInfo.micdList = micdList
+function mod.IconMICD(icd, alpha1, alpha2, alpha3, ...)
+	-- look for the buff
+	local i = 1
+	local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID  = UnitAura("player", i, "HELPFUL|PLAYER")
+	while name do
+		for j = 1, select("#", ...) do
+			if spellID == select(j, ...) then
+				-- found it
+				-- add the first id to the table, group is identified by it
+				spellID = select(1, ...)
+				if not micdList[spellID] then micdList[spellID] = { expires = expires, duration = duration, icon = icon } end
+				if micdList[spellID].expires ~= expires then
+					micdList[spellID].expires = expires
+					micdList[spellID].duration = duration
+					micdList[spellID].icon = icon
+				end
+				return true, icon, expires - duration, duration, 1, nil, nil, alpha2
+			end
+		end
+			
+		i = i + 1
+		name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID  = UnitAura("player", i, "HELPFUL|PLAYER")
+	end
+	
+	-- we identify after first spell
+	local spell = select(1, ...)
+	
+	-- not found
+	-- need to check get spellinfo for icon
+	name, rank, icon = GetSpellInfo(spell)
+	-- check if it's a valid spell
+	if not name then return end
+	
+	-- check if it's in the list
+	if micdList[spell] then
+		-- check if it's on cooldown
+		icon = micdList[spell].icon
+		expires = micdList[spell].expires
+		duration = micdList[spell].duration
+		
+		local x = GetTime() - expires
+		-- update the info after cooldown frame does it's small animation, hides cooldown frame otherwise during next cooldown
+		if x < 0.5 then
+			return true, icon, expires - duration, duration, 1, nil, nil, alpha2
+		end
+		
+		x = x + duration - icd
+		if x <= 0 then
 			-- on cooldown
 			return true, icon, expires, icd - duration, 1, nil, nil, alpha3
 		end

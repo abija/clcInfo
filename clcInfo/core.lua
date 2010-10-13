@@ -11,6 +11,8 @@ clcInfo.lastBuild = nil	 -- string that has talent info, used to see if talents 
 
 clcInfo.mf = CreateFrame("Frame", "clcInfoMF")  -- all elements parented to this frame, so it's easier to hide/show them
 
+clcInfo.mf.unit = "player" -- fix parent unit for when we have to parent bars here
+
 -- frame levels
 -- grid: mf + 1
 -- icons, bars: mf + 2
@@ -22,23 +24,37 @@ clcInfo.LSM = LibStub("LibSharedMedia-3.0")  -- SharedMedia
 clcInfo.lbf = LibStub("LibButtonFacade", true)  -- ButtonFacade
 
 --------------------------------------------------------------------------------
--- slash command handling
+-- slash command and blizzard options
 --------------------------------------------------------------------------------
-SLASH_CLCINFO_OPTIONS1 = "/clcinfo"
-SlashCmdList["CLCINFO_OPTIONS"] = function(msg)
-	msg = msg and string.lower(string.trim(msg))
-
-	-- no arguments -> open options
-	if msg == "" then
+local function OpenOptions()
+	if not clcInfo_Options then
 		local loaded, reason = LoadAddOn("clcInfo_Options")
 		if( not clcInfo_Options ) then
 			print("Failed to load configuration addon. Error returned: ", reason)
 			return
 		end
-		
-		clcInfo_Options:Open()
-		return
 	end
+	clcInfo_Options:Open()
+end
+
+-- add a button to open the config to blizzard's options
+local panel = CreateFrame("Frame", "clcInfoPanel", UIParent)
+panel.name = "clcInfo"
+local b = CreateFrame("Button", "clcInfoPanelOpenConfig", panel, "UIPanelButtonTemplate")
+b:SetText("Open config")
+b:SetWidth(150)
+b:SetHeight(22)
+b:SetPoint("TOPLEFT", 10, -10)
+b:SetScript("OnClick", OpenOptions)
+InterfaceOptions_AddCategory(panel)
+
+-- slash command
+SLASH_CLCINFO_OPTIONS1 = "/clcinfo"
+SlashCmdList["CLCINFO_OPTIONS"] = function(msg)
+	msg = msg and string.lower(string.trim(msg))
+
+	-- no arguments -> open options
+	if msg == "" then return OpenOptions() end
 	
 	-- simple argument handling
 	-- try to pass it to the registered function if it exists

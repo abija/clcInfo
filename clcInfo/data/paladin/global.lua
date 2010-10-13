@@ -1,21 +1,72 @@
--- build check
-local _, _, _, toc = GetBuildInfo()
-if toc >= 40000 then return end
+-- don't load if class is wrong
+local _, class = UnitClass("player")
+if class ~= "PALADIN" then return end
 
+local defaults = {
+	movePPBar = false,
+	-- paladin power bar coords
+	ppbX = 0,
+	ppbY = 0,
+	ppbScale = 1,
+	ppbAlpha = 1,
+	
+	version = 1,
+}
+
+-- create a module in the main addon
+local mod = clcInfo:RegisterClassModule("global")
+local db -- ! it's a tdb, change if needed
+-- functions visible to exec should be attached to this
 local emod = clcInfo.env
 
+-- this function, if it exists, will be called at init
+function mod.OnInitialize()
+	db = clcInfo:RegisterClassModuleTDB("global", defaults)
+	if db then
+		mod.UpdatePPBar()
+		
+		-- small fix
+		-- major changes should be handled in another way
+		if not db.ppbAlpha then db.ppbAlpha = 1 end
+		if not db.version then db.version = 1 end
+	end
+end
+mod.OnTemplatesUpdate = mod.OnInitialize
+
+local function MovePPBar()
+	-- parent it to mf
+	PaladinPowerBar:SetParent(clcInfo.mf)
+	PaladinPowerBar:ClearAllPoints()
+	PaladinPowerBar:SetScale(db.ppbScale)
+	PaladinPowerBar:SetAlpha(db.ppbAlpha)
+	PaladinPowerBar:SetPoint("CENTER", UIParent, "CENTER", db.ppbX, db.ppbY)
+end
+local function RestorePPBar()
+	if PlayerFrame then
+		PaladinPowerBar:SetParent("PlayerFrame")
+		PaladinPowerBar:ClearAllPoints()
+		PaladinPowerBar:SetScale(1)
+		PaladinPowerBar:SetAlpha(1)
+		PaladinPowerBar:SetPoint("TOP", "PlayerFrame", "BOTTOM", 43, 39)
+	end
+end
+function mod.UpdatePPBar()
+	if not PaladinPowerBar then return end -- don't do anything if someone removed it
+	if db.movePPBar then
+		MovePPBar()
+	else
+		RestorePPBar()
+	end
+end
+
+--------------------------------------------------------------------------------
 --[[
 	-- sov tracking
 --]]
 do
 	local sovName, sovId, sovSpellTexture
-	if UnitFactionGroup("player") == "Alliance" then
-		sovId = 31803
-		sovName, _, sovSpellTexture = GetSpellInfo(sovId)						-- holy vengeance
-	else
-		sovId = 53742
-		sovName, _, sovSpellTexture = GetSpellInfo(sovId)						-- blood corruption
-	end
+	sovId = 31803
+	sovName, _, sovSpellTexture = GetSpellInfo(sovId)						-- Censure
 	
 	local function ExecCleanup()
 		emod.___e.___sovList = nil
@@ -34,19 +85,24 @@ do
 		local targetGUID
 		if UnitExists("target") then
 			targetGUID = UnitGUID("target")
-			local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitDebuff("target", sovName, nil, "PLAYER")
-			if name then
-			-- found it
-				if count > 0 and showStack then 
-					if showStack == "before" then
-						name = string.format("(%s) %s", count, UnitName("target"))
+			local j = 1
+			local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitDebuff("target", j)
+			while name do
+				if name == sovName and caster == "player" then
+					-- found it
+					if count > 1 and showStack then 
+						if showStack == "before" then
+							name = string.format("(%s) %s", count, UnitName("target"))
+						else
+							name = string.format("%s (%s)", UnitName("target"), count)
+						end
 					else
-						name = string.format("%s (%s)", UnitName("target"), count)
+						name = UnitName("target")
 					end
-				else
-					name = UnitName("target")
+					tsov[targetGUID] = { name, duration, expires }
 				end
-				tsov[targetGUID] = { name, duration, expires }
+				j = j + 1
+				name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitDebuff("target", j)
 			end
 		end
 		
@@ -73,3 +129,5 @@ do
 		end
 	end
 end
+
+

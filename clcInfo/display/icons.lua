@@ -120,8 +120,9 @@ local function OnUpdate(self, elapsed)
 	end
 	self.lastSVC = svc
 	
+	alpha = alpha or 1
 	if self.lastAlpha ~= alpha then
-		self.elements:SetAlpha(alpha or 1)
+		self.elements:SetAlpha(alpha)
 		self.lastAlpha = alpha
 	end
 	
@@ -417,6 +418,7 @@ function prototype:UpdateExec()
   
   -- reset alpha
   self.elements:SetAlpha(1)
+  self.lastAlpha = 1
   
   -- cleanup if required
   self.externalUpdate = false

@@ -47,6 +47,10 @@ local function LoadModuleActiveTemplate()
 								order = 4, type = "range", min = 0.1, max = 10, step = 0.1, name = "Scale",
 								get = Get, set = Set,
 							},
+							rbAlpha = {
+								order = 5, type = "range", min = 0, max = 1, step = 0.01, name = "Alpha",
+								get = Get, set = Set,
+							},
 						},
 					},
 				},
