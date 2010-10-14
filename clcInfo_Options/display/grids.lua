@@ -118,19 +118,35 @@ local function GetSkinTypeList()
 	return list
 end
 
+local function GetUDLabel(info)
+	local name = modGrids.active[tonumber(info[3])].db.udLabel
+	if name == "" then name = "Grid" .. info[3] end
+	return name
+end
+
+
 function mod:UpdateGridList()
 	local db = modGrids.active
 	local optionsGrids = options.args.activeTemplate.args.grids
 	
 	for i = 1, #db do
 		optionsGrids.args[tostring(i)] = {
-			type = "group", childGroups = "tab", name = "Grid" .. i,
+			type = "group", childGroups = "tab", name = GetUDLabel,
 			args = {
 				tabGeneral = {
 					order = 1, type = "group", name = "General",
 					args = {
+						label = {
+							order = 1, type = "group", inline = true, name = "Label",
+							args = {
+								udLabel = {
+									type = "input", width = "double", name = "",
+									get = Get, set = Set,
+								}
+							},
+						},
 						add = {
-							order = 1, type = "group", inline = true, name = "Add Elements", args = {
+							order = 2, type = "group", inline = true, name = "Add Elements", args = {
 								addIcon = { order = 1, type = "execute", name = "Add Icon", func = AddIcon },
 								addBar = { order = 2, type = "execute", name = "Add Bar", func = AddBar },
 								addMIcon = { order = 3, type = "execute", name = "Add Multi Icon", func = AddMIcon },
@@ -138,7 +154,7 @@ function mod:UpdateGridList()
 				  		}
 						},
 						lock = {
-							order = 2, type = "group", inline = true, name = "Lock",
+							order = 3, type = "group", inline = true, name = "Lock",
 							args = {
 								lock = {
 				  				order = 1, type = "execute", name = "Lock", func = Lock

@@ -58,6 +58,11 @@ function prototype:UpdateLayout()
 	
 	-- update the elements attached to it
 	self:UpdateChildren()
+	
+	-- change the text of the label
+	local udl = g.udLabel
+	if udl == "" then udl = "Grid" .. self.index end
+	self.label:SetText(udl)
 end
 
 -- enables control of the object
@@ -119,9 +124,6 @@ function mod:New(index)
 		grid:Init()
 	end
 	
-	-- change the text of the label here since it's done only now
-	grid.label:SetText("Grid" .. grid.index)
-	
 	grid:UpdateLayout()
 	if self.unlock then
 		grid:Unlock()
@@ -160,6 +162,8 @@ end
 -- gets the default options
 function mod:GetDefault()
 	local t = {
+		udLabel = "", -- user defined label
+	
 		-- cell size
 		cellWidth = 30,
 		cellHeight = 30,

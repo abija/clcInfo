@@ -3,7 +3,7 @@ local function bprint(...)
 	print(...)
 end
 
-clcInfo.__version = 43
+clcInfo.__version = 46
 
 --------------------------------------------------------------------------------
 -- TODO, make this GOOD
@@ -62,6 +62,10 @@ function clcInfo:FixSavedData()
 	
 	if not clcInfo.cdb.version then clcInfo.cdb.version = 0 end
 	if clcInfo.cdb.version == clcInfo.__version then return true end
+	
+	if clcInfo.cdb.version < 44 then
+		print("clcInfo:", "Made some changes to templates to reflect new way talent trees are handled. Please make sure you edit your settings (/clcInfo -> templates)!")
+	end
 	
 	bprint("performing db maintenace")
 	

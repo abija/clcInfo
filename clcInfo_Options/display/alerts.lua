@@ -72,6 +72,13 @@ end
 
 local SmoothingValues = { IN = "IN", IN_OUT = "IN_OUT", NONE = "NONE", OUT = "OUT"}
 
+-- get label
+local function GetUDLabel(info)
+	local name = modAlerts.active[tonumber(info[3])].db.udLabel
+	if name == "" then name = "Alert" .. info[3] end
+	return "[" .. info[3] .. "]" .. name
+end	
+
 function mod:UpdateAlertList()
 	local db = modAlerts.active
 	local optionsAlerts = options.args.activeTemplate.args.alerts
@@ -79,7 +86,7 @@ function mod:UpdateAlertList()
 	for i = 1, #db do
 		optionsAlerts.args[tostring(i)] = {
 			type = "group",
-			name = "Alert" .. i,
+			name = GetUDLabel,
 			order = i,
 			childGroups = "tab",
 			args = {
@@ -87,8 +94,17 @@ function mod:UpdateAlertList()
 				tabGeneral = {
 					order = 1, type = "group", name = "General",
 					args = {
+						label = {
+							order = 1, type = "group", inline = true, name = "Label",
+							args = {
+								udLabel = {
+									type = "input", width = "double", name = "",
+									get = Get, set = Set,
+								}
+							},
+						},
 						lock = {
-							order = 1, type = "group", inline = true, name = "",
+							order = 2, type = "group", inline = true, name = "",
 							args = {
 								lock = {
 				  				type = "execute", name = "Lock", func = Lock

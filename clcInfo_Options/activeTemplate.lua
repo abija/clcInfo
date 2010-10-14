@@ -127,10 +127,13 @@ end
 --------------------------------------------------------------------------------
 
 function mod:LoadActiveTemplate()
+	-- name
 	local atn = ""
-	if clcInfo.activeTemplate then atn = "Template" .. clcInfo.activeTemplateIndex end
+	if clcInfo.activeTemplate then
+		atn = clcInfo.activeTemplate.options.udLabel
+		if atn == "" then atn = "Template" .. clcInfo.activeTemplateIndex end
+	end
 		
-
   -- delete the old template
   options.args.activeTemplate = {
   	order = 1, type = "group", name = "Active: " .. atn, args = {}

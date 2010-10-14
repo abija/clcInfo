@@ -86,14 +86,6 @@ local function SetExec(info, val)
 	obj:UpdateExec()
 end
 
-local function GetGridList()
-	local list = { [0] = "None" }
-	for i = 1, #(clcInfo.display.grids.active) do
-		list[i] = "Grid" .. i
-	end
-	return list
-end
-
 -- set/get for skin icons
 local function SetSkinIcons(info, val)
 	local obj = modIcons.active[tonumber(info[3])]
@@ -117,8 +109,13 @@ local function SetSound(info, val) sound = val end
 local function GetErrExec(info) return modIcons.active[tonumber(info[3])].errExec or "" end
 local function GetErrExecAlert(info) return modIcons.active[tonumber(info[3])].errExecAlert or "" end
 
-
-
+-- get label
+local function GetUDLabel(info)
+	local name = modIcons.active[tonumber(info[3])].db.udLabel
+	if name == "" then name = "Icon" .. info[3] end
+	return name
+end				
+						
 function mod:UpdateIconList()
 	local db = modIcons.active
 	local optionsIcons = options.args.activeTemplate.args.icons
@@ -126,7 +123,7 @@ function mod:UpdateIconList()
 	for i = 1, #db do
 		optionsIcons.args[tostring(i)] = {
 			type = "group",
-			name = "Icon" .. i,
+			name = GetUDLabel,
 			order = i,
 			childGroups = "tab",
 			args = {
@@ -134,8 +131,17 @@ function mod:UpdateIconList()
 				tabGeneral = {
 					order = 1, type = "group", name = "General",
 					args = {
+						label = {
+							order = 1, type = "group", inline = true, name = "Label",
+							args = {
+								udLabel = {
+									type = "input", width = "double", name = "",
+									get = Get, set = Set,
+								}
+							},
+						},
 						lock = {
-							order = 1, type = "group", inline = true, name = "",
+							order = 5, type = "group", inline = true, name = "",
 							args = {
 								lock = {
 				  				type = "execute", name = "Lock", func = Lock
@@ -149,7 +155,7 @@ function mod:UpdateIconList()
 							order = 11, type = "group", inline = true, name = "",
 							args = {
 								gridId = {
-									order = 1, type = "select", name = "Select Grid", values = GetGridList,
+									order = 1, type = "select", name = "Select Grid", values = clcInfo_Options.GetGridList,
 									get = Get, set = Set, 
 								},
 								skinSource = {

@@ -56,4 +56,19 @@ function mod:Open()
 	AceDialog:Open("clcInfo")
 end
 
+--------------------------------------------------------------------------------
+-- functions that are identical for elements
+--------------------------------------------------------------------------------
+-- grid list
+function mod.GetGridList()
+	local list = { [0] = "None" }
+	local name
+	for i = 1, #(clcInfo.display.grids.active) do
+		name = clcInfo.display.grids.active[i].db.udLabel
+		if name == "" then name = "Grid" .. i end
+		list[i] = name
+	end
+	return list
+end
+
 

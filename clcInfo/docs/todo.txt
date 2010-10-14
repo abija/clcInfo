@@ -1,10 +1,9 @@
+-- templates
+
 - effects on the elements themselves?
-- stop updating cooldowns when not needed on icons to let omnicc flash
-- the nil issue....
+- the nil issue.... (x.y == nil)
 
-- type of alert to trigger when stuff is removed
 - implement a way to add alerts for random stuff?
-
 
 - enabled/ranged improved?
 - on class modules, make sure spells are checked since spec might not be guaranteed due to enforce (get tv cd on holy template etc)
@@ -28,14 +27,11 @@
 
 - function to cleanup unused vars from db somehow
 
-- better stack display for icons
 - more accurate lbf support for icons
 - better default skin?
 
 
 - add option to run stuff after return ?
-
-! make sure that ___e is the one we want, check for threading problems
 
 
 

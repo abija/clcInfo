@@ -245,8 +245,9 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 	end
 	
 	if start ~= icon.lastStart then
-		icon.lastStart = start
+		e:StopAnimating()
 		CooldownFrame_SetTimer(e, start, duration, enable)
+		icon.lastStart = start
 	end
 	
 	-- stack
@@ -457,6 +458,11 @@ function prototype:UpdateLayout()
 	
 	self.skin = skin
 	
+	-- change the text of the label
+	local udl = self.db.udLabel
+	if udl == "" then udl = "MIcon" .. self.index end
+	self.label:SetText(udl)
+	
 	-- update children
 	self:UpdateIconsLayout()	
 end
@@ -585,9 +591,6 @@ function mod:New(index)
 		micon:Init()
 	end
 	
-	-- change the text of the label here since it's done only now
-	micon.label:SetText("MIcon" .. micon.index)
-	
 	micon:UpdateLayout()
 	micon:UpdateExec()
 	
@@ -643,6 +646,8 @@ function mod:GetDefault()
 	local y = (UIParent:GetHeight() - ICON_DEFAULT_HEIGHT) / 2 * UIParent:GetScale()
 	
 	return {
+		udLabel = "", -- user defined label
+	
 		growth = "up", -- up or down
 		spacing = 1, -- space between icons
 	

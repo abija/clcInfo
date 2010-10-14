@@ -248,7 +248,7 @@ function prototype:Unlock()
   ex.bar:SetMinMaxValues(0, 1)
   ex.bar:SetValue(0.55)
   
-  self.locked = false
+  self.unlock = true
   
   self:FakeShow()
 end
@@ -266,7 +266,7 @@ function prototype:Lock()
   ex.bar:SetMinMaxValues(self.lockMinValue, self.lockMaxValue)
   ex.bar:SetValue(self.lockValue)
   
-  self.locked = true
+  self.unlock = false
   
   -- restore update function
   self:FakeHide()
@@ -511,6 +511,18 @@ function prototype:UpdateLayout()
 		self.elements.bar:SetStatusBarColor(unpack(self.db.skin.barColor))
 		self.elements.barFrame:SetBackdropColor(unpack(self.db.skin.barBgColor))
 	end
+	
+	-- change the text of the label
+	local udl = self.db.udLabel
+	if udl == "" then udl = "Bar" .. self.index end
+	self.label = udl
+	-- adjust label when unlocked
+	if self.unlock then
+		local ex = self.elements
+		ex.textLeft:SetText(self.label)
+ 		ex.textCenter:SetText(self.label)
+  	ex.textRight:SetText(self.label)
+	end
 end
 
 -- update the exec function and related stuff
@@ -564,7 +576,7 @@ function prototype:UpdateExec()
   end
   
   -- in case we update while the element is unlocked
-  if self.locked then
+  if not self.unlock then
   	self:SetScript("OnUpdate", OnUpdate)
   end
 end
@@ -616,9 +628,6 @@ function mod:New(index)
 		bar:Init()
 	end
 	self.active[index] = bar
-	
-	-- change the text of the label here since it's done only now
-	bar.label = "Bar" .. bar.index
 	
 	bar:UpdateLayout()
 	bar:UpdateExec()
@@ -733,6 +742,8 @@ function mod.GetDefault()
 
 	-- bar default settings
 	return {
+		udLabel = "", -- user defined label
+	
 		x = x,
 		y = y,
 		point = "BOTTOMLEFT",

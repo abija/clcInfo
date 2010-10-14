@@ -96,6 +96,7 @@ local function OnUpdate(self, elapsed)
 	-- TODO
 	-- check if this is working properly, don't want to miss timers
 	if start ~= self.lastStart then
+		e:StopAnimating()
 		CooldownFrame_SetTimer(e, start, duration, enable)
 		self.lastStart = start
 	end
@@ -393,6 +394,11 @@ function prototype:UpdateLayout()
 	
 	-- scale the stack text
 	self.elements.stackFrame:SetScale(self.db.height / ICON_DEFAULT_HEIGHT)
+	
+	-- change the text of the label
+	local udl = self.db.udLabel
+	if udl == "" then udl = "Icon" .. self.index end
+	self.label:SetText(udl)
 end
 
 -- update the exec function and perform cleanup
@@ -488,9 +494,6 @@ function mod:New(index)
 		icon:Init()
 	end
 	
-	-- change the text of the label here since it's done only now
-	icon.label:SetText("Icon" .. icon.index)
-	
 	icon:UpdateLayout()
 	icon:UpdateExec()
 	if self.unlock then
@@ -545,6 +548,8 @@ function mod:GetDefault()
 	local y = (UIParent:GetHeight() - ICON_DEFAULT_HEIGHT) / 2 * UIParent:GetScale()
 	
 	return {
+		udLabel = "", -- user defined label
+	
 		x = x,
 		y = y,
 		point = "BOTTOMLEFT",

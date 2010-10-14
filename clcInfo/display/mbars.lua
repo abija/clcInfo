@@ -544,6 +544,11 @@ function prototype:UpdateLayout()
 	
 	self.skin = skin
 	
+	-- change the text of the label
+	local udl = self.db.udLabel
+	if udl == "" then udl = "MBar" .. self.index end
+	self.label:SetText(udl)
+	
 	-- update children
 	self:UpdateBarsLayout()	
 end
@@ -672,9 +677,6 @@ function mod:New(index)
 		mbar:Init()
 	end
 	
-	-- change the text of the label here since it's done only now
-	mbar.label:SetText("MBar" .. mbar.index)
-	
 	mbar:UpdateLayout()
 	mbar:UpdateExec()
 	
@@ -731,6 +733,8 @@ function mod:GetDefault()
 	
 	-- mbar default settings
 	return {
+		udLabel = "", -- user defined label
+	
 		growth = "up", -- up or down
 		spacing = 1, -- space between bars
 	

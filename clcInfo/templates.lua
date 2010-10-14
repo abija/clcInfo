@@ -2,6 +2,10 @@ local mod = clcInfo.templates -- the module
 
 -- check if spec matches current talent build
 local function IsActiveTemplate(spec)
+	-- check primary tree
+	if spec.primary ~= GetPrimaryTalentTree() then return false end
+	
+	-- check distinctive talent
 	local name, _, _, _, rank = GetTalentInfo(spec.tree, spec.talent)
 	if name and (rank == spec.rank) then return true end
 	return false
@@ -44,8 +48,9 @@ end
 function mod:GetDefault()
 	local t = {
 		classModules = {},
-		spec = { tree = 1, talent = 0, rank = 1 },
+		spec = { primary = 1, tree = 1, talent = 0, rank = 1 }, 
 		options = {
+			udLabel = "", -- user defined label
 			gridSize = 1,
 			showWhen = "always",
 			strata = "MEDIUM",

@@ -96,7 +96,7 @@ end
 
 -- update display according to options
 function prototype:UpdateLayout()
-local opt = self.db
+	local opt = self.db
 	self:ClearAllPoints()
 	self:SetWidth(self.db.width)
 	self:SetHeight(self.db.height)
@@ -127,6 +127,11 @@ local opt = self.db
 	a:SetDuration(opt.scaleDuration)
 	a:SetStartDelay(opt.scaleStartDelay)
 	a:SetEndDelay(opt.scaleEndDelay)
+	
+	-- change the text of the label
+	local udl = opt.udLabel
+	if udl == "" then udl = "Alert" .. self.index end
+	self.label:SetText(udl)
 end
 
 -- enables control of the object
@@ -181,9 +186,6 @@ function mod:New(index)
 	
 	self.active[index] = alert
 	
-	-- change the text of the label here since it's done only now
-	alert.label:SetText("Alert" .. alert.index)
-	
 	alert:UpdateLayout()
 	if self.unlock then
 		alert:Unlock()
@@ -229,6 +231,8 @@ end
 -- gets the default options
 function mod:GetDefault()
 	return {
+		udLabel = "", -- user defined label
+	
 		-- size and position relative to UIParent, defaults to center of screen
 		width = 100, height = 100, x = 0, y = 0,
 		point = "CENTER", relativePoint = "CENTER",

@@ -248,14 +248,17 @@ function mod.IconICD(spell, icd, alpha1, alpha2, alpha3)
 		expires = icdList[spell].expires
 		duration = icdList[spell].duration
 		
-		local x = GetTime() - expires
 		-- update the info after cooldown frame does it's small animation, hides cooldown frame otherwise during next cooldown
+		--[[
+		local x = GetTime() - expires
+		
 		if x < 0.5 then
 			return true, icon, expires - duration, duration, 1, nil, nil, alpha2
 		end
 		
 		x = x + duration - icd
-		if x <= 0 then
+		--]]
+		if (GetTime() - expires + duration - icd) <= 0 then
 			-- on cooldown
 			return true, icon, expires, icd - duration, 1, nil, nil, alpha3
 		end
@@ -311,6 +314,7 @@ function mod.IconMICD(icd, alpha1, alpha2, alpha3, ...)
 		expires = micdList[spell].expires
 		duration = micdList[spell].duration
 		
+		--[[
 		local x = GetTime() - expires
 		-- update the info after cooldown frame does it's small animation, hides cooldown frame otherwise during next cooldown
 		if x < 0.5 then
@@ -318,7 +322,8 @@ function mod.IconMICD(icd, alpha1, alpha2, alpha3, ...)
 		end
 		
 		x = x + duration - icd
-		if x <= 0 then
+		--]]
+		if (GetTime() - expires + duration - icd) <= 0 then
 			-- on cooldown
 			return true, icon, expires, icd - duration, 1, nil, nil, alpha3
 		end

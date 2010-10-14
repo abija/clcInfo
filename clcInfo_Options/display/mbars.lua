@@ -97,14 +97,6 @@ local function SetExec(info, val)
 	obj:UpdateExec()
 end
 
-local function GetGridList()
-	local list = { [0] = "None" }
-	for i = 1, #(clcInfo.display.grids.active) do
-		list[i] = "Grid" .. i
-	end
-	return list
-end
-
 -- sound donothing control
 local sound = "None"
 local function GetSound() return sound end
@@ -112,6 +104,12 @@ local function SetSound(info, val) sound = val end
 -- used to change error strings
 local function GetErrExec(info) return modMBars.active[tonumber(info[3])].errExec or "" end
 local function GetErrExecAlert(info) return modMBars.active[tonumber(info[3])].errExecAlert or "" end
+
+local function GetUDLabel(info)
+	local name = modMBars.active[tonumber(info[3])].db.udLabel
+	if name == "" then name = "MBar" .. info[3] end
+	return name
+end
 
 
 
@@ -122,15 +120,24 @@ function mod:UpdateMBarList()
 	for i = 1, #db do
 		optionsMBars.args[tostring(i)] = {
 			type = "group",
-			name = "MBar" .. i,
+			name = GetUDLabel,
 			order = i,
 			childGroups = "tab",
 			args = {
 				tabGeneral = {
 					order = 1, type = "group", name = "General",
 					args = {
+						label = {
+							order = 1, type = "group", inline = true, name = "Label",
+							args = {
+								udLabel = {
+									type = "input", width = "double", name = "",
+									get = Get, set = Set,
+								}
+							},
+						},
 						lock = {
-							order = 1, type = "group", inline = true, name = "",
+							order = 2, type = "group", inline = true, name = "",
 							args = {
 								lock = {
 				  				type = "execute", name = "Lock", func = Lock
@@ -144,7 +151,7 @@ function mod:UpdateMBarList()
 							order = 2, type = "group", inline = true, name = "",
 							args = {
 								gridId = {
-									order = 1, type = "select", name = "Select Grid", values = GetGridList,
+									order = 1, type = "select", name = "Select Grid", values = clcInfo_Options.GetGridList,
 									get = Get, set = Set, 
 								},
 								skinSource = {
@@ -195,7 +202,7 @@ function mod:UpdateMBarList()
 							order = 1,  type = "group", inline = true, name = "",
 							args = {
 								gridId = {
-									order = 1, type = "select", name = "Select Grid", values = GetGridList,
+									order = 1, type = "select", name = "Select Grid", values = clcInfo_Options.GetGridList,
 									get = Get, set = Set, 
 								},
 								gridX = {

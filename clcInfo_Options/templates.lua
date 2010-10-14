@@ -50,11 +50,12 @@ local function SpecSet(info, val)
 	clcInfo:OnTemplatesUpdate()
 end
 
+
 local function GetTalentTrees()
 	local list = {}
 	local name
 	for i = 1, 3 do  
-		name = GetTalentTabInfo(i)
+		_, name = GetTalentTabInfo(i)
 		table.insert(list, name)
 	end
 	return list
@@ -78,8 +79,14 @@ end
 
 local function GetForceTemplateList()
 	local list = { [0] = "Disabled" }
+	local name
 	for i = 1, #(clcInfo.cdb.templates) do
-		list[i] = "Template" .. i
+		name = clcInfo.cdb.templates[i].options.udLabel
+		if name ~= "" then
+			list[i] = name
+		else
+			list[i] = "Template" .. i
+		end
 	end
 	return list
 end
@@ -91,13 +98,26 @@ local function SetForceTemplate(info, val)
 	clcInfo:OnTemplatesUpdate()
 end
 
+local function GetUDLabel(info)
+	local name = clcInfo.cdb.templates[tonumber(info[2])].options.udLabel
+	if name ~= "" then return name end
+	return "Template"..info[2]
+end
+local function Get(info)
+	return clcInfo.cdb.templates[tonumber(info[2])].options.udLabel
+end
+local function Set(info, val)
+	clcInfo.cdb.templates[tonumber(info[2])].options.udLabel = val
+end
+
 function mod:UpdateTemplateList()
 	local db = clcInfo.cdb.templates
 	local optionsTemplates = options.args.templates
 	for i = 1, #(db) do
 		optionsTemplates.args[tostring(i)] = {
+			order = i,
 			type = "group",
-			name = "Template " .. i,
+			name = GetUDLabel,
 			childGroups = "tab",
 			args = {
 				tabSpec = {
@@ -105,8 +125,26 @@ function mod:UpdateTemplateList()
 					name = "Spec",
 					order = 1,
 					args = {
+						label = {
+							order = 1, type = "group", inline = true, name = "Label",
+							args = {
+								udLabel = {
+									type = "input", width = "double", name = "",
+									get = Get, set = Set,
+								}
+							},
+						},
+						primaryTree = {
+							order = 2, type = "group", inline = true, name = "Primary Tree",
+							args = {
+								primary = {
+									order = 1, type = "select", name = "", values = specTrees,
+									get = SpecGet, set = SpecSet,	
+								},
+							},
+						},
 						spec = {
-							order = 1, type = "group", inline = true, name = "",							
+							order = 3, type = "group", inline = true, name = "Distinctive talent",							
 							args = {
 								tree = {
 									order = 1, type = "select", name = "Tree", values = specTrees,
