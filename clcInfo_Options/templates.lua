@@ -110,6 +110,56 @@ local function Set(info, val)
 	clcInfo.cdb.templates[tonumber(info[2])].options.udLabel = val
 end
 
+
+--------------------------------------------------------------------------------
+-- import / export
+--------------------------------------------------------------------------------
+local importString
+local importId
+StaticPopupDialogs["CLCINFO_CONFIRM_IMPORT_TEMPLATE"] = {
+	text = "Are you sure you want to import this data?\nIf the information you pasted is wrong it could lead to a lot of problems.",
+	button1 = YES,
+	button2 = NO,
+	OnAccept = function (self)
+		if not importString or importString == "" then return end
+		local success, t = AceSerializer:Deserialize(importString)
+		if success then
+			clcInfo.spew = t
+			
+			mod.SafeCopyTable(t, clcInfo.cdb.templates[importId])
+			
+			-- now we need to add the elements
+			for k in pairs(clcInfo.display) do
+				clcInfo.cdb.templates[importId][k] = {}
+				for i, v in ipairs(t[k]) do
+					clcInfo.cdb.templates[importId][k][i] = clcInfo.display[k]:GetDefault()
+					mod.SafeCopyTable(v, clcInfo.cdb.templates[importId][k][i])
+				end
+			end
+			
+			mod:UpdateTemplateList()
+		else
+			print(t)
+		end
+	end,
+	OnCancel = function (self) end,
+	hideOnEscape = 1,
+	timeout = 0,
+	exclusive = 1,
+}
+local function GetExport(info)
+	return AceSerializer:Serialize(clcInfo.cdb.templates[tonumber(info[2])])
+end
+local function SetExport(info, val) end
+local function GetImport(info) end
+local function SetImport(info, val)
+	importString = val
+	importId = tonumber(info[2])
+	StaticPopup_Show("CLCINFO_CONFIRM_IMPORT_TEMPLATE")
+end
+--------------------------------------------------------------------------------
+
+
 function mod:UpdateTemplateList()
 	local db = clcInfo.cdb.templates
 	local optionsTemplates = options.args.templates
@@ -162,15 +212,42 @@ function mod:UpdateTemplateList()
 						},
 					},
 				},
+				
+				tabExport = {
+					order = 90, type = "group", name = "Export/Import", 
+					args = {
+						export = {
+							order = 1, type = "group", inline = true, name = "Export string",
+							args = {
+								text = {
+									order = 1, type = "input", multiline = true, name = "", width = "full",
+									get = GetExport, set = SetExport,
+								},
+							},
+						},
+						import = {
+							order = 1, type = "group", inline = true, name = "Import string",
+							args = {
+								info = {
+									order = 1, type = "description", name = "Do not import objects of different type here.\nClass Modules settings might not import properly.",
+								},
+								text = {
+									order = 3, type = "input", multiline = true, name = "", width = "full",
+									get = GetImport, set = SetImport,
+								},
+							},
+						},
+					},
+				},
+				
 				tabDelete = {
 					type = "group",
 					name = "Delete",
-					order = 2,
+					order = 100,
 					args = {
 							execDelete = {
 							type = "execute",
 							name = "Delete",
-							order = 100,
 							func = function(info)						
 								selectedForDelete = i,
 								StaticPopup_Show("CLCINFO_CONFIRM_DELETE_TEMPLATE")

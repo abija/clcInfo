@@ -30,8 +30,6 @@ mod.cache = {}
 -- their active list is hold by the object
 mod.cacheIcons = {}			
 
-local LSM = clcInfo.LSM
-
 local db
 
 -- some defaults used for skinning

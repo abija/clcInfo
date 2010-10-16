@@ -19,6 +19,8 @@ clcInfo.mf.unit = "player" -- fix parent unit for when we have to parent bars he
 -- frame levels
 -- grid: mf + 1
 -- icons, bars: mf + 2
+-- text: mf + 5
+-- alerts: mf + 10
 clcInfo.frameLevel = clcInfo.mf:GetFrameLevel()
 
 clcInfo.env = setmetatable({}, {__index = _G})  -- add all data functions in this environment and pass them to the exec calls

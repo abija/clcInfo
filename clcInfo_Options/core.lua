@@ -70,3 +70,27 @@ function mod.GetGridList()
 end
 
 
+--------------------------------------------------------------------------------
+-- helper functions
+--------------------------------------------------------------------------------
+
+-- recursive copy
+-- s = source, t = target
+-- doesn't delete existing elements
+local function SafeCopyTable(s, t)
+	if not s or not t then return end
+	if type(s) ~= "table" or type(t) ~= "table" then return end
+	if #s > 0 or #t > 0 then return end  -- don't copy indexed tables
+
+	-- copy data
+	for k, v in pairs(s) do
+		if t[k] ~= nil then
+			if type(v) == "table" then
+				SafeCopyTable(v, t[k])
+			else
+				t[k] = v
+			end
+		end
+	end
+end
+mod.SafeCopyTable = SafeCopyTable

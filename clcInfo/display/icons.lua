@@ -5,7 +5,6 @@ mod.onGrid = true
 
 -- button facade
 local lbf = clcInfo.lbf
-local LSM = clcInfo.LSM
 
 local prototype = CreateFrame("Frame")  -- base frame object
 prototype:Hide()
@@ -122,6 +121,7 @@ local function OnUpdate(self, elapsed)
 	end
 	
 	-- SetVertexColor
+	svc = svc or false
 	if svc then
 		self.elements.texMain:SetVertexColor(r, g, b, a)
 	else

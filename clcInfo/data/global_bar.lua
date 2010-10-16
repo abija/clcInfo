@@ -174,7 +174,7 @@ do
 		local name, rank, icon, count, dispelType, duration, expires, caster
 		for i = 1, #groupUnitList do
 			if UnitExists(groupUnitList[i]) then
-				name, rank, icon, count, _, duration, expires, caster = UnitBuff(groupUnitList[i], spell)
+				name, rank, icon, count, _, duration, expires, caster = UnitBuff(groupUnitList[i], spell, nil, "player")
 				if name and caster == "player" then
 					-- found -> return required info				
 					if count > 1 and showStack then 

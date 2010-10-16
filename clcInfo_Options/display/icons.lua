@@ -132,6 +132,7 @@ local function SetExecTemplate(info, val)
 end
 --------------------------------------------------------------------------------
 
+
 --------------------------------------------------------------------------------
 -- import / export
 --------------------------------------------------------------------------------
@@ -145,9 +146,9 @@ StaticPopupDialogs["CLCINFO_CONFIRM_IMPORT_ICON"] = {
 		if not importString or importString == "" then return end
 		local success, t = AceSerializer:Deserialize(importString)
 		if success then
-			clcInfo.cdb.templates[clcInfo.activeTemplateIndex].icons[importId] = t
-			clcInfo.display.icons:ClearElements()
-			clcInfo.display.icons:InitElements()
+			mod.SafeCopyTable(t, clcInfo.cdb.templates[clcInfo.activeTemplateIndex].icons[importId])
+			clcInfo.display.icons.active[importId]:UpdateLayout()
+			clcInfo.display.icons.active[importId]:UpdateExec()
 			mod:UpdateIconList()
 		else
 			print(t)
@@ -161,8 +162,7 @@ StaticPopupDialogs["CLCINFO_CONFIRM_IMPORT_ICON"] = {
 local function GetExport(info)
 	return AceSerializer:Serialize(modIcons.active[tonumber(info[3])].db)
 end
-local function SetExport(info, val)
-end
+local function SetExport(info, val) end
 local function GetImport(info) end
 local function SetImport(info, val)
 	importString = val
@@ -373,8 +373,11 @@ function mod:UpdateIconList()
 						import = {
 							order = 1, type = "group", inline = true, name = "Import string",
 							args = {
+								info = {
+									order = 1, type = "description", name = "Do not import objects of different type here.",
+								},
 								text = {
-									order = 1, type = "input", multiline = true, name = "", width = "full",
+									order = 2, type = "input", multiline = true, name = "", width = "full",
 									get = GetImport, set = SetImport,
 								},
 							},
@@ -382,7 +385,7 @@ function mod:UpdateIconList()
 					},
 				},
 				
-				deleteTab = {
+				tabDelete = {
 					order = 100, type = "group", name = "Delete", 
 					args = {
 						-- delete button

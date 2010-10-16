@@ -180,7 +180,7 @@ function mod:New(index)
 		setmetatable(alert, { __index = prototype })
 		alert.index = index
 		alert.db = db[index]
-		alert:SetFrameLevel(clcInfo.frameLevel + 1)
+		alert:SetFrameLevel(clcInfo.frameLevel + 10)
 		alert:Init()
 	end
 	

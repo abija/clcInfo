@@ -137,6 +137,45 @@ end
 --------------------------------------------------------------------------------
 
 
+--------------------------------------------------------------------------------
+-- import / export
+--------------------------------------------------------------------------------
+local importString
+local importId
+StaticPopupDialogs["CLCINFO_CONFIRM_IMPORT_MICON"] = {
+	text = "Are you sure you want to import this data?\nIf the information you pasted is wrong it could lead to a lot of problems.",
+	button1 = YES,
+	button2 = NO,
+	OnAccept = function (self)
+		if not importString or importString == "" then return end
+		local success, t = AceSerializer:Deserialize(importString)
+		if success then
+			mod.SafeCopyTable(t, clcInfo.cdb.templates[clcInfo.activeTemplateIndex].micons[importId])
+			clcInfo.display.micons.active[importId]:UpdateLayout()
+			clcInfo.display.micons.active[importId]:UpdateExec()
+			mod:UpdateMIconList()
+		else
+			print(t)
+		end
+	end,
+	OnCancel = function (self) end,
+	hideOnEscape = 1,
+	timeout = 0,
+	exclusive = 1,
+}
+local function GetExport(info)
+	return AceSerializer:Serialize(modMIcons.active[tonumber(info[3])].db)
+end
+local function SetExport(info, val) end
+local function GetImport(info) end
+local function SetImport(info, val)
+	importString = val
+	importId = tonumber(info[3])
+	StaticPopup_Show("CLCINFO_CONFIRM_IMPORT_MICON")
+end
+--------------------------------------------------------------------------------
+
+
 function mod:UpdateMIconList()
 	local db = modMIcons.active
 	local optionsMIcons = options.args.activeTemplate.args.micons
@@ -336,7 +375,35 @@ function mod:UpdateMIconList()
 						},
 					},
 				},
-				deleteTab = {
+
+				tabExport = {
+					order = 90, type = "group", name = "Export/Import", 
+					args = {
+						export = {
+							order = 1, type = "group", inline = true, name = "Export string",
+							args = {
+								text = {
+									order = 1, type = "input", multiline = true, name = "", width = "full",
+									get = GetExport, set = SetExport,
+								},
+							},
+						},
+						import = {
+							order = 1, type = "group", inline = true, name = "Import string",
+							args = {
+								info = {
+									order = 1, type = "description", name = "Do not import objects of different type here.",
+								},
+								text = {
+									order = 2, type = "input", multiline = true, name = "", width = "full",
+									get = GetImport, set = SetImport,
+								},
+							},
+						},
+					},
+				},
+				
+				tabDelete = {
 					order = 100, type = "group", name = "Delete", 
 					args = {
 						-- delete button

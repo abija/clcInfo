@@ -51,8 +51,13 @@ function mod.UpdatePPBar()
 	
 	if db.hideBlizPPB then
 		PaladinPowerBar:Hide()
+		PaladinPowerBar:UnregisterAllEvents()
+		PaladinPowerBar:SetScript("OnShow", function(self) self:Hide() end)
 	else
+		PaladinPowerBar:SetScript("OnShow", nil)
 		PaladinPowerBar:Show()
+		PaladinPowerBar_OnLoad(PaladinPowerBar)
+		PaladinPowerBar_Update(PaladinPowerBar)
 	end
 end
 

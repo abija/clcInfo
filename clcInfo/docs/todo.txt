@@ -1,4 +1,8 @@
 -- TEXTS
+-- import/export
+-- SAFE import (double check returned table with the default settings)
+
+-- enable disable per element?
 
 -- tutorial todo:
 - skins

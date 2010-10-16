@@ -94,20 +94,21 @@ local function AddIcon(info)
 	clcInfo.display.icons:Add(tonumber(info[3]))
 	mod:UpdateIconList()
 end
-
 local function AddMIcon(info)
 	clcInfo.display.micons:Add(tonumber(info[3]))
 	mod:UpdateMIconList()
 end
-
 local function AddBar(info)
 	clcInfo.display.bars:Add(tonumber(info[3]))
 	mod:UpdateBarList()
 end
-
 local function AddMBar(info)
 	clcInfo.display.mbars:Add(tonumber(info[3]))
 	mod:UpdateMBarList()
+end
+local function AddText(info)
+	clcInfo.display.texts:Add(tonumber(info[3]))
+	mod:UpdateTextList()
 end
 
 
@@ -123,6 +124,44 @@ local function GetUDLabel(info)
 	if name == "" then name = "Grid" .. info[3] end
 	return name
 end
+
+
+--------------------------------------------------------------------------------
+-- import / export
+--------------------------------------------------------------------------------
+local importString
+local importId
+StaticPopupDialogs["CLCINFO_CONFIRM_IMPORT_GRID"] = {
+	text = "Are you sure you want to import this data?\nIf the information you pasted is wrong it could lead to a lot of problems.",
+	button1 = YES,
+	button2 = NO,
+	OnAccept = function (self)
+		if not importString or importString == "" then return end
+		local success, t = AceSerializer:Deserialize(importString)
+		if success then
+			mod.SafeCopyTable(t, clcInfo.cdb.templates[clcInfo.activeTemplateIndex].grids[importId])
+			clcInfo.display.grids.active[importId]:UpdateLayout()
+			mod:UpdateGridList()
+		else
+			print(t)
+		end
+	end,
+	OnCancel = function (self) end,
+	hideOnEscape = 1,
+	timeout = 0,
+	exclusive = 1,
+}
+local function GetExport(info)
+	return AceSerializer:Serialize(modGrids.active[tonumber(info[3])].db)
+end
+local function SetExport(info, val) end
+local function GetImport(info) end
+local function SetImport(info, val)
+	importString = val
+	importId = tonumber(info[3])
+	StaticPopup_Show("CLCINFO_CONFIRM_IMPORT_GRID")
+end
+--------------------------------------------------------------------------------
 
 
 function mod:UpdateGridList()
@@ -151,6 +190,7 @@ function mod:UpdateGridList()
 								addBar = { order = 2, type = "execute", name = "Add Bar", func = AddBar },
 								addMIcon = { order = 3, type = "execute", name = "Add Multi Icon", func = AddMIcon },
 								addMBar = { order = 4, type = "execute", name = "Add Multi Bar", func = AddMBar },
+								addText = { order = 5, type = "execute", name = "Add Text", func = AddText },
 				  		}
 						},
 						lock = {
@@ -814,10 +854,94 @@ function mod:UpdateGridList()
 								},
 							},
 						},
+						
+						texts = {
+							order = 7, type = "group", name = "Texts",
+							args = {
+								base = {
+									order = 2, type = "group", inline = true, name = "Base",
+									args = {
+										family = {
+											order = 1, type = 'select', dialogControl = 'LSM30_Font', name = 'Font', values = LSM:HashTable("font"),
+											get = GetSkin, set = SetSkin,
+										},
+										size = {
+											order = 2, type = "range", min = 0, max = 200, step = 1, name = "Size%",
+											get = GetSkin, set = SetSkin,
+										},
+										color = {
+											order = 3, type = "color", hasAlpha = true, name = "Color",
+											get = GetSkinColor, set = SetSkinColor,
+										},
+									},
+								},
+								shadow = {
+									order = 3, type = "group", inline = true, name = "Shadow",
+									args = {
+										shadowOffsetX = {
+											order = 1, type = "range", min = -20, max = 20, step = 0.01, name = "Shadow Offset X",
+											get = GetSkin, set = SetSkin,
+										},
+										shadowOffsetY = {
+											order = 2, type = "range", min = -20, max = 20, step = 0.01, name = "Shadow Offset Y",
+											get = GetSkin, set = SetSkin,
+										},
+										shadowColor = {
+											order = 3, type = "color", hasAlpha = true, name = "Shadow Color",
+											get = GetSkinColor, set = SetSkinColor,
+										},
+									},
+								},
+								flags = {
+									order = 4, type = "group", inline = true, name = "Flags",
+									args = {
+										aliasing = {
+											order = 1, type = "toggle", name = "Aliasing",
+											get = GetSkin, set = SetSkin,
+										},
+										outline = {
+											order = 2, type = "toggle", name = "Outline",
+											get = GetSkin, set = SetSkin,
+										},
+										thickoutline = {
+											order = 3, type = "toggle", name = "Thick Outline",
+											get = GetSkin, set = SetSkin,
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 				
-				deleteTab = {
+				tabExport = {
+					order = 90, type = "group", name = "Export/Import", 
+					args = {
+						export = {
+							order = 1, type = "group", inline = true, name = "Export string",
+							args = {
+								text = {
+									order = 1, type = "input", multiline = true, name = "", width = "full",
+									get = GetExport, set = SetExport,
+								},
+							},
+						},
+						import = {
+							order = 1, type = "group", inline = true, name = "Import string",
+							args = {
+								info = {
+									order = 1, type = "description", name = "Do not import objects of different type here.",
+								},
+								text = {
+									order = 2, type = "input", multiline = true, name = "", width = "full",
+									get = GetImport, set = SetImport,
+								},
+							},
+						},
+					},
+				},
+				
+				tabDelete = {
 					order = 100, type = "group", name = "Delete",
 					args = {
 						-- delete button
