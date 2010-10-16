@@ -19,7 +19,7 @@ function mod.AddAlertIconStart(alertIndex, sound)
 		alertIndex = alertIndex,
 		sound = sound,
 		
-		last = 0,
+		last = -1,
 	}
 end
 --------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ function mod.AddAlertMIconStart(id, alertIndex, sound)
 		alertIndex = alertIndex,
 		sound = sound,
 		
-		last = 0,
+		last = -1,
 	}
 end
 --------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ function mod.AddAlertBarStart(alertIndex, sound)
 		alertIndex = alertIndex,
 		sound = sound,
 		
-		last = 0,
+		last = -1,
 		lastReversed = 1000000, -- some really big number
 	}
 end
@@ -97,7 +97,7 @@ function mod.AddAlertMBarStart(id, alertIndex, sound)
 		alertIndex = alertIndex,
 		sound = sound,
 		
-		last = 0,
+		last = -1,
 		lastReversed = 1000000, -- some really big number
 	}
 end

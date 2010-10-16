@@ -78,9 +78,6 @@ function iconPrototype:Init()
 	self.stack:SetJustifyH("RIGHT")
 	self.stack:SetPoint("RIGHT", self.stackFrame, "RIGHT", 0, 0)
 	
-	-- helpful vars
-	self.lastReversed = -1
-	
 	self:Hide()
 end
 
@@ -207,12 +204,18 @@ end
 -- this should be called for alerts, when you don't add the icon
 function prototype:___HideIcon(id)
 	-- expiration alert handling
-	if self.hasAlerts == 1 and self.alerts[id].expiration then
-		local a = self.alerts[id].expiration
-		if a.last > a.timeLeft then
-			a.last = 0
-			modAlerts:Play(a.alertIndex, a.texture, a.sound)
+	if self.hasAlerts == 1 then
+		if self.alerts[id].expiration then
+			local a = self.alerts[id].expiration
+			if a.last > a.timeLeft then
+				a.last = 0
+				modAlerts:Play(a.alertIndex, a.texture, a.sound)
+			end
 		end
+		if self.alerts[id].start then
+			self.alerts[id].start.last = -1
+		end
+			
 	end
 end
 
@@ -244,10 +247,11 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 		icon.lastReversed = reversed
 	end
 	
-	if start ~= icon.lastStart then
+	if start ~= icon.lastStart or duration ~= icon.lastDuration then
 		e:StopAnimating()
 		CooldownFrame_SetTimer(e, start, duration, enable)
 		icon.lastStart = start
+		icon.lastDuration = duration
 	end
 	
 	-- stack
@@ -293,7 +297,7 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 			-- start alert
 			if self.alerts[id].start then
 				local a = self.alerts[id].start
-				if v ~= -1 and a.last == -1 then
+				if (v ~= -1 and a.last == -1) or (v > 0 and v > a.last) then
 					modAlerts:Play(a.alertIndex, texture, a.sound)
 				end
 				a.last = v
@@ -324,7 +328,9 @@ local function OnUpdate(self, elapsed)
 		-- display the first error met into the behavior tab
 		-- also announce the user we got an error
 		if self.errExec == "" then
-			print("clcInfo.MIcon" .. self.index ..":", err)
+			local en = self.db.udLabel
+			if en == "" then en = "clcInfo.MIcon" .. self.index end
+			print( en ..":", err)
 			self.errExec = err
 			clcInfo:UpdateOptions() -- request update of the tab
 		end

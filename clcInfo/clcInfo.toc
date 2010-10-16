@@ -17,6 +17,7 @@ display\icons.lua
 display\bars.lua
 display\micons.lua
 display\mbars.lua
+display\texts.lua
 
 data\global_icon.lua
 data\global_bar.lua

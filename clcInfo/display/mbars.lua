@@ -387,7 +387,9 @@ local function OnUpdate(self, elapsed)
 			-- display the first error met into the behavior tab
 			-- also announce the user we got an error
 			if self.errExec == "" then
-				print("clcInfo.MBar" .. self.index ..":", err)
+				local en = self.db.udLabel
+				if en == "" then en = "clcInfo.MBar" .. self.index end
+				print( en ..":", err)
 				self.errExec = err
 				clcInfo:UpdateOptions() -- request update of the tab
 			end

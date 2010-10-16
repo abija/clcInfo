@@ -56,7 +56,9 @@ local function OnUpdate(self, elapsed)
 		-- display the first error met into the behavior tab
 		-- also announce the user we got an error
 		if self.errExec == "" then
-			print("clcInfo.Icon" .. self.index ..":", visible)
+			local en = self.db.udLabel
+			if en == "" then en = "clcInfo.Icon" .. self.index end
+			print( en ..":", visible)
 			self.errExec = visible
 			clcInfo:UpdateOptions() -- request update of the tab
 		end
@@ -66,12 +68,19 @@ local function OnUpdate(self, elapsed)
 	
 	-- hide when not visible
 	if not visible then
-		-- check if expiration alert ran 
-		if self.hasAlerts == 1 and self.alerts.expiration then
-			local a = self.alerts.expiration
-			if a.last > a.timeLeft then
-				a.last = 0
-				modAlerts:Play(a.alertIndex, self.lastTexture, a.sound)
+		-- check for alerts
+		if self.hasAlerts == 1 then
+			-- expiration alert
+			if self.alerts.expiration then
+				local a = self.alerts.expiration
+				if a.last > a.timeLeft then
+					a.last = 0
+					modAlerts:Play(a.alertIndex, self.lastTexture, a.sound)
+				end
+			end
+			-- start alert
+			if self.alerts.start then
+				self.alerts.start.last = -1
 			end
 		end
 		self:FakeHide()
@@ -95,10 +104,11 @@ local function OnUpdate(self, elapsed)
 	
 	-- TODO
 	-- check if this is working properly, don't want to miss timers
-	if start ~= self.lastStart then
+	if start ~= self.lastStart or duration ~= self.lastDuration then
 		e:StopAnimating()
 		CooldownFrame_SetTimer(e, start, duration, enable)
 		self.lastStart = start
+		self.lastDuration = duration
 	end
 	
 	
@@ -143,7 +153,7 @@ local function OnUpdate(self, elapsed)
 		-- start alert
 		if self.alerts.start then
 			local a = self.alerts.start
-			if v ~= -1 and a.last == -1 then
+			if (v ~= -1 and a.last == -1) or (v > 0 and v > a.last) then
 				modAlerts:Play(a.alertIndex, self.lastTexture, a.sound)
 			end
 			a.last = v

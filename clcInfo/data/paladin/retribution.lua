@@ -7,13 +7,13 @@ local GetTime = GetTime
 -- default settings for this module
 --------------------------------------------------------------------------------
 local defaults = {
-	version = 1,
+	version = 2,
 	
 	rangePerSkill = false,
-	fillers = { "exo", "j", "how", "hw" },
+	fillers = { "how", "tv", "cs", "exo", "j", "hw" },
 }
 
-local MAX_FILLERS = 5
+local MAX_FILLERS = 9
 
 -- create a module in the main addon
 local mod = clcInfo:RegisterClassModule("retribution")
@@ -32,12 +32,12 @@ local enabled = true
 local s2
 local UpdateS2
 
-local taowSpellName = GetSpellInfo(59578) 				-- the art of war
-local spellHandOfLight = GetSpellInfo(90174)
+local buffTheArtOfWar = GetSpellInfo(59578)
+local buffHandOfLight = GetSpellInfo(90174)
+local buffZealotry = GetSpellInfo(85696)
 
 -- priority queue generated from fillers
 local pq
-local ppq
 -- number of spells in the queue
 local numSpells
 -- display queue
@@ -57,7 +57,7 @@ local spells = {
 	cls 	= { id = 4987		},		-- cleanse
 }
 
-local fillers = { exo = {}, how = {}, j = {}, hw = {}, cons = {} }
+local fillers = { tv = {}, cs = {}, exo = {}, how = {}, j = {}, hw = {}, cons = {} }
 
 -- expose for options
 mod.fillers = fillers
@@ -71,6 +71,12 @@ function mod.OnInitialize()
 		clcInfo.cdb.classModules["retribution"] = defaults
 		db = clcInfo.cdb.classModules["retribution"]
 		print("clcInfo/ClassModules/Retribution:", "Settings have been reset to clear 3.x data. Sorry for the inconvenience.")
+	end
+	
+	if db.version < 2 then
+		clcInfo:SPD("CS and TV are again included into the rotation. Make sure to adjust your settings.")
+		db.fillers = { "how", "tv", "cs", "exo", "j", "hw" }
+		db.version = 2
 	end
 	
 	mod:InitSpells()
@@ -122,7 +128,7 @@ end
 -- pass filler order from command line
 -- intended to be used in macros
 local function CmdRetFillers(args)
-	local lastCount = #db.filler
+	local lastCount = #db.fillers
 
 	-- add args to options
 	local num = 0
@@ -189,185 +195,106 @@ function mod.RetRotation(csBoost, useInq, preInq)
 	local ctime, cdStart, cdDuration, cs, gcd
 	ctime = GetTime()
 	
+	local preCS = true -- skils before CS are boosted too
+
 	-- get HP, HoL
 	local hp = UnitPower("player", SPELL_POWER_HOLY_POWER)
-	local hol = UnitBuff("player", spellHandOfLight) or false
+	local hol = UnitBuff("player", buffHandOfLight) or false
+	local zeal = UnitBuff("player", buffZealotry) or false
 	
-	if hp == 3 and hol then
-		-- got lucky, double tv
-		dq[1] = spells.tv.name
-		dq[2] = spells.tv.name
+	-- gcd
+	cdStart, cdDuration = GetSpellCooldown(spells.cls.name)
+	if cdStart > 0 then
+		gcd = cdStart + cdDuration - ctime
 	else
-		-- didn't get lucky, find out cs + filler cooldowns
+		gcd = 0
+	end
+	
+	-- get cooldowns for fillers
+	local v, cd, index
+	
+	for i = 1, #pq do
+		v = pq[i]
 		
-		-- gcd
-		cdStart, cdDuration = GetSpellCooldown(spells.cls.name)
+		cdStart, cdDuration = GetSpellCooldown(v.name)
 		if cdStart > 0 then
-			gcd = cdStart + cdDuration - ctime
+			v.cd = cdStart + cdDuration - ctime - gcd
 		else
-			gcd = 0
+			v.cd = 0
 		end
 		
-		-- cs
-		cdStart, cdDuration = GetSpellCooldown(spells.cs.name)
-		if cdStart > 0 then
-			cs = cdStart + cdDuration - ctime
-		else
-			cs = 0
-		end
-		cs = cs - gcd - csBoost
+		-- boost skills before CS
+		if preCS then v.cd = v.cd - csBoost end
 		
-		if hp == 3 or hol then
-			-- tv + x
-			dq[1] = spells.tv.name
-			
-			-- everything now is delayed by 1.5s
-			cs = cs - 1.5  -- adjust cs
-			
-			-- test maybe we don't need to check rest of cooldowns
-			if cs <= 0 then
-				-- got lucky, tv + cs
-				dq[2] = spells.cs.name
-			else
-				-- get cooldowns for fillers
-				local v, cd, index
-				
-				for i = 1, #pq do
-					v = pq[i]
-					v.name = spells[v.alias].name
-					
-					cdStart, cdDuration = GetSpellCooldown(v.name)
-					if cdStart > 0 then
-						v.cd = cdStart + cdDuration - ctime - 1.5 - gcd
-					else
-						v.cd = 0
-					end
-					
-					if v.alias == "how" then
-						if not IsUsableSpell(v.name) then v.cd = 100 end
-					elseif v.alias == "exo" then
-						if UnitBuff("player", taowSpellName) == nil then v.cd = 100 end
-					end
-					
-					-- clamp so sorting is proper
-					if v.cd < 0 then v.cd = 0 end
-				end
-				
-				-- sort cooldowns once, get min cd and the index in the table
-				index = 1
-				cd = pq[1].cd
-				for i = 1, #pq do
-					v = pq[i]
-					if (v.cd < cd) or ((v.cd == cd) and (i < index)) then
-						index = i
-						cd = v.cd
-					end
-				end
-				
-				-- test vs cs
-				if cs <= cd then
-					-- tv + cs
-					dq[2] = spells.cs.name
-				else
-					-- tv + f1
-					dq[2] = pq[index].name
-				end
+		if v.alias == "how" then
+			if not IsUsableSpell(v.name) then
+				v.cd = 100
 			end
-		else
-			-- no tv -> it's either cs + filler or 2 fillers
-			-- TODO : is 2 fillers even viable at low haste?
-			
-			-- get cooldowns for fillers
-			local v, cd, index
-			
-			for i = 1, #pq do
-				v = pq[i]
-				v.name = spells[v.alias].name
-				
-				cdStart, cdDuration = GetSpellCooldown(v.name)
-				if cdStart > 0 then
-					v.cd = cdStart + cdDuration - ctime - gcd
-				else
-					v.cd = 0
-				end
-				
-				if v.alias == "how" then
-					if not IsUsableSpell(v.name) then v.cd = 100 end
-				elseif v.alias == "exo" then
-					if UnitBuff("player", taowSpellName) == nil then v.cd = 100 end
-				end
-				
-				-- clamp so sorting is proper
-				if v.cd < 0 then v.cd = 0 end
+		elseif v.alias == "tv" then
+			if not (hol or hp == 3) then
+				v.cd = 15
 			end
-			
-			-- sort cooldowns once, get min cd and the index in the table
-			index = 1
-			cd = pq[1].cd
-			for i = 1, #pq do
-				v = pq[i]
-				if (v.cd < cd) or ((v.cd == cd) and (i < index)) then
-					index = i
-					cd = v.cd
-				end
-			end
-			
-			-- test vs cs
-			if cs <= cd then
-				-- cs + f1
-				dq[1] = spells.cs.name
-				if hp == 2 then
-					-- 3 hp ability
-					dq[2] = spells.tv.name
-				else
-					dq[2] = pq[index].name
-				end
-			else
-				-- f1 + cs or f2
-				dq[1] = pq[index].name
-				
-				-- delay everything by 1.5 now
-				-- todo: take haste into account here, since s1 might be a spell
-				cs = cs - 1.5
-				
-				-- one more hope with cs
-				if cs <= 0 then
-					-- f1 + cs
-					dq[2] = spells.cs.name
-				else
-					-- worst case scenario possible
-					pq[index].cd = 1000 -- delay last used skill a lot
-					
-					-- get new clamped cooldowns
-					for i = 1, #pq do
-						v.cd = v.cd - 1.5
-						if v.cd < 0 then v.cd = 0 end
-					end
-					
-					-- get min again
-					index = 1
-					cd = pq[1].cd
-					for i = 1, #pq do
-						v = pq[i]
-						if (v.cd < cd) or ((v.cd == cd) and (i < index)) then
-							index = i
-							cd = v.cd
-						end
-					end
-						
-					-- test vs cs
-					if cs <= cd then
-						-- f1 + cs
-						dq[2] = spells.cs.name
-					else
-						-- f1 + f2
-						dq[2] = pq[index].name
-					end
-				end
-			end
-			
+		elseif v.alias == "cs" then
+			preCS = false
+		elseif v.alias == "exo" then
+			if UnitBuff("player", buffTheArtOfWar) == nil then v.cd = 100 end
+		end
+		
+		-- clamp so sorting is proper
+		if v.cd < 0 then v.cd = 0 end
+	end
+	
+	-- sort cooldowns once, get min cd and the index in the table
+	index = 1
+	cd = pq[1].cd
+	for i = 1, #pq do
+		v = pq[i]
+		if (v.cd < cd) or ((v.cd == cd) and (i < index)) then
+			index = i
+			cd = v.cd
 		end
 	end
+	
+	dq[1] = pq[index].name
+	
+	-- adjust hp for next skill
+	if dq[1] == spells.cs.name then
+		if zeal then
+			hp = hp + 3
+		else
+			hp = hp + 1
+		end
+	elseif dq[1] == spells.tv.name and not hol then
+		hp = 0
+	end
+	pq[index].cd = 101 -- put first one at end of queue
+	
+	-- get new clamped cooldowns
+	for i = 1, #pq do
+		v = pq[i]
+		if v.name == spells.tv.name then
+			if hp >= 3 then
+				v.cd = 0
+			else
+				v.cd = 100
+			end
+		else
+			v.cd = v.cd - 1.5 - cd
+			if v.cd < 0 then v.cd = 0 end
+		end
+	end
+	
+	-- sort again
+	index = 1
+	cd = pq[1].cd
+	for i = 1, #pq do
+		v = pq[i]
+		if (v.cd < cd) or ((v.cd == cd) and (i < index)) then
+			index = i
+			cd = v.cd
+		end
+	end
+	dq[2] = pq[index].name
 	
 	-- inquisition, if active and needed -> change first tv in dq1 or dq2 with inquisition
 	if useInq then
@@ -426,3 +353,38 @@ function emod.IconRet2()
 	s2.ExecCleanup = ExecCleanup
 end
 --------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-- various other rotation tries
+--------------------------------------------------------------------------------
+local rotations = {}
+
+-- // test r1
+do
+	-- @findme
+	-- rearange this list to change priority
+	local pq = {
+		{ alias = "how" },
+		{ alias = "tv" },
+		{ alias = "cs" },
+		{ alias = "exo" },
+		{ alias = "j" },
+		{ alias = "hw" },
+	}
+	function rotations.r1(csBoost)
+	end -- //
+end
+-- // test r1
+
+function emod.IconRet1Ex(rotation, ...)
+	local gotskill = false
+	if enabled then
+		gotskill = rotations[rotation](...)
+	end
+	
+	if s2 then UpdateS2(s2, 100) end	-- update with a big "elapsed" so it's updated on call
+	if gotskill then
+		return emod.IconSpell(dq[1], db.rangePerSkill or spells.cs.name)
+	end
+end

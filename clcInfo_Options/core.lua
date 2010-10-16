@@ -1,9 +1,10 @@
-clcInfo_Options = {}
+clcInfo_Options = { templates = { icons = {}, bars = {}, micons = {}, mbars = {}, texts = {} } }
 local mod = clcInfo_Options
 local AceDialog, AceRegistry, AceGUI, SML, registered, options
 
 AceDialog = AceDialog or LibStub("AceConfigDialog-3.0")
 AceRegistry = AceRegistry or LibStub("AceConfigRegistry-3.0")
+AceSerializer = AceSerializer or LibStub("AceSerializer-3.0")
 
 options = {
 	type = "group",
@@ -14,11 +15,8 @@ options = {
 -- expose
 mod.AceDialog = AceDialog
 mod.AceRegistry = AceRegistry
+mod.AceSerializer = AceSerializer
 mod.options = options
-
--- list of class modules
-mod.cmLoaders = {}
-mod.cmLoadersActiveTemplate = {}
 
 -- useful tables for options
 mod.anchorPoints = { CENTER = "CENTER", TOP = "TOP", BOTTOM = "BOTTOM", LEFT = "LEFT", RIGHT = "RIGHT", TOPLEFT = "TOPLEFT", TOPRIGHT = "TOPRIGHT", BOTTOMLEFT = "BOTTOMLEFT", BOTTOMRIGHT = "BOTTOMRIGHT" }
@@ -32,14 +30,14 @@ end
 function mod:LoadClassModules()
 	-- delete old table
 	options.args.classModules = { order = 50, type = "group", name = "Class Modules", args = {} }
-	for i = 1, #(mod.cmLoaders) do
-		mod.cmLoaders[i]()
+	for i = 1, #(clcInfo.optionsCMLoaders) do
+		clcInfo.optionsCMLoaders[i]()
 	end
 	
 	-- update all the class modules that save options in templates
 	if clcInfo.activeTemplate then
-  	for i = 1, #(mod.cmLoadersActiveTemplate) do
-			mod.cmLoadersActiveTemplate[i]()
+  	for i = 1, #(clcInfo.optionsCMLoadersActiveTemplate) do
+			clcInfo.optionsCMLoadersActiveTemplate[i]()
 		end
 	end
 end

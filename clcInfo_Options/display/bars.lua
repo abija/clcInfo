@@ -103,12 +103,28 @@ local function SetSound(info, val) sound = val end
 local function GetErrExec(info) return modBars.active[tonumber(info[3])].errExec or "" end
 local function GetErrExecAlert(info) return modBars.active[tonumber(info[3])].errExecAlert or "" end
 
+-- user defined label
 local function GetUDLabel(info)
 	local name = modBars.active[tonumber(info[3])].db.udLabel
 	if name == "" then name = "Bar" .. info[3] end
 	return name
 end
 
+
+-- template code
+--------------------------------------------------------------------------------
+local execTemplateList = {}
+for k, v in pairs(clcInfo_Options.templates.bars) do
+	execTemplateList[k] = v.name
+end
+
+local function SetExecTemplate(info, val)
+	local obj = modBars.active[tonumber(info[3])]
+	obj.db.exec = clcInfo_Options.templates.bars[val].exec
+	obj:UpdateExec()
+	clcInfo:UpdateOptions()
+end
+--------------------------------------------------------------------------------
 
 
 function mod:UpdateBarList()
@@ -253,8 +269,12 @@ function mod:UpdateBarList()
 				tabSkin = {
 					order = 4, type = "group", name = "Skin",
 					args = {
+						__warning = {
+							order = 1, type = "description",
+							name = "|cff00ffffIn order to use these settings go to General tab and set |cffffffff[Use skin from] |cff00ffffoption to |cffffffff[Self]|cff00ffff.\n",
+						},
 						hasBg = {
-							order = 1, type = "group", inline = true, name = "",
+							order = 2, type = "group", inline = true, name = "",
 							args = {
 								barBg = {
 									type = "toggle", width = "full", name = "Use background texture.",
@@ -263,7 +283,7 @@ function mod:UpdateBarList()
 							},
 						},
 						barColors = {
-							order = 2, type = "group", inline = true, name = "Bar Colors",
+							order = 3, type = "group", inline = true, name = "Bar Colors",
 							args = {
 									barColor = {
 										order = 1, type = "color", hasAlpha = true, name = "Bar",
@@ -279,7 +299,7 @@ function mod:UpdateBarList()
 							},
 						},
 						barTextures = {
-							order = 3, type = "group", inline = true, name = "Bar Textures",
+							order = 4, type = "group", inline = true, name = "Bar Textures",
 							args = {
 								barTexture = {
 									order = 1, type = 'select', dialogControl = 'LSM30_Statusbar', name = 'Bar',
@@ -537,7 +557,7 @@ function mod:UpdateBarList()
 									order = 1, type = "input", multiline = true, name = "", width = "full",
 									get = Get, set = SetExec,
 								},
-								err = { order = 2, type = "description", name = GetErrExec },
+								err = { order = 10, type = "description", width = "full", name = GetErrExec },
 							},
 						},
 						ups = {
@@ -558,7 +578,7 @@ function mod:UpdateBarList()
 								},
 								err = { order = 2, type = "description", name = GetErrExecAlert },
 								_x1 = {
-									order = 3, type = 'select', dialogControl = 'LSM30_Sound', name = 'List of available sounds',
+									order = 3, type = 'select', dialogControl = 'LSM30_Sound', width="full", name = 'List of available sounds',
 									values = LSM:HashTable("sound"), get = GetSound, set = SetSound,
 								},
 							},
@@ -578,6 +598,16 @@ function mod:UpdateBarList()
 			},
 		}
 	end
+	
+	-- add the templates
+  if #execTemplateList > 0 then
+  	for i =1, #db do
+  		optionsBars.args[tostring(i)].args.tabBehavior.args.code.args.templates = {
+				order = 2, type = "select", width = "double", name = "Templates", values = execTemplateList,
+				set = SetExecTemplate,
+			}
+  	end
+  end
 	
 	if mod.lastBarCount > #(db) then
 		-- nil the rest of the args

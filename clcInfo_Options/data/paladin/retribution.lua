@@ -11,7 +11,7 @@ local baseMod = clcInfo.classModules.retribution
 local baseDB = clcInfo.cdb.classModules.retribution
 
 -- some lazy staic numbers
-local MAX_FILLERS = 5	
+local MAX_FILLERS = 9
 
 --[[
 classModules
@@ -49,38 +49,6 @@ local function GetSpellChoice()
 	return sc
 end
 
--- preset frame get, set
-local function GetPF(info)
-	return baseDB.presetFrame[info[#info]]
-end
-local function SetPF(info, val)
-	baseDB.presetFrame[info[#info]] = val
-	baseMod:PresetFrame_UpdateAll()
-end
-local function GetPF_Color(info)
-	return unpack(baseDB.presetFrame[info[#info]])
-end
-local function SetPF_Color(info, r, g, b, a)
-	baseDB.presetFrame[info[#info]] = {r, g, b, a}
-	baseMod:PresetFrame_UpdateAll()
-end
-
--- preset get, set, load, save
---info: classModules retribution tabPresets 1 name
-local function GetP(info)
-	return baseDB.presets[tonumber(info[4])][info[5]]
-end
-local function SetP(info, val)
-	baseDB.presets[tonumber(info[4])][info[5]] = strtrim(val)
-	baseMod:PresetFrame_UpdateAll()
-end
-local function LoadP(info)
-	baseMod.Preset_Load(tonumber(info[4]))
-end
-local function SaveP(info)
-	baseMod.Preset_SaveCurrent(tonumber(info[4]))
-end
-
 local function LoadModule()
 	options.args.classModules.args.retribution = {
 		order = 4, type = "group", childGroups = "tab", name = "Retribution",
@@ -99,21 +67,18 @@ local function LoadModule()
 					},
 				},
 			},
-			tabFillers = { order = 2, type = "group", name = "Filler Order", args = {} },
+			tabFillers = { order = 2, type = "group", name = "Priority", args = {} },
 		},
 	}
 	
 	-- filler selection
 	local args = options.args.classModules.args.retribution.args.tabFillers.args
 	for i = 1, MAX_FILLERS do
-		args["label" .. i] = {
-			order = i*2, type = "description", name = "", width = "double",
-		}
 		args[tostring(i)] = {
-			order = i*2 - 1, type = "select", name = tostring(i), 
+			order = i, type = "select", name = tostring(i), 
 			get = GetFiller, set = SetFiller, values = GetSpellChoice,
 		}
 	end
 	
 end
-mod.cmLoaders[#(mod.cmLoaders) + 1] = LoadModule
+clcInfo.optionsCMLoaders[#(clcInfo.optionsCMLoaders) + 1] = LoadModule

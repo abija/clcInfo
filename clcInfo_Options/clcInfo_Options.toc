@@ -10,6 +10,19 @@ embeds.xml
 #@end-no-lib-strip@
 
 core.lua
+
+code_templates\global.lua
+code_templates\deathknight.lua
+code_templates\druid.lua
+code_templates\hunter.lua
+code_templates\mage.lua
+code_templates\paladin.lua
+code_templates\priest.lua
+code_templates\rogue.lua
+code_templates\shaman.lua
+code_templates\warlock.lua
+code_templates\warrior.lua
+
 templates.lua
 activeTemplate.lua
 
@@ -19,6 +32,7 @@ display\bars.lua
 display\micons.lua
 display\mbars.lua
 display\alerts.lua
+display\texts.lua
 
 data\global.lua
 data\custom.lua
@@ -30,3 +44,4 @@ data\paladin\holy.lua
 data\paladin\custom.lua
 
 data\deathknight\global.lua
+

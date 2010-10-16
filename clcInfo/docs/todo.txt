@@ -1,3 +1,11 @@
+-- TEXTS
+
+-- tutorial todo:
+- skins
+--------------------------------------------------------------------------------
+
+-- transform ppb from xml to lua so it also runs on demand?
+
 -- templates
 
 - effects on the elements themselves?

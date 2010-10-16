@@ -28,27 +28,32 @@ local function LoadModuleActiveTemplate()
 			tabGeneral = {
 				order = 1, type = "group", name = "General", args = {
 					movePPBar = {
-						order = 1, type = "group", inline = true, name = "Paladin Power Bar Position",
+						order = 1, type = "group", inline = true, name = "Custom Holy Power Bar",
 						args = {
 							movePPBar = {
-								order = 1, type = "toggle", width = "full",
-								name = "Enabled",
+								order = 1, type = "toggle",
+								name = "Use own bar",
+								get = Get, set = Set,
+							},
+							hideBlizPPB = {
+								order = 2, type = "toggle", width="double",
+								name = "Hide Blizzard",
 								get = Get, set = Set,
 							},
 							ppbX = {
-								order = 2, type = "range", min = -2000, max = 2000, step = 1, name = "X",
+								order = 12, type = "range", min = -2000, max = 2000, step = 1, name = "X",
 								get = Get, set = Set,
 							},
 							ppbY = {
-								order = 3, type = "range", min = -2000, max = 2000, step = 1, name = "Y",
+								order = 13, type = "range", min = -2000, max = 2000, step = 1, name = "Y",
 								get = Get, set = Set,
 							},
 							ppbScale = {
-								order = 4, type = "range", min = 0.1, max = 10, step = 0.1, name = "Scale",
+								order = 14, type = "range", min = 0.1, max = 10, step = 0.1, name = "Scale",
 								get = Get, set = Set,
 							},
 							ppbAlpha = {
-								order = 5, type = "range", min = 0, max = 1, step = 0.01, name = "Alpha",
+								order = 15, type = "range", min = 0, max = 1, step = 0.01, name = "Alpha",
 								get = Get, set = Set,
 							},
 						},
@@ -58,4 +63,4 @@ local function LoadModuleActiveTemplate()
 		},
 	}
 end
-mod.cmLoadersActiveTemplate[#(mod.cmLoadersActiveTemplate) + 1] = LoadModuleActiveTemplate
+clcInfo.optionsCMLoadersActiveTemplate[#(clcInfo.optionsCMLoadersActiveTemplate) + 1] = LoadModuleActiveTemplate

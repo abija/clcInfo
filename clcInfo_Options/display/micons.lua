@@ -112,12 +112,29 @@ local function GetErrExec(info) return modMIcons.active[tonumber(info[3])].errEx
 local function GetErrExecAlert(info) return modMIcons.active[tonumber(info[3])].errExecAlert or "" end
 
 
+-- user defined label
 local function GetUDLabel(info)
 	local name = modMIcons.active[tonumber(info[3])].db.udLabel
 	if name == "" then name = "MIcon" .. info[3] end
 	return name
 end
 
+
+
+-- template code
+--------------------------------------------------------------------------------
+local execTemplateList = {}
+for k, v in pairs(clcInfo_Options.templates.micons) do
+	execTemplateList[k] = v.name
+end
+
+local function SetExecTemplate(info, val)
+	local obj = modMIcons.active[tonumber(info[3])]
+	obj.db.exec = clcInfo_Options.templates.micons[val].exec
+	obj:UpdateExec()
+	clcInfo:UpdateOptions()
+end
+--------------------------------------------------------------------------------
 
 
 function mod:UpdateMIconList()
@@ -263,8 +280,12 @@ function mod:UpdateMIconList()
 				tabSkin = {
 					order = 4, type = "group", name = "Skin",
 					args = {
+						__warning = {
+							order = 1, type = "description",
+							name = "|cff00ffffIn order to use these settings go to General tab and set |cffffffff[Use skin from] |cff00ffffoption to |cffffffff[Self]|cff00ffff.\n",
+						},
 						selectType = {
-							order = 1, type = "group", inline = true, name = "Skin Type",
+							order = 2, type = "group", inline = true, name = "Skin Type",
 							args = {
 								skinType = {
 									order = 1, type = "select", name = "Skin type", values = GetSkinTypeList,
@@ -308,7 +329,7 @@ function mod:UpdateMIconList()
 								},
 								err = { order = 2, type = "description", name = GetErrExecAlert },
 								_x1 = {
-									order = 3, type = 'select', dialogControl = 'LSM30_Sound', name = 'List of available sounds',
+									order = 3, type = 'select', dialogControl = 'LSM30_Sound', width="full", name = 'List of available sounds',
 									values = LSM:HashTable("sound"), get = GetSound, set = SetSound,
 								},
 							},
@@ -333,7 +354,7 @@ function mod:UpdateMIconList()
   if clcInfo.lbf then
   	for i = 1, #db do
 	  	optionsMIcons.args[tostring(i)].args.tabSkin.args.bfOptions = {
-	  		order = 2, type = "group", inline = true, name = "Button Facade Options",
+	  		order = 10, type = "group", inline = true, name = "Button Facade Options",
 	  		args = {
 	  			bfSkin = {
 	  				order = 1, type = "select", name = "Button Facade Skin", values = clcInfo.lbf.ListSkins,
@@ -346,6 +367,16 @@ function mod:UpdateMIconList()
 	  		}
 	  	}
 	  end
+  end
+  
+  -- add the templates
+  if #execTemplateList > 0 then
+  	for i =1, #db do
+  		optionsMIcons.args[tostring(i)].args.tabBehavior.args.code.args.templates = {
+				order = 2, type = "select", width = "double", name = "Templates", values = execTemplateList,
+				set = SetExecTemplate,
+			}
+  	end
   end
 	
 	if mod.lastMIconCount > #(db) then

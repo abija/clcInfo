@@ -1,6 +1,7 @@
 -- exposed vars
 local mod = clcInfo_Options
 local AceRegistry = mod.AceRegistry
+local AceSerializer = AceSerializer
 local options = mod.options
 
 local modIcons = clcInfo.display.icons
@@ -114,7 +115,61 @@ local function GetUDLabel(info)
 	local name = modIcons.active[tonumber(info[3])].db.udLabel
 	if name == "" then name = "Icon" .. info[3] end
 	return name
-end				
+end	
+
+-- template code
+--------------------------------------------------------------------------------
+local execTemplateList = {}
+for k, v in pairs(clcInfo_Options.templates.icons) do
+	execTemplateList[k] = v.name
+end
+
+local function SetExecTemplate(info, val)
+	local obj = modIcons.active[tonumber(info[3])]
+	obj.db.exec = clcInfo_Options.templates.icons[val].exec
+	obj:UpdateExec()
+	clcInfo:UpdateOptions()
+end
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- import / export
+--------------------------------------------------------------------------------
+local importString
+local importId
+StaticPopupDialogs["CLCINFO_CONFIRM_IMPORT_ICON"] = {
+	text = "Are you sure you want to import this data?\nIf the information you pasted is wrong it could lead to a lot of problems.",
+	button1 = YES,
+	button2 = NO,
+	OnAccept = function (self)
+		if not importString or importString == "" then return end
+		local success, t = AceSerializer:Deserialize(importString)
+		if success then
+			clcInfo.cdb.templates[clcInfo.activeTemplateIndex].icons[importId] = t
+			clcInfo.display.icons:ClearElements()
+			clcInfo.display.icons:InitElements()
+			mod:UpdateIconList()
+		else
+			print(t)
+		end
+	end,
+	OnCancel = function (self) end,
+	hideOnEscape = 1,
+	timeout = 0,
+	exclusive = 1,
+}
+local function GetExport(info)
+	return AceSerializer:Serialize(modIcons.active[tonumber(info[3])].db)
+end
+local function SetExport(info, val)
+end
+local function GetImport(info) end
+local function SetImport(info, val)
+	importString = val
+	importId = tonumber(info[3])
+	StaticPopup_Show("CLCINFO_CONFIRM_IMPORT_ICON")
+end
+--------------------------------------------------------------------------------
 						
 function mod:UpdateIconList()
 	local db = modIcons.active
@@ -246,8 +301,12 @@ function mod:UpdateIconList()
 				tabSkin = {
 					order = 4, type = "group", name = "Skin",
 					args = {
+						__warning = {
+							order = 1, type = "description",
+							name = "|cff00ffffIn order to use these settings go to General tab and set |cffffffff[Use skin from] |cff00ffffoption to |cffffffff[Self]|cff00ffff.\n",
+						},
 						selectType = {
-							order = 1, type = "group", inline = true, name = "Skin Type",
+							order = 2, type = "group", inline = true, name = "Skin Type",
 							args = {
 								skinType = {
 									order = 1, type = "select", name = "Skin type", values = GetSkinTypeList,
@@ -270,7 +329,7 @@ function mod:UpdateIconList()
 									order = 1, type = "input", multiline = true, name = "", width = "full",
 									get = Get, set = SetExec,
 								},
-								err = { order = 2, type = "description", name = GetErrExec },
+								err = { order = 10, type = "description", width = "full", name = GetErrExec },
 							},
 						},
 						ups = {
@@ -291,13 +350,38 @@ function mod:UpdateIconList()
 								},
 								err = { order = 2, type = "description", name = GetErrExecAlert },
 								soundList = {
-									order = 3, type = 'select', dialogControl = 'LSM30_Sound', name = 'List of available sounds',
+									order = 3, type = 'select', dialogControl = 'LSM30_Sound', width="full", name = 'List of available sounds',
 									values = LSM:HashTable("sound"), get = GetSound, set = SetSound,
 								},
 							},
 						},
 					},
 				},
+				
+				tabExport = {
+					order = 90, type = "group", name = "Export/Import", 
+					args = {
+						export = {
+							order = 1, type = "group", inline = true, name = "Export string",
+							args = {
+								text = {
+									order = 1, type = "input", multiline = true, name = "", width = "full",
+									get = GetExport, set = SetExport,
+								},
+							},
+						},
+						import = {
+							order = 1, type = "group", inline = true, name = "Import string",
+							args = {
+								text = {
+									order = 1, type = "input", multiline = true, name = "", width = "full",
+									get = GetImport, set = SetImport,
+								},
+							},
+						},
+					},
+				},
+				
 				deleteTab = {
 					order = 100, type = "group", name = "Delete", 
 					args = {
@@ -316,7 +400,7 @@ function mod:UpdateIconList()
   if clcInfo.lbf then
   	for i = 1, #db do
 	  	optionsIcons.args[tostring(i)].args.tabSkin.args.bfOptions = {
-	  		order = 2, type = "group", inline = true, name = "Button Facade Options",
+	  		order = 10, type = "group", inline = true, name = "Button Facade Options",
 	  		args = {
 	  			bfSkin = {
 	  				order = 1, type = "select", name = "Button Facade Skin", values = clcInfo.lbf.ListSkins,
@@ -329,6 +413,16 @@ function mod:UpdateIconList()
 	  		}
 	  	}
 	  end
+  end
+  
+  -- add the templates
+  if #execTemplateList > 0 then
+  	for i =1, #db do
+  		optionsIcons.args[tostring(i)].args.tabBehavior.args.code.args.templates = {
+				order = 2, type = "select", width = "double", name = "Templates", values = execTemplateList,
+				set = SetExecTemplate,
+			}
+  	end
   end
 	
 	if mod.lastIconCount > #(db) then

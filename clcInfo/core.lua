@@ -4,6 +4,9 @@ clcInfo.templates = {}	-- the templates
 clcInfo.classModules = {}  -- stuff loaded per class
 clcInfo.cmdList = {}	-- list of functions registered to call from command line parameteres
 
+clcInfo.optionsCMLoaders = {} -- class module options loaders
+clcInfo.optionsCMLoadersActiveTemplate = {} -- special list for the ones who need options based on active template
+
 clcInfo.activeTemplate = nil  -- points to the active template
 clcInfo.activeTemplateIndex = 0 -- index of the active template
 
@@ -22,6 +25,13 @@ clcInfo.env = setmetatable({}, {__index = _G})  -- add all data functions in thi
 
 clcInfo.LSM = LibStub("LibSharedMedia-3.0")  -- SharedMedia
 clcInfo.lbf = LibStub("LibButtonFacade", true)  -- ButtonFacade
+
+-- static popup dialog
+StaticPopupDialogs["CLCINFO"] = {
+	text = "",
+	button1 = OKAY,
+	timeout = 0,
+}
 
 --------------------------------------------------------------------------------
 -- slash command and blizzard options
@@ -357,3 +367,11 @@ clcInfo.LSM:Register("sound", "clcInfo: Run", [[Sound\Creature\HoodWolf\HoodWolf
 clcInfo.LSM:Register("sound", "clcInfo: Explosion", [[Sound\Doodad\Hellfire_Raid_FX_Explosion05.wav]])
 clcInfo.LSM:Register("sound", "clcInfo: Die", [[Sound\Creature\CThun\CThunYouWillDIe.wav]])
 clcInfo.LSM:Register("sound", "clcInfo: Cheer", [[Sound\Event Sounds\OgreEventCheerUnique.wav]])
+
+-- static popup dialog call
+function clcInfo:SPD(s)
+	StaticPopupDialogs.CLCINFO.text = s
+	StaticPopup_Show("CLCINFO")
+end
+
+

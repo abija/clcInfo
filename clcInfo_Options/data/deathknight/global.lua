@@ -59,4 +59,4 @@ local function LoadModuleActiveTemplate()
 	}
 end
 -- these modules are loaded whenever template changes
-mod.cmLoadersActiveTemplate[#(mod.cmLoadersActiveTemplate) + 1] = LoadModuleActiveTemplate
+clcInfo.optionsCMLoadersActiveTemplate[#(clcInfo.optionsCMLoadersActiveTemplate) + 1] = LoadModuleActiveTemplate
