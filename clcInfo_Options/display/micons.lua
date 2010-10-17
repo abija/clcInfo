@@ -245,16 +245,19 @@ function mod:UpdateMIconList()
 				tabGrid = {
 					order = 2, type = "group", name = "Grid",
 					args = {
-						grid = {
-							order = 1,  type = "group", inline = true, name = "",
+						gridPosition = {
+							order = 1,  type = "group", inline = true, name = "Position in grid and size of the icons in cells",
 							args = {
 								gridX = {
-									order = 2, name = "Column", type = "range", min = 1, max = 200, step = 1,
+									order = 1, name = "Column", type = "range", min = 1, max = 200, step = 1,
 									get = Get, set = Set,
 								},
 								gridY = {
-									order = 3, name = "Row", type = "range", min = 1, max = 200, step = 1,
+									order = 2, name = "Row", type = "range", min = 1, max = 200, step = 1,
 									get = Get, set = Set,
+								},
+								_s1 = {
+									order = 3, type = "description", name = "",
 								},
 								sizeX = {
 									order = 4, name = "Width", type = "range", min = 1, max = 200, step = 1,

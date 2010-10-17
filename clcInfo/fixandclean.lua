@@ -3,7 +3,7 @@ local function bprint(...)
 	print(...)
 end
 
-clcInfo.__version = 49
+clcInfo.__version = 59
 
 --------------------------------------------------------------------------------
 -- TODO, make this GOOD
@@ -22,8 +22,7 @@ local function HasKey(t, key)
 	return false
 end
 -- IMPOTANT: does not delete not found keys due to the way it's called
-local AdaptConfig
-AdaptConfig = function(info, t1, t2)
+local function AdaptConfig(info, t1, t2)
 	if t1 == nil or type(t1) ~= "table" then bprint(info, "t1 is not a table") return end
 	if t2 == nil or type(t2) ~= "table" then bprint(info, "t2 is not a table") return end
 	
@@ -41,13 +40,38 @@ AdaptConfig = function(info, t1, t2)
 			bprint("found: " .. info .. ":" .. tostring(k))
 			if type(v) == "table" then
 				if type(t1[k]) ~= "table" then t1[k] = {} end
-				if not AdaptConfig(info .. "." .. tostring(k), t1[k], v) then return end
+				if not AdaptConfig(info .. "." .. tostring(k), t1[k], t2[k]) then return end
 			end
 		end
 	end
 	
 	return true
 end
+
+local function AdaptConfigAndClean(info, t1, t2)
+	if t1 == nil or type(t1) ~= "table" then bprint(info, "t1 is not a table") return end
+	if t2 == nil or type(t2) ~= "table" then bprint(info, "t2 is not a table") return end
+	
+	-- adapt first
+	if not AdaptConfig(info, t1, t2) then return end
+	
+	-- now clean
+	for k, v in pairs(t1) do
+		if not HasKey(t2, k) then
+			-- not found so delete
+			bprint("deleting: " .. info .. "." .. tostring(k))
+			t1[k] = nil
+		else
+			if type(v) == "table" then
+				-- recursive scan
+				if not AdaptConfigAndClean(info .. "." .. tostring(k), t1[k], t2[k]) then return end
+			end
+		end
+	end
+	
+	return true
+end
+
 
 -- to be done
 local function CleanConfig()
@@ -65,6 +89,10 @@ function clcInfo:FixSavedData()
 	
 	if clcInfo.cdb.version < 44 then
 		print("clcInfo:", "Made some changes to templates to reflect new way talent trees are handled. Please make sure you edit your settings (/clcInfo -> templates)!")
+	end
+	
+	if clcInfo.cdb.version < 59 then
+		clcInfo.SPD("clcInfo:\nNew skin settings for bars and multi bars elements. Also your UI scale settings will be applied to clcInfo elements.\nPlease adjust your configuration.\nSorry for the inconvenience.")
 	end
 	
 	bprint("performing db maintenace")
@@ -86,14 +114,14 @@ function clcInfo:FixSavedData()
 		
 		if not AdaptConfig("template" .. i .. ".skinOptions", x[i].skinOptions, ts) then return end
 		for k in pairs(ts) do
-			if not AdaptConfig("template" .. i .. ".skinOptions." .. k, x[i].skinOptions[k], clcInfo.display[k]:GetDefaultSkin()) then return end
+			if not AdaptConfigAndClean("template" .. i .. ".skinOptions." .. k, x[i].skinOptions[k], clcInfo.display[k]:GetDefaultSkin()) then return end
 		end
 		
 		-- display elements
 		for k in pairs(clcInfo.display) do
 			local y = x[i][k]
 			for j = 1, #y do
-				if not AdaptConfig("template" .. i .. "." .. k .. j, y[j], clcInfo.display[k].GetDefault()) then return end
+				if not AdaptConfigAndClean("template" .. i .. "." .. k .. j, y[j], clcInfo.display[k].GetDefault()) then return end
 			end	
 		end
 	end

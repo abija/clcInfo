@@ -74,7 +74,7 @@ function mod.OnInitialize()
 	end
 	
 	if db.version < 2 then
-		clcInfo:SPD("CS and TV are again included into the rotation. Make sure to adjust your settings.")
+		clcInfo.SPD("CS and TV are again included into the rotation. Make sure to adjust your settings.")
 		db.fillers = { "how", "tv", "cs", "exo", "j", "hw" }
 		db.version = 2
 	end

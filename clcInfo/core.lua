@@ -12,7 +12,7 @@ clcInfo.activeTemplateIndex = 0 -- index of the active template
 
 clcInfo.lastBuild = nil	 -- string that has talent info, used to see if talents really changed
 
-clcInfo.mf = CreateFrame("Frame", "clcInfoMF")  -- all elements parented to this frame, so it's easier to hide/show them
+clcInfo.mf = CreateFrame("Frame", "clcInfoMF", UIParent)  -- all elements parented to this frame, so it's easier to hide/show them
 
 clcInfo.mf.unit = "player" -- fix parent unit for when we have to parent bars here
 
@@ -371,7 +371,7 @@ clcInfo.LSM:Register("sound", "clcInfo: Die", [[Sound\Creature\CThun\CThunYouWil
 clcInfo.LSM:Register("sound", "clcInfo: Cheer", [[Sound\Event Sounds\OgreEventCheerUnique.wav]])
 
 -- static popup dialog call
-function clcInfo:SPD(s)
+function clcInfo.SPD(s)
 	StaticPopupDialogs.CLCINFO.text = s
 	StaticPopup_Show("CLCINFO")
 end

@@ -54,17 +54,17 @@ function barPrototype:Init()
 	self.barBd = {}
 	self.bar = CreateFrame("StatusBar", nil, self.barFrame)
 	
-	self.textLeft = self.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
-	self.textLeft:SetJustifyH("LEFT")
-	self.textCenter = self.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
-	self.textCenter:SetJustifyH("CENTER")
-	self.textRight = self.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
-	self.textRight:SetJustifyH("RIGHT")
+	self.t1 = self.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
+	self.t1:SetJustifyH("LEFT")
+	self.t2 = self.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
+	self.t2:SetJustifyH("CENTER")
+	self.t3 = self.bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
+	self.t3:SetJustifyH("RIGHT")
 	
 	self:Hide()
 end
 
--- for lazy/normal? people
+-- a simple skin, for faster use
 local function SimpleSkin(self, skin)
 	local opt = self.parent.db
 	
@@ -72,28 +72,30 @@ local function SimpleSkin(self, skin)
 	self:SetBackdrop(nil)
 	self.iconFrame:SetBackdrop(nil)
 	
-	self.bar:SetAllPoints(self.barFrame)
-	self.icon:SetAllPoints(self.iconFrame)
-	
 	if not skin.barBg then
 		self.barFrame:SetBackdrop(nil)
 	else
 		self.barBd.bgFile = LSM:Fetch("statusbar", skin.barBgTexture)
-		self.barBd.insets 	= { left = 0, right = 0, top = 0, bottom = 0 }
+		self.barBd.insets = { left = 0, right = 0, top = 0, bottom = 0 }
 		self.barFrame:SetBackdrop(self.barBd)
 		self.barFrame:SetBackdropColor(unpack(skin.barBgColor))
 		self.barFrame:SetBackdropBorderColor(0, 0, 0, 0)
 	end
 	
 	-- icon is same size as height and positioned to the left
-	self.iconFrame:SetWidth(opt.height)
-	self.iconFrame:SetHeight(opt.height)
+	self.iconFrame:ClearAllPoints()
+	self.iconFrame:SetSize(opt.height, opt.height)
 	self.iconFrame:SetPoint("LEFT", self)
+	self.icon:ClearAllPoints()
+	self.icon:SetAllPoints(self.iconFrame)
 	
 	-- 1px spacing
-	self.barFrame:SetWidth(opt.width - 1 - opt.height)
-	self.barFrame:SetHeight(opt.height)
+	self.barFrame:ClearAllPoints()
+	self.barFrame:SetSize(opt.width - 1 - opt.height, opt.height)
 	self.barFrame:SetPoint("LEFT", self, "LEFT", opt.height + 1, 0)
+	self.bar:ClearAllPoints()
+	self.bar:SetAllPoints(self.barFrame)
+	
 	
 	self.bar:SetStatusBarTexture(LSM:Fetch("statusbar", skin.barTexture))
 	self.bar:SetStatusBarColor(unpack(skin.barColor))
@@ -102,26 +104,29 @@ local function SimpleSkin(self, skin)
 	-- stack
 	local fh = opt.height * 0.7
 	if fh < 6 then fh = 6 end
-	local fontFace, _, fontFlags = self.textLeft:GetFont()
+	local fontFace, _, fontFlags = self.t1:GetFont()
 	
-	self.textLeft:SetFont(fontFace, fh, fontFlags)
-	self.textLeft:SetPoint("LEFT", self.barFrame, "LEFT", 2, 0)
-	self.textLeft:SetVertexColor(1, 1, 1, 1)
+	self.t1:SetFont(fontFace, fh, fontFlags)
+	self.t1:SetPoint("LEFT", self.barFrame, "LEFT", 2, 0)
+	self.t1:SetVertexColor(1, 1, 1, 1)
 	
-	self.textCenter:SetFont(fontFace, fh, fontFlags)
-	self.textCenter:SetPoint("CENTER", self.barFrame)
-	self.textCenter:SetVertexColor(1, 1, 1, 1)
+	self.t2:SetFont(fontFace, fh, fontFlags)
+	self.t2:SetPoint("CENTER", self.barFrame)
+	self.t2:SetVertexColor(1, 1, 1, 1)
 	
-	self.textRight:SetFont(fontFace, fh, fontFlags)
-	self.textRight:SetPoint("RIGHT", self.barFrame, "RIGHT", -2, 0)
-	self.textRight:SetVertexColor(1, 1, 1, 1)
+	self.t3:SetFont(fontFace, fh, fontFlags)
+	self.t3:SetPoint("RIGHT", self.barFrame, "RIGHT", -2, 0)
+	self.t3:SetVertexColor(1, 1, 1, 1)
 end
 
--- plenty of options
+-- full option skinning
 local function AdvancedSkin(self, skin)
 	local opt = self.parent.db
 	
-	-- full backdrop
+	------------------------------------------------------------------------------
+	-- backdrops
+	------------------------------------------------------------------------------
+	-- full
 	if skin.bd then
 		self.bd.bgFile 		= LSM:Fetch("background", skin.bdBg)
 		self.bd.edgeFile	= LSM:Fetch("border", skin.bdBorder)
@@ -134,42 +139,7 @@ local function AdvancedSkin(self, skin)
 		self:SetBackdrop(nil)
 	end
 	
-	-- icon positioning: right, left or hidden
-	local iconSizeLeft, iconSpaceLeft, iconSizeRight, iconSpaceRight
-	if skin.iconAlign == "right" then
-		iconSizeLeft = 0
-		iconSpaceLeft = 0
-		iconSizeRight = opt.height - 2 * skin.padding
-		iconSpaceRight = skin.iconSpacing
-	elseif skin.iconAlign == "left" then
-		iconSizeLeft = opt.height - 2 * skin.padding
-		iconSpaceLeft = skin.iconSpacing
-		iconSizeRight = 0
-		iconSpaceRight = 0
-	else
-		iconSizeLeft = 0
-		iconSpaceLeft = 0
-		iconSizeRight = 0
-		iconSpaceRight = 0
-	end
-	
-	-- icon frame
-	self.iconFrame:ClearAllPoints()
-	if skin.iconAlign == "right" then
-		self.iconFrame:Show()
-		self.iconFrame:SetPoint("TOPRIGHT", -skin.padding, -skin.padding)
-		self.iconFrame:SetPoint("BOTTOMLEFT", self, "BOTTOMRIGHT", -skin.padding - iconSizeRight, skin.padding)
-	elseif skin.iconAlign == "left" then
-		self.iconFrame:Show()
-		self.iconFrame:SetPoint("TOPLEFT", skin.padding, -skin.padding)
-		self.iconFrame:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", skin.padding + iconSizeLeft, skin.padding)
-	else
-		self.iconFrame:Hide()
-	end
-	self.icon:SetPoint("TOPLEFT", skin.iconPadding, -skin.iconPadding)
-	self.icon:SetPoint("BOTTOMRIGHT", -skin.iconPadding, skin.iconPadding)
-	
-	-- icon backdrop
+	-- icon
 	if skin.iconBd then
 		self.iconBd.bgFile = LSM:Fetch("statusbar", skin.iconBdBg)
 		self.iconBd.edgeFile = LSM:Fetch("border", skin.iconBdBorder)
@@ -182,12 +152,7 @@ local function AdvancedSkin(self, skin)
 		self.iconFrame:SetBackdrop(nil)
 	end
 	
-	-- barframe positioning
-	self.barFrame:ClearAllPoints()
-	self.barFrame:SetPoint("TOPLEFT", skin.padding + iconSizeLeft + iconSpaceLeft, -skin.padding)
-	self.barFrame:SetPoint("BOTTOMRIGHT", - skin.padding - iconSizeRight - iconSpaceRight, skin.padding)
-	
-	-- barframe backdrop
+	-- bar
 	self.barBd = {}
 	if skin.barBd then
 		self.barBd.bgFile = LSM:Fetch("statusbar", skin.barBgTexture)
@@ -203,35 +168,95 @@ local function AdvancedSkin(self, skin)
 		self.barFrame:SetBackdrop(self.barBd)
 		self.barFrame:SetBackdropColor(unpack(skin.barBgColor))
 	end
+	------------------------------------------------------------------------------
 	
-	-- bar
+	------------------------------------------------------------------------------
+	-- icon positioning: left, right or hidden
+	------------------------------------------------------------------------------
+	self.iconFrame:ClearAllPoints()
+	local iconSize = opt.height - skin.iconTop - skin.iconBottom
+	local iconSizeLeft, iconSizeRight -- some values useful for the bar
+	if skin.iconAlign == "left" then
+		self.iconFrame:Show()
+		self.iconFrame:SetPoint("TOPLEFT", self, "TOPLEFT", skin.iconLeft, -skin.iconTop)
+		self.iconFrame:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", skin.iconLeft + iconSize, skin.iconBottom)
+		iconSizeLeft = skin.iconLeft + iconSize + skin.iconRight
+		iconSizeRight = 0
+	elseif skin.iconAlign == "right" then
+		self.iconFrame:Show()
+		self.iconFrame:SetPoint("TOPLEFT", self, "TOPRIGHT", -skin.iconRight - iconSize, -skin.iconTop)
+		self.iconFrame:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -skin.iconRight, skin.iconBottom)
+		iconSizeLeft = 0
+		iconSizeRight = skin.iconLeft + iconSize + skin.iconRight
+	else
+		self.iconFrame:Hide()
+		iconSizeLeft = 0
+		iconSizeRight = 0
+	end
+	self.icon:SetPoint("TOPLEFT", skin.iconPadding, -skin.iconPadding)
+	self.icon:SetPoint("BOTTOMRIGHT", -skin.iconPadding, skin.iconPadding)
+	------------------------------------------------------------------------------
+	
+	------------------------------------------------------------------------------
+	-- bar positioning
+	------------------------------------------------------------------------------
+	self.barFrame:ClearAllPoints()
+	self.barFrame:SetPoint("TOPLEFT", iconSizeLeft + skin.barLeft, -skin.barTop)
+	self.barFrame:SetPoint("BOTTOMRIGHT", -iconSizeRight - skin.barRight, skin.barBottom)
 	self.bar:ClearAllPoints()
 	self.bar:SetPoint("TOPLEFT", self.barFrame, "TOPLEFT", skin.barPadding, -skin.barPadding)
 	self.bar:SetPoint("BOTTOMRIGHT", self.barFrame, "BOTTOMRIGHT", -skin.barPadding, skin.barPadding)
+	------------------------------------------------------------------------------
+	
+	-- text positioning
+	------------------------------------------------------------------------------
+	self.t1:ClearAllPoints()
+	self.t1:SetPoint("LEFT", self.barFrame, "LEFT", skin.t1Left, skin.t1Center)
+	self.t1:SetWidth(self.barFrame:GetWidth() * skin.t1HSize / 100)
+	
+	self.t2:ClearAllPoints()
+	self.t2:SetPoint("CENTER", self.barFrame, "CENTER", 0, skin.t2Center)
+	self.t2:SetWidth(self.barFrame:GetWidth() * skin.t2HSize / 100)
+	
+	self.t3:ClearAllPoints()
+	self.t3:SetPoint("RIGHT", self.barFrame, "RIGHT", -skin.t3Right, skin.t3Center)
+	self.t3:SetWidth(self.barFrame:GetWidth() * skin.t3HSize / 100)
+	------------------------------------------------------------------------------
+	
+	
+	-- bar texture and color
 	self.bar:SetStatusBarTexture(LSM:Fetch("statusbar", skin.barTexture))
 	self.bar:SetStatusBarColor(unpack(skin.barColor))
 	
-	-- texts
-	local fh = self.bar:GetHeight() * skin.textLeftSize / 100
-	if fh < 5 then fh = 5 end
-	self.textLeft:SetFont(LSM:Fetch("font", skin.textLeftFont), fh)
-	self.textLeft:ClearAllPoints()
-	self.textLeft:SetPoint("LEFT", self.bar, "LEFT", skin.textLeftPadding, 0)
-	self.textLeft:SetVertexColor(unpack(skin.textLeftColor))
+	-- text family/color/flags
+	local t
 	
-	fh = self.bar:GetHeight() * skin.textCenterSize / 100
+	local fh = opt.height * skin.t1Size / 100
 	if fh < 5 then fh = 5 end
-	self.textCenter:SetFont(LSM:Fetch("font", skin.textCenterFont), fh)
-	self.textCenter:ClearAllPoints()
-	self.textCenter:SetPoint("CENTER", self.bar)
-	self.textCenter:SetVertexColor(unpack(skin.textCenterColor))
+	t = {}
+	if not skin.t1Aliasing then t[#t+1] = "MONOCHROME" end
+	if skin.t1Outline then t[#t+1] = "OUTLINE" end
+	if skin.t1ThickOutline then t[#t+1] = "THICKOUTLINE" end
+	self.t1:SetFont(LSM:Fetch("font", skin.t1Font), fh, table.concat(t, "|"))
+	self.t1:SetVertexColor(unpack(skin.t1Color))
 	
-	fh = self.bar:GetHeight() * skin.textRightSize / 100
+	fh = opt.height * skin.t2Size / 100
 	if fh < 5 then fh = 5 end
-	self.textRight:SetFont(LSM:Fetch("font", skin.textRightFont), fh)
-	self.textRight:ClearAllPoints()
-	self.textRight:SetPoint("RIGHT", self.bar, "RIGHT", - skin.textRightPadding, 0)
-	self.textRight:SetVertexColor(unpack(skin.textRightColor))
+	t = {}
+	if not skin.t2Aliasing then t[#t+1] = "MONOCHROME" end
+	if skin.t2Outline then t[#t+1] = "OUTLINE" end
+	if skin.t2ThickOutline then t[#t+1] = "THICKOUTLINE" end
+	self.t2:SetFont(LSM:Fetch("font", skin.t2Font), fh, table.concat(t, "|"))
+	self.t2:SetVertexColor(unpack(skin.t2Color))
+	
+	fh = opt.height * skin.t3Size / 100
+	if fh < 5 then fh = 5 end
+	t = {}
+	if not skin.t3Aliasing then t[#t+1] = "MONOCHROME" end
+	if skin.t3Outline then t[#t+1] = "OUTLINE" end
+	if skin.t3ThickOutline then t[#t+1] = "THICKOUTLINE" end
+	self.t3:SetFont(LSM:Fetch("font", skin.t3Font), fh, table.concat(t, "|"))
+	self.t3:SetVertexColor(unpack(skin.t3Color))
 end
 
 function barPrototype:UpdateLayout(i, skin)
@@ -260,12 +285,12 @@ function barPrototype:UpdateLayout(i, skin)
 	self:SetAlpha(1)
 	
 	-- fix text width/height
-	self.textLeft:SetWidth(self.bar:GetWidth() * 0.8)
-	self.textLeft:SetHeight(self.bar:GetHeight())
-	self.textCenter:SetWidth(self.bar:GetWidth())
-	self.textCenter:SetHeight(self.bar:GetHeight())
-	self.textRight:SetWidth(self.bar:GetWidth() * 0.3)
-	self.textCenter:SetHeight(self.bar:GetHeight())
+	self.t1:SetWidth(self.bar:GetWidth() * 0.8)
+	self.t1:SetHeight(self.bar:GetHeight())
+	self.t2:SetWidth(self.bar:GetWidth())
+	self.t2:SetHeight(self.bar:GetHeight())
+	self.t3:SetWidth(self.bar:GetWidth() * 0.3)
+	self.t2:SetHeight(self.bar:GetHeight())
 	
 	-- own colors to make it easier to configure
 	if opt.ownColors then
@@ -303,7 +328,7 @@ function prototype:___HideBar(id)
 	end
 end
 
-function prototype:___AddBar(id, alpha, r, g, b, a, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight)
+function prototype:___AddBar(id, alpha, r, g, b, a, texture, minValue, maxValue, value, mode, t1, t2, t3)
 	self.___dc = self.___dc + 1
 	
 	local bar
@@ -320,9 +345,9 @@ function prototype:___AddBar(id, alpha, r, g, b, a, texture, minValue, maxValue,
 	bar.icon:SetTexture(texture)
 	bar.bar:SetMinMaxValues(minValue, maxValue)
 	bar.bar:SetValue(value)
-	bar.textLeft:SetText(textLeft)
-	bar.textCenter:SetText(textCenter)
-	bar.textRight:SetText(textRight)
+	bar.t1:SetText(t1)
+	bar.t2:SetText(t2)
+	bar.t3:SetText(t3)
 	bar:Show()
 	
 	-- save important stuff for quick updates
@@ -483,7 +508,7 @@ function prototype:Unlock()
   self:HideBars()
   
   -- show first bar
-  -- alpha, r, g, b, a, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight
+  -- alpha, r, g, b, a, texture, minValue, maxValue, value, mode, t1, t2, t3
   self.___dc = 0
  	self:___AddBar(nil, nil, nil, nil, nil, nil, "Interface\\Icons\\ABILITY_SEAL", 1, 100, 50, nil, "left", "center", "right")
 end
@@ -730,8 +755,8 @@ mod.GetDefaultSkin = clcInfo.display.bars.GetDefaultSkin
 
 -- mbar stuff
 function mod:GetDefault()
-	local x = (UIParent:GetWidth() - 130) / 2 * UIParent:GetScale()
-	local y = (UIParent:GetHeight() - 15) / 2 * UIParent:GetScale()
+	local x = (UIParent:GetWidth() - 300) / 2
+	local y = (UIParent:GetHeight() - 30) / 2
 	
 	-- mbar default settings
 	return {
@@ -745,8 +770,8 @@ function mod:GetDefault()
 		point = "BOTTOMLEFT",
 		relativeTo = "UIParent",
     relativePoint = "BOTTOMLEFT",
-		width = 200,
-		height = 20,
+		width = 300,
+		height = 30,
 		exec = "",
 		alertExec = "",
 		ups = 5,

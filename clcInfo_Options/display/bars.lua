@@ -239,26 +239,22 @@ function mod:UpdateBarList()
 					order = 2, type = "group", name = "Grid",
 					args = {
 						grid = {
-							order = 1,  type = "group", inline = true, name = "",
+							order = 1,  type = "group", inline = true, name = "Position in grid and size of the bar in cells",
 							args = {
-								gridId = {
-									order = 1, type = "select", name = "Select Grid", values = clcInfo_Options.GetGridList,
-									get = Get, set = Set, 
-								},
 								gridX = {
-									order = 2, name = "Column", type = "range", min = 1, max = 200, step = 1,
+									order = 3, name = "Column", type = "range", min = 1, max = 200, step = 1,
 									get = Get, set = Set,
 								},
 								gridY = {
-									order = 3, name = "Row", type = "range", min = 1, max = 200, step = 1,
+									order = 4, name = "Row", type = "range", min = 1, max = 200, step = 1,
 									get = Get, set = Set,
 								},
 								sizeX = {
-									order = 4, name = "Width", type = "range", min = 1, max = 200, step = 1,
+									order = 5, name = "Width", type = "range", min = 1, max = 200, step = 1,
 									get = Get, set = Set,
 								},
 								sizeY = {
-									order = 5, name = "Height", type = "range", min = 1, max = 200, step = 1,
+									order = 6, name = "Height", type = "range", min = 1, max = 200, step = 1,
 									get = Get, set = Set,
 								},
 							},
@@ -374,74 +370,194 @@ function mod:UpdateBarList()
 									values = { ["left"] = "Left", ["right"] = "Right", ["hidden"] = "Hidden" },
 									get = GetSkinBars, set = SetSkinBars,
 								},
-								iconSpacing = {
-									order = 2, type = "range", min = -100, max = 100, step = 1, name = "Icon Spacing",
+								_s1 = {
+									order = 2, type = "description", name = "", width = "full"
+								},
+								iconLeft = {
+									order = 3, type = "range", min = -100, max = 100, step = 0.1, name = "Left",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								iconRight = {
+									order = 4, type = "range", min = -100, max = 100, step = 0.1, name = "Right",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								iconTop = {
+									order = 5, type = "range", min = -100, max = 100, step = 0.1, name = "Top",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								iconBottom = {
+									order = 6, type = "range", min = -100, max = 100, step = 0.1, name = "Bottom",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+							},
+						},
+						
+						barpos = {
+							order = 8, type = "group", inline = true, name = "Bar Position",
+							args = {
+								barLeft = {
+									order = 1, type = "range", min = -100, max = 100, step = 0.1, name = "Left",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								barRight = {
+									order = 2, type = "range", min = -100, max = 100, step = 0.1, name = "Right",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								barTop = {
+									order = 3, type = "range", min = -100, max = 100, step = 0.1, name = "Top",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								barBottom = {
+									order = 4, type = "range", min = -100, max = 100, step = 0.1, name = "Bottom",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+							},
+						},
+						
+						textPosition = {
+							order = 9, type = "group", inline = true, name = "Text positions",
+							args = {
+								l1 = {
+									order = 1, type = "description", name = "Left Text", width = "half"
+								},
+								t1Left = {
+									order = 2, type = "range", min = -100, max = 100, step = 0.1, name = "Horizontal",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								t1Center = {
+									order = 3, type = "range", min = -100, max = 100, step = 0.1, name = "Vertical",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								_s1 = {
+									order = 5, type = "description", name = "", width = "full"
+								},
+								
+								l2 = {
+									order = 6, type = "description", name = "Center Text", width = "half"
+								},
+								t2Center = {
+									order = 7, type = "range", min = -100, max = 100, step = 0.1, name = "Vertical",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								_s2 = {
+									order = 9, type = "description", name = "", width = "full"
+								},
+								
+								l3 = {
+									order = 10, type = "description", name = "Right Text", width = "half"
+								},
+								t3Right = {
+									order = 11, type = "range", min = -100, max = 100, step = 0.1, name = "Horizontal",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								t3Center = {
+									order = 12, type = "range", min = -100, max = 100, step = 0.1, name = "Vertical",
 									get = GetSkinBars, set = SetSkinBars,
 								},
 							},
 						},
 						
 						fontLeft = {
-							order = 8, type = "group", inline = true, name = "Left Text",
+							order = 10, type = "group", inline = true, name = "Left Text",
 							args = {
-								textLeftFont = {
+								t1Font = {
 									order = 1, type = 'select', dialogControl = 'LSM30_Font', name = 'Font',
 									values = LSM:HashTable("font"),
 									get = GetSkinBars, set = SetSkinBars,
 								},
-								textLeftPadding = {
-									order = 2, type = "range", min = -100, max = 100, step = 1, name = "Text Padding",
+								t1Size = {
+									order = 2, type = "range", min = 1, max = 200, step = 1, name = "Height",
 									get = GetSkinBars, set = SetSkinBars,
 								},
-								textLeftSize = {
-									order = 3, type = "range", min = 1, max = 100, step = 1, name = "Text Size",
+								t1HSize = {
+									order = 3, type = "range", min = 1, max = 200, step = 1, name = "Width",
 									get = GetSkinBars, set = SetSkinBars,
 								},
-								textLeftColor = {
+								t1Color = {
 									order = 4, type = "color", hasAlpha = true, name = "Color",
 									get = GetSkinBarsColor, set = SetSkinBarsColor,
+								},
+								t1Aliasing = {
+									order = 5, type = "toggle", name = "Aliasing",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								t1Outline = {
+									order = 6, type = "toggle", name = "Outline",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								t1ThickOutline = {
+									order = 7, type = "toggle", name = "Thick Outline",
+									get = GetSkinBars, set = SetSkinBars,
 								},
 							},
 						},
 						
 						fontCenter = {
-							order = 9, type = "group", inline = true, name = "Center Text",
+							order = 11, type = "group", inline = true, name = "Center Text",
 							args = {
-								textCenterFont = {
+								t2Font = {
 									order = 1, type = 'select', dialogControl = 'LSM30_Font', name = 'Font',
 									values = LSM:HashTable("font"),
 									get = GetSkinBars, set = SetSkinBars,
 								},
-								textCenterSize = {
-									order = 3, type = "range", min = 1, max = 100, step = 1, name = "Text Size",
+								t2Size = {
+									order = 2, type = "range", min = 1, max = 200, step = 1, name = "Text Size",
 									get = GetSkinBars, set = SetSkinBars,
 								},
-								textCenterColor = {
+								t2HSize = {
+									order = 3, type = "range", min = 1, max = 200, step = 1, name = "Width",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								t2Color = {
 									order = 4, type = "color", hasAlpha = true, name = "Color",
 									get = GetSkinBarsColor, set = SetSkinBarsColor,
+								},
+								t2Aliasing = {
+									order = 5, type = "toggle", name = "Aliasing",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								t2Outline = {
+									order = 6, type = "toggle", name = "Outline",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								t2ThickOutline = {
+									order = 7, type = "toggle", name = "Thick Outline",
+									get = GetSkinBars, set = SetSkinBars,
 								},
 							},
 						},
 						
 						fontRight = {
-							order = 10, type = "group", inline = true, name = "Right Text",
+							order = 12, type = "group", inline = true, name = "Right Text",
 							args = {
-								textRightFont = {
+								t3Font = {
 									order = 1, type = 'select', dialogControl = 'LSM30_Font', name = 'Font',
 									values = LSM:HashTable("font"),
 									get = GetSkinBars, set = SetSkinBars,
 								},
-								textRightPadding = {
-									order = 2, type = "range", min = -100, max = 100, step = 1, name = "Text Padding",
+								t3Size = {
+									order = 2, type = "range", min = 1, max = 200, step = 1, name = "Text Size",
 									get = GetSkinBars, set = SetSkinBars,
 								},
-								textRightSize = {
-									order = 3, type = "range", min = 1, max = 100, step = 1, name = "Text Size",
+								t3HSize = {
+									order = 3, type = "range", min = 1, max = 200, step = 1, name = "Width",
 									get = GetSkinBars, set = SetSkinBars,
 								},
-								textRightColor = {
+								t3Color = {
 									order = 4, type = "color", hasAlpha = true, name = "Color",
 									get = GetSkinBarsColor, set = SetSkinBarsColor,
+								},
+								t3Aliasing = {
+									order = 5, type = "toggle", name = "Aliasing",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								t3Outline = {
+									order = 6, type = "toggle", name = "Outline",
+									get = GetSkinBars, set = SetSkinBars,
+								},
+								t3ThickOutline = {
+									order = 7, type = "toggle", name = "Thick Outline",
+									get = GetSkinBars, set = SetSkinBars,
 								},
 							},
 						},
@@ -450,43 +566,42 @@ function mod:UpdateBarList()
 							order = 21, type = "group", inline = true, name = "Frame Backdrop",
 							args = {
 								bd = {
-									order = 1, type = "toggle", width = "full", name = "Enable",
+									order = 1, type = "toggle", name = "Enable",
 									get = GetSkinBars, set = SetSkinBars,
 								},
 								inset = {
 									order = 2, type = "range", min = 0, max = 20, step = 0.1, name = "Inset",
 									get = GetSkinBars, set = SetSkinBars,
 								},
-								padding = {
-									order = 3, type = "range", min = 0, max = 20, step = 0.1, name = "Padding",
+								edgeSize = {
+									order = 3, type = "range", min = 0, max = 64, step = 1, name = "Edge",
 									get = GetSkinBars, set = SetSkinBars,
 								},
-								edgeSize = {
-									order = 4, type = "range", min = 0, max = 64, step = 1, name = "Edge",
-									get = GetSkinBars, set = SetSkinBars,
+								__f1 = {
+									order = 4, type = "description", width = "full", name = "",
 								},
 								_bg = {
-									order = 10, type = "header", name = "Background",
+									order = 10, type = "description", width = "normal", name = "Background",
 								},
 								bdBg = {
 									order = 11, type = 'select', dialogControl = 'LSM30_Background', name = 'Texture',
 									values = LSM:HashTable("background"), get = GetSkinBars, set = SetSkinBars,
 								},
-								__f1 = {
+								__f2 = {
 									order = 12, type = "description", width = "half", name = "",
 								},
 								bdColor = {
-									order = 13, type = "color", hasAlpha = true, name = "Color",
+									order = 13, type = "color", hasAlpha = true, name = "Color", width = "normal",
 									get = GetSkinBarsColor, set = SetSkinBarsColor,
 								},
 								_border = {
-									order = 20, type = "header", name = "Border",
+									order = 20, type = "description", width = "normal", name = "Border",
 								},
 								bdBorder = {
 									order = 21, type = 'select', dialogControl = 'LSM30_Border', name = 'Texture',
 									values = LSM:HashTable("border"), get = GetSkinBars, set = SetSkinBars,
 								},
-								__f2 = {
+								__f3 = {
 									order = 22, type = "description", width = "half", name = "",
 								},
 								bdBorderColor = {
@@ -500,7 +615,7 @@ function mod:UpdateBarList()
 							order = 22, type = "group", inline = true, name = "Icon Backdrop",
 							args = {
 								iconBd = {
-									order = 1, type = "toggle", width = "full", name = "Enable",
+									order = 1, type = "toggle", name = "Enable",
 									get = GetSkinBars, set = SetSkinBars,
 								},
 								iconInset = {
@@ -516,7 +631,7 @@ function mod:UpdateBarList()
 									get = GetSkinBars, set = SetSkinBars,
 								},
 								_bg = {
-									order = 10, type = "header", name = "Background",
+									order = 10, type = "description", width = "normal", name = "Background",
 								},
 								iconBdBg = {
 									order = 11, type = 'select', dialogControl = 'LSM30_Background', name = 'Texture',
@@ -526,11 +641,11 @@ function mod:UpdateBarList()
 									order = 12, type = "description", width = "half", name = "",
 								},
 								iconBdColor = {
-									order = 13, type = "color", hasAlpha = true, name = "Color",
+									order = 13, type = "color", hasAlpha = true, name = "Color", width = "normal",
 									get = GetSkinBarsColor, set = SetSkinBarsColor,
 								},
 								_border = {
-									order = 20, type = "header", name = "Border",
+									order = 20, type = "description", width = "normal", name = "Border",
 								},
 								iconBdBorder = {
 									order = 21, type = 'select', dialogControl = 'LSM30_Border', name = 'Texture',
@@ -550,7 +665,7 @@ function mod:UpdateBarList()
 							order = 23, type = "group", inline = true, name = "Bar Backdrop",
 							args = {
 								barBd = {
-									order = 1, type = "toggle", width = "full", name = "Enable",
+									order = 1, type = "toggle", name = "Enable",
 									get = GetSkinBars, set = SetSkinBars,
 								},
 								barInset = {
@@ -566,7 +681,7 @@ function mod:UpdateBarList()
 									get = GetSkinBars, set = SetSkinBars,
 								},
 								_border = {
-									order = 20, type = "header", name = "Border",
+									order = 20, type = "description", width = "normal", name = "Border",
 								},
 								barBdBorder = {
 									order = 21, type = 'select', dialogControl = 'LSM30_Border', name = 'Texture',

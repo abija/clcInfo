@@ -361,8 +361,8 @@ end
 
 -- default options
 function mod:GetDefault()
-	local x = (UIParent:GetWidth() - 100) / 2 * UIParent:GetScale()
-	local y = (UIParent:GetHeight() - 30) / 2 * UIParent:GetScale()
+	local x = (UIParent:GetWidth() - 100) / 2
+	local y = (UIParent:GetHeight() - 30) / 2
 	
 	return {
 		udLabel = "", -- user defined label

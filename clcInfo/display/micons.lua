@@ -646,8 +646,8 @@ mod.GetDefaultSkin = clcInfo.display.icons.GetDefaultSkin
 
 -- micon stuff
 function mod:GetDefault()
-	local x = (UIParent:GetWidth() - ICON_DEFAULT_WIDTH) / 2 * UIParent:GetScale()
-	local y = (UIParent:GetHeight() - ICON_DEFAULT_HEIGHT) / 2 * UIParent:GetScale()
+	local x = (UIParent:GetWidth() - ICON_DEFAULT_WIDTH) / 2
+	local y = (UIParent:GetHeight() - ICON_DEFAULT_HEIGHT) / 2
 	
 	return {
 		udLabel = "", -- user defined label

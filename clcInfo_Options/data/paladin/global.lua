@@ -40,6 +40,9 @@ local function LoadModuleActiveTemplate()
 								name = "Hide Blizzard",
 								get = Get, set = Set,
 							},
+							_s1 = {
+								order = 3, type = "description", name = "",
+							},
 							ppbX = {
 								order = 12, type = "range", min = -2000, max = 2000, step = 1, name = "X",
 								get = Get, set = Set,

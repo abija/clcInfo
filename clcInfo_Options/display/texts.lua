@@ -53,16 +53,6 @@ local function Get(info)
 	return modTexts.active[tonumber(info[3])].db[info[6]]
 end
 
-local function SetLockedGrid(info, val)
-	local obj = modTexts.active[tonumber(info[3])]
-	obj.db.sizeX = val
-	obj.db.sizeY = val
-	obj:UpdateLayout()
-end
-local function GetLockedGrid(info)
-	return modTexts.active[tonumber(info[3])].db.sizeX
-end
-
 local function Lock(info)
 	modTexts.active[tonumber(info[3])]:Lock()
 end
@@ -224,7 +214,7 @@ function mod:UpdateTextList()
 					order = 2, type = "group", name = "Grid",
 					args = {
 						grid = {
-							order = 1,  type = "group", inline = true, name = "",
+							order = 1,  type = "group", inline = true, name = "Position in grid and size of the textbox in cells",
 							args = {
 								gridX = {
 									order = 2, name = "Column", type = "range", min = 1, max = 200, step = 1,
@@ -241,10 +231,6 @@ function mod:UpdateTextList()
 								sizeY = {
 									order = 5, name = "Height", type = "range", min = 1, max = 200, step = 1,
 									get = Get, set = Set,
-								},
-								sizeXY = {
-									order = 6, name = "Width and Height", type = "range", min = 1, max = 200, step = 1,
-									get = GetLockedGrid, set = SetLockedGrid,
 								},
 							},
 						},

@@ -11,7 +11,7 @@ args:
 	timeRight
 		if true, display time left on right of the bar
 --------------------------------------------------------------------------------
-expected return: visible, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight
+expected return: visible, texture, minValue, maxValue, value, mode, t1, t2, t3
 --]]
 --- Bar that shows cooldown for specified spell.
 -- @param spell Name of the spell.
@@ -61,7 +61,7 @@ args:
 	timeRight
 		if true, display time left on right of the bar
 --------------------------------------------------------------------------------
-expected return: visible, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight
+expected return: visible, texture, minValue, maxValue, value, mode, t1, t2, t3
 --]]	
 function mod.BarAura(filter, unitTarget, spell, unitCaster, showStack, timeRight)
 		-- check the unit
@@ -109,7 +109,7 @@ args:
 	timeRight
 		if true, display time left on right of the bar
 --------------------------------------------------------------------------------
-expected return: visible, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight
+expected return: visible, texture, minValue, maxValue, value, mode, t1, t2, t3
 --------------------------------------------------------------------------------
 TODO
 	multiple items with same name ?
