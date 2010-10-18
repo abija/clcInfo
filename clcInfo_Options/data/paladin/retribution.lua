@@ -81,4 +81,4 @@ local function LoadModule()
 	end
 	
 end
-clcInfo.optionsCMLoaders[#(clcInfo.optionsCMLoaders) + 1] = LoadModule
+clcInfo_Options.optionsCMLoaders[#(clcInfo_Options.optionsCMLoaders) + 1] = LoadModule

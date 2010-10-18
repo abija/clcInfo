@@ -127,7 +127,6 @@ function prototype:Init()
 	
 	self:FakeHide()
 	self:Show()
-	self:SetScript("OnUpdate", OnUpdate)	
 
   -- move and config
   self:EnableMouse(false)
@@ -147,13 +146,30 @@ function prototype:Unlock()
   self.text:Show()
   self.lastText = self.label
   self.text:SetText(self.label)
+  
+  self.unlock = true
 end
 
 -- disables control of the frame
 function prototype:Lock()
   self.bg:Hide()
   self:EnableMouse(false)
-  self:SetScript("OnUpdate", OnUpdate)
+  self.unlock = false
+  
+  self:UpdateEnabled()
+end
+
+function prototype:UpdateEnabled()
+	if self.db.enabled then
+		if not self.unlock then
+			self:SetScript("OnUpdate", OnUpdate)
+		end
+	else
+		self:SetScript("OnUpdate", nil)
+		if not self.unlock then
+			self:FakeHide()
+		end
+	end
 end
 
 
@@ -223,6 +239,8 @@ function prototype:UpdateLayout()
 	local udl = self.db.udLabel
 	if udl == "" then udl = "Text" .. self.index end
 	self.label = udl
+	
+	self:UpdateEnabled()
 end
 
 -- update the exec function and perform cleanup
@@ -256,9 +274,7 @@ function prototype:UpdateExec()
   	self.ExecCleanup = nil
   end
   
-  if not self.unlock then
-  	self:SetScript("OnUpdate", OnUpdate)
-  end
+	self:UpdateEnabled()
 end
 
 -- show/hide only elements
@@ -365,6 +381,7 @@ function mod:GetDefault()
 	local y = (UIParent:GetHeight() - 30) / 2
 	
 	return {
+		enabled = true,
 		udLabel = "", -- user defined label
 	
 		x = x,

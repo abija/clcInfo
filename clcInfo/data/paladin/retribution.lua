@@ -22,9 +22,6 @@ local db
 -- functions visible to exec should be attached to this
 local emod = clcInfo.env
 
--- rotations
-local rmod = {}
-
 -- any error sets this to false
 local enabled = true
 
@@ -56,8 +53,9 @@ local spells = {
 	hw		= { id = 2812  	},		-- holy wrath
 	cls 	= { id = 4987		},		-- cleanse
 }
+local spellDS, spellCS, spellTV, spellInq, spellCleanse
 
-local fillers = { tv = {}, cs = {}, exo = {}, how = {}, j = {}, hw = {}, cons = {} }
+local fillers = { tv = {}, cs = {}, exo = {}, how = {}, j = {}, hw = {}, cons = {}, ds = {} }
 
 -- expose for options
 mod.fillers = fillers
@@ -93,6 +91,9 @@ function mod.InitSpells()
 		data.id = spells[alias].id
 		data.name = spells[alias].name
 	end
+	
+	-- to be easier to access
+	spellCS, spellTV, spellDS, spellInq, spellCleanse = spells.cs.name, spells.tv.name, spells.ds.name, spells.inq.name, spells.cls.name
 end
 
 function mod.UpdateFillers()
@@ -161,35 +162,12 @@ clcInfo.cmdList["ret_fillers"] = CmdRetFillers
 
 --------------------------------------------------------------------------------
 
--- returns the lowest cooldown and skill index
-local function GetMinCooldown()
-	local cd, index, v
-	index = 1
-	cd = pq[1].cd
-	
-	-- get min cooldown
-	for i = 1, #pq do
-		v = pq[i]
-		if (v.cd < cd) or ((v.cd == cd and i < index)) then
-			index = i
-			cd = v.cd
-		end
-	end
-	
-	return cd, index
-end
-
 --------------------------------------------------------------------------------
---[[
-test rotation:
-tv 3 only
-cs < filler + csBoost -> cs
---]]
+-- rotation: priority system
 --------------------------------------------------------------------------------
-
 function mod.RetRotation(csBoost, useInq, preInq)
 	csBoost = csBoost or 0
-	minHPInq = minHPInq or 3
+	useInq = useInq or false
 	preInq = preInq or 5
 
 	local ctime, cdStart, cdDuration, cs, gcd
@@ -203,7 +181,7 @@ function mod.RetRotation(csBoost, useInq, preInq)
 	local zeal = UnitBuff("player", buffZealotry) or false
 	
 	-- gcd
-	cdStart, cdDuration = GetSpellCooldown(spells.cls.name)
+	cdStart, cdDuration = GetSpellCooldown(spellCleanse)
 	if cdStart > 0 then
 		gcd = cdStart + cdDuration - ctime
 	else
@@ -230,7 +208,7 @@ function mod.RetRotation(csBoost, useInq, preInq)
 			if not IsUsableSpell(v.name) then
 				v.cd = 100
 			end
-		elseif v.alias == "tv" then
+		elseif v.alias == "tv" or v.alias == "ds" then
 			if not (hol or hp == 3) then
 				v.cd = 15
 			end
@@ -258,13 +236,13 @@ function mod.RetRotation(csBoost, useInq, preInq)
 	dq[1] = pq[index].name
 	
 	-- adjust hp for next skill
-	if dq[1] == spells.cs.name then
+	if dq[1] == spellCS then
 		if zeal then
 			hp = hp + 3
 		else
 			hp = hp + 1
 		end
-	elseif dq[1] == spells.tv.name and not hol then
+	elseif (dq[1] == spellTV or dq[1] == spellDS) and not hol then
 		hp = 0
 	end
 	pq[index].cd = 101 -- put first one at end of queue
@@ -272,7 +250,7 @@ function mod.RetRotation(csBoost, useInq, preInq)
 	-- get new clamped cooldowns
 	for i = 1, #pq do
 		v = pq[i]
-		if v.name == spells.tv.name then
+		if v.name == spellTV or v.name == spellDS then
 			if hp >= 3 then
 				v.cd = 0
 			else
@@ -299,7 +277,7 @@ function mod.RetRotation(csBoost, useInq, preInq)
 	-- inquisition, if active and needed -> change first tv in dq1 or dq2 with inquisition
 	if useInq then
 		local inqLeft = 0
-		local name, rank, icon, count, debuffType, duration, expirationTime = UnitBuff("player", spells.inq.name)
+		local name, rank, icon, count, debuffType, duration, expirationTime = UnitBuff("player", spellInq)
 		if name then 
 			inqLeft = expirationTime - ctime
 		end
@@ -307,10 +285,10 @@ function mod.RetRotation(csBoost, useInq, preInq)
 		-- test time for 2nd skill
 		-- check for spell gcd?
 		if (inqLeft - 1.5) <= preInq then
-			if (dq[1] == spells.tv.name) and (inqLeft <= preInq) then
-				dq[1] = spells.inq.name
-			elseif (dq[2] == spells.tv.name) and ((inqLeft - 1.5) <= preInq) then
-				dq[2] = spells.inq.name
+			if (dq[1] == spellTV or dq[1] == spellDS) and (inqLeft <= preInq) then
+				dq[1] = spellInq
+			elseif (dq[2] == spellTV or dq[2] == spellDS) and ((inqLeft - 1.5) <= preInq) then
+				dq[2] = spellInq
 			end
 		end
 	end
@@ -326,7 +304,7 @@ end
 -- function to be executed when OnUpdate is called manually
 local function S2Exec()
 	if not enabled then return end
-	return emod.IconSpell(dq[2], db.rangePerSkill or spells.cs.name)
+	return emod.IconSpell(dq[2], db.rangePerSkill or spellCS)
 end
 -- cleanup function for when exec changes
 local function ExecCleanup()
@@ -340,7 +318,7 @@ function emod.IconRet1(...)
 	
 	if s2 then UpdateS2(s2, 100) end	-- update with a big "elapsed" so it's updated on call
 	if gotskill then
-		return emod.IconSpell(dq[1], db.rangePerSkill or spells.cs.name)
+		return emod.IconSpell(dq[1], db.rangePerSkill or spellCS)
 	end
 end
 function emod.IconRet2()
@@ -385,6 +363,6 @@ function emod.IconRet1Ex(rotation, ...)
 	
 	if s2 then UpdateS2(s2, 100) end	-- update with a big "elapsed" so it's updated on call
 	if gotskill then
-		return emod.IconSpell(dq[1], db.rangePerSkill or spells.cs.name)
+		return emod.IconSpell(dq[1], db.rangePerSkill or spellCS)
 	end
 end

@@ -1,0 +1,25 @@
+--------------------------------------------------------------------------------
+Paladin
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Deathknight
+--------------------------------------------------------------------------------
+How about something for DKs? From the DK page here:
+
+Unholy: [url]http://elitistjerks.com/f72/t105521-unholy_dps_cataclysm_come_back_me/#Rotation[/url]
+
+Diseases > Dark Transformation > SS if both Unholy and/or all Death runes are up > FeS if both pairs of Blood and Frost runes are up >
+DC if SD, 100 RP, will overcap RP with anything else or if RC isn’t up > SS > FeS > DC > HoW.
+
+
+Frost: [url]http://elitistjerks.com/f72/t105701-frost_dps_cataclysm_where_we_belong/#Rotation[/url]
+
+Diseases > Ob if both Frost/Unholy pairs and/or both Death runes are up, or if KM is procced > 
+BS if both Blood Runes are up > FS > Rime > Ob > BS > HoW.
+
+Things that'll need tracking are runes, diseases, a few procs and such - should be fairly run of the mill stuff TBH (except the runes I guess?).
+------
+--------------------------------------------------------------------------------

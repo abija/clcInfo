@@ -1,11 +1,4 @@
--- TEXTS
--- import/export
--- SAFE import (double check returned table with the default settings)
-
--- enable disable per element?
-
--- tutorial todo:
-- skins
+-- tutorial: skins
 --------------------------------------------------------------------------------
 
 -- transform ppb from xml to lua so it also runs on demand?
@@ -51,3 +44,14 @@
 ----------------------------------------------
 - presets?
 - sort a proper way to fix db whenever is needed
+
+-- protection
+
+
+""
+--[[
+
+--]]
+
+
+-- dk

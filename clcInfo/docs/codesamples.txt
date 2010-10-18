@@ -1,0 +1,9 @@
+Is it possible to add icons that show up if certain events happen?
+For example to show Hand of Freedom when you are snared/rooted, Hand of Salvation if you pull aggro or similiar events? 
+
+
+
+local _, status = UnitDetailedThreatSituation("player", "target")
+if status and status > 1 then
+	return "threat"
+end

@@ -89,28 +89,32 @@ function mod.IconSpell(spell, checkRange, showWhen, mouseover)
 		end
 	end
 	
+	local timeLeft = start + duration - GetTime()
 	
-	-- current vertex color priority: oor > usable > oom
-	local oor = nil
-	if checkRange then
-		local unit
-		if mouseover and UnitExists("mouseover") then unit = "mouseover" end
-		if UnitExists("target") then unit = "target" end
-		if checkRange == true then checkRange = spell end
-		if unit then
-			oor = IsSpellInRange(checkRange, unit)
-			oor = oor ~= nil and oor == 0
-			if oor then
-				return true, texture, start, duration, enable, nil, nil, nil, true, 0.8, 0.1, 0.1, 1
+	-- modify vertex only when out of cooldow
+	if timeLeft < 1.5 then
+		-- current vertex color priority: oor > usable > oom
+		local oor = nil
+		if checkRange then
+			local unit
+			if mouseover and UnitExists("mouseover") then unit = "mouseover" end
+			if UnitExists("target") then unit = "target" end
+			if checkRange == true then checkRange = spell end
+			if unit then
+				oor = IsSpellInRange(checkRange, unit)
+				oor = oor ~= nil and oor == 0
+				if oor then
+					return true, texture, start, duration, enable, nil, nil, nil, true, 0.8, 0.1, 0.1, 1
+				end
 			end
 		end
-	end
-	
-	local isUsable, notEnoughMana = IsUsableSpell(spell)
-	if notEnoughMana then
-		return true, texture, start, duration, enable, nil, nil, nil, true, 0.1, 0.1, 0.8, 1
-	elseif not isUsable then
-		return true, texture, start, duration, enable, nil, nil, nil, true, 0.3, 0.3, 0.3, 1
+		
+		local isUsable, notEnoughMana = IsUsableSpell(spell)
+		if notEnoughMana then
+			return true, texture, start, duration, enable, nil, nil, nil, true, 0.1, 0.1, 0.8, 1
+		elseif not isUsable then
+			return true, texture, start, duration, enable, nil, nil, nil, true, 0.3, 0.3, 0.3, 1
+		end
 	end
 
 	return true, texture, start, duration, enable, nil, nil, nil, true, 1, 1, 1, 1
@@ -136,12 +140,12 @@ TODO
 	multiple items with same name ?
 --]]
 function mod.IconItem(item, equipped, showWhen, checkRange, mouseover)
-	-- equipped check if requested
-	if equipped and not IsEquippedItem(item) then return end
-	
 	local texture = GetItemIcon(item)
 	-- if item has no texture it means the item doesn't exist?
 	if not texture then return end
+
+	-- equipped check if requested
+	if equipped and not IsEquippedItem(item) then return end
 	
 	-- cooldown and showWhen checks
 	local start, duration, enable = GetItemCooldown(item)
@@ -152,6 +156,10 @@ function mod.IconItem(item, equipped, showWhen, checkRange, mouseover)
 			if not (duration and duration > 1.5) then return end
 		end
 	end
+	
+	local count  = GetItemCount(item)
+	if count < 1 then count = nil end
+		
 	
 	-- current vertex color priority: oor > usable > oom
 	local oor = nil
@@ -164,7 +172,7 @@ function mod.IconItem(item, equipped, showWhen, checkRange, mouseover)
 				oor = IsItemInRange(item, unit)
 				oor = oor ~= nil and oor == 0
 				if oor then
-					return true, texture, start, duration, enable, nil, nil, nil, true, 0.8, 0.1, 0.1, 1
+					return true, texture, start, duration, enable, nil, count, nil, true, 0.8, 0.1, 0.1, 1
 				end
 			end
 		else
@@ -173,7 +181,7 @@ function mod.IconItem(item, equipped, showWhen, checkRange, mouseover)
 				oor = IsSpellInRange(checkRange, unit)
 				oor = oor ~= nil and oor == 0
 				if oor then
-					return true, texture, start, duration, enable, nil, nil, nil, true, 0.8, 0.1, 0.1, 1
+					return true, texture, start, duration, enable, nil, count, nil, true, 0.8, 0.1, 0.1, 1
 				end
 			end
 		end
@@ -184,12 +192,12 @@ function mod.IconItem(item, equipped, showWhen, checkRange, mouseover)
 	-- current vertex color priority: oor > oom > usable
 	local isUsable, notEnoughMana = IsUsableItem(item)
 	if notEnoughMana then
-		return true, texture, start, duration, enable, nil, nil, nil, true, 0.1, 0.1, 0.8, 1
+		return true, texture, start, duration, enable, nil, count, nil, true, 0.1, 0.1, 0.8, 1
 	elseif not isUsable then
-		return true, texture, start, duration, enable, nil, nil, nil, true, 0.3, 0.3, 0.3, 1
+		return true, texture, start, duration, enable, nil, count, nil, true, 0.3, 0.3, 0.3, 1
 	end
 
-	return true, texture, start, duration, enable, nil, nil, nil, true, 1, 1, 1, 1
+	return true, texture, start, duration, enable, nil, count, nil, true, 1, 1, 1, 1
 end
 
 
@@ -406,32 +414,24 @@ function mod.IconAction(slot, checkRange, showWhen)
 		end
 	end
 	
+		local timeLeft = start + duration - GetTime()
 	
-	-- current vertex color priority: oor > usable > oom
-	--[[
-	local oor = nil
-	if checkRange and UnitExists("target") then
-		if checkRange == true then checkRange = spell end
-		oor = IsSpellInRange(checkRange, "target")
-		oor = oor ~= nil and oor == 0
-		if oor then
-			return true, texture, start, duration, enable, nil, nil, nil, true, 0.8, 0.1, 0.1, 1
+	-- modify vertex only when out of cooldow
+	if timeLeft < 1.5 then
+		local count  = GetActionCount(slot)
+		if count <= 1 then count = nil end
+		
+		if checkRange and ActionHasRange(slot) and (IsActionInRange(slot) == 0) then
+			return true, texture, start, duration, enable, nil, count, nil, true, 0.8, 0.1, 0.1, 1
 		end
+		
+		local isUsable, notEnoughMana = IsUsableAction(slot)
+		if notEnoughMana then
+			return true, texture, start, duration, enable, nil, count, nil, true, 0.1, 0.1, 0.8, 1
+		elseif not isUsable then
+			return true, texture, start, duration, enable, nil, count, nil, true, 0.3, 0.3, 0.3, 1
+		end		
 	end
-	--]]
-	if checkRange and ActionHasRange(slot) and (IsActionInRange(slot) == 0) then
-		return true, texture, start, duration, enable, nil, nil, nil, true, 0.8, 0.1, 0.1, 1
-	end
-	
-	local isUsable, notEnoughMana = IsUsableAction(slot)
-	if notEnoughMana then
-		return true, texture, start, duration, enable, nil, nil, nil, true, 0.1, 0.1, 0.8, 1
-	elseif not isUsable then
-		return true, texture, start, duration, enable, nil, nil, nil, true, 0.3, 0.3, 0.3, 1
-	end
-	
-	local count  = GetActionCount(slot)
-	if count <= 1 then count = nil end
 
 	return true, texture, start, duration, enable, nil, count, nil, true, 1, 1, 1, 1
 end

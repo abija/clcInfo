@@ -212,7 +212,6 @@ function prototype:Init()
 	-- show and register for on update
 	self.elapsed = 0
 	self:Show()
-	self:SetScript("OnUpdate", OnUpdate)	
 	
 	-- needed stuff
 	self.lastTexture = nil
@@ -272,7 +271,20 @@ function prototype:Lock()
   
   -- restore update function
   self:FakeHide()
-  self:SetScript("OnUpdate", OnUpdate)
+  self:UpdateEnabled()
+end
+
+function prototype:UpdateEnabled()
+	if self.db.enabled then
+		if not self.unlock then
+			self:SetScript("OnUpdate", OnUpdate)
+		end
+	else
+		self:SetScript("OnUpdate", nil)
+		if not self.unlock then
+			self:FakeHide()
+		end
+	end
 end
 
 
@@ -550,6 +562,9 @@ function prototype:UpdateLayout()
  		ex.t2:SetText(self.label)
   	ex.t3:SetText(self.label)
 	end
+	
+	-- update function
+	self:UpdateEnabled()
 end
 
 -- update the exec function and related stuff
@@ -602,10 +617,7 @@ function prototype:UpdateExec()
   	print("in:", self.db.execAlert)
   end
   
-  -- in case we update while the element is unlocked
-  if not self.unlock then
-  	self:SetScript("OnUpdate", OnUpdate)
-  end
+  self:UpdateEnabled()
 end
 
 -- hide only the elements frame so that we still get onupdate calls
@@ -792,6 +804,7 @@ function mod.GetDefault()
 
 	-- bar default settings
 	return {
+		enabled = true,
 		udLabel = "", -- user defined label
 	
 		x = x,

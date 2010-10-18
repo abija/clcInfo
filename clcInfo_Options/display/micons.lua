@@ -191,17 +191,26 @@ function mod:UpdateMIconList()
 				tabGeneral = {
 					order = 1, type = "group", name = "General",
 					args = {
+						enabled = {
+							order = 1, type = "group", inline = true, name = "",
+							args = {
+								enabled = {
+									type = "toggle", name = "Enabled",
+									get = Get, set = Set,
+								},
+							},
+						},
 						label = {
-							order = 1, type = "group", inline = true, name = "Label",
+							order = 2, type = "group", inline = true, name = "",
 							args = {
 								udLabel = {
-									type = "input", width = "double", name = "",
+									type = "input", width = "double", name = "Label",
 									get = Get, set = Set,
 								}
 							},
 						},
 						lock = {
-							order = 2, type = "group", inline = true, name = "",
+							order = 5, type = "group", inline = true, name = "",
 							args = {
 								lock = {
 				  				type = "execute", name = "Lock", func = Lock

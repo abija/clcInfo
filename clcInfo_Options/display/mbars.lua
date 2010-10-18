@@ -183,17 +183,26 @@ function mod:UpdateMBarList()
 				tabGeneral = {
 					order = 1, type = "group", name = "General",
 					args = {
+						enabled = {
+							order = 1, type = "group", inline = true, name = "",
+							args = {
+								enabled = {
+									type = "toggle", name = "Enabled",
+									get = Get, set = Set,
+								},
+							},
+						},
 						label = {
-							order = 1, type = "group", inline = true, name = "Label",
+							order = 2, type = "group", inline = true, name = "",
 							args = {
 								udLabel = {
-									type = "input", width = "double", name = "",
+									type = "input", width = "double", name = "Label",
 									get = Get, set = Set,
 								}
 							},
 						},
 						lock = {
-							order = 2, type = "group", inline = true, name = "",
+							order = 3, type = "group", inline = true, name = "",
 							args = {
 								lock = {
 				  				type = "execute", name = "Lock", func = Lock
@@ -204,7 +213,7 @@ function mod:UpdateMBarList()
 							},
 						},
 						grid = {
-							order = 2, type = "group", inline = true, name = "",
+							order = 4, type = "group", inline = true, name = "",
 							args = {
 								gridId = {
 									order = 1, type = "select", name = "Select Grid", values = clcInfo_Options.GetGridList,
@@ -218,7 +227,7 @@ function mod:UpdateMBarList()
 							},
 						},
 						ownColors = {
-							order = 3, type = "group", inline = true, name = "Colors",
+							order = 5, type = "group", inline = true, name = "Colors",
 							args = {
 								ownColors = {
 									order = 1, type = "toggle", width = "full", name = "Force own colors.",
@@ -235,7 +244,7 @@ function mod:UpdateMBarList()
 							},
 						},
 						children = {
-							order = 4, type = "group", inline = true, name = "Bars",
+							order = 6, type = "group", inline = true, name = "Bars",
 							args = {
 								growth = {
 									order = 1, type = "select", values = directionValues, name = "Direction",

@@ -405,6 +405,7 @@ function prototype:Unlock()
   self:SetScript("OnUpdate", nil)
   self:HideIcons()
   self.___dc = 0
+  self.unlock = true
 end
 
 -- disables control of the frame
@@ -412,7 +413,19 @@ function prototype:Lock()
   self:EnableMouse(false)
   self.bg:Hide()
   self.label:Hide()
-  self:SetScript("OnUpdate", OnUpdate)
+  self.unlock = false
+  self:UpdateEnabled()
+end
+
+function prototype:UpdateEnabled()
+	if self.db.enabled then
+		if not self.unlock then
+			self:SetScript("OnUpdate", OnUpdate)
+		end
+	else
+		self:SetScript("OnUpdate", nil)
+		self:ReleaseIcons()
+	end
 end
 
 -- display the elements according to the settings
@@ -467,6 +480,8 @@ function prototype:UpdateLayout()
 	if udl == "" then udl = "MIcon" .. self.index end
 	self.label:SetText(udl)
 	
+	self:UpdateEnabled()
+	
 	-- update children
 	self:UpdateIconsLayout()	
 end
@@ -518,7 +533,7 @@ function prototype:UpdateExec()
   -- release the icons
   self:ReleaseIcons()
   
-  self:SetScript("OnUpdate", OnUpdate)
+  self:UpdateEnabled()
 end
 
 -- caaaaaaaaaaaaaaaaaaareful
@@ -650,6 +665,7 @@ function mod:GetDefault()
 	local y = (UIParent:GetHeight() - ICON_DEFAULT_HEIGHT) / 2
 	
 	return {
+		enabled = true, 
 		udLabel = "", -- user defined label
 	
 		growth = "up", -- up or down

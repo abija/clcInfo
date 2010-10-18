@@ -222,9 +222,8 @@ function prototype:Init()
 	self.toolbox:SetFrameLevel(self.elements:GetFrameLevel() + 3)
 	
 	self.label = self.toolbox:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
-	self.label:SetPoint("BOTTOMLEFT", self.elements.texMain, "TOPLEFT", 0, 1)
 	local fontFace, _, fontFlags = self.label:GetFont()
-	self.label:SetFont(fontFace, 6, fontFlags)
+	self.label:SetFont(fontFace, 8, fontFlags)
 	
 	-- lock
 	self.lockTex = self.toolbox:CreateTexture(nil, "BACKGROUND")
@@ -234,7 +233,6 @@ function prototype:Init()
 	
 	self:FakeHide()
 	self:Show()
-	self:SetScript("OnUpdate", OnUpdate)	
 
   -- move and config
   self:EnableMouse(false)
@@ -251,11 +249,19 @@ function prototype:Unlock()
   self:EnableMouse(true)
   self.toolbox:Show()
 end
-
 -- disables control of the frame
 function prototype:Lock()
   self:EnableMouse(false)
   self.toolbox:Hide()
+end
+
+function prototype:UpdateEnabled()
+	if self.db.enabled then
+		self:SetScript("OnUpdate", OnUpdate)
+	else
+		self:SetScript("OnUpdate", nil)
+		self:FakeHide()
+	end
 end
 
 
@@ -381,6 +387,9 @@ function prototype:UpdateLayout()
 	self.elements:ClearAllPoints()
 	self.elements:SetAllPoints(self)
 	
+	self.label:ClearAllPoints()
+	self.label:SetPoint("BOTTOMLEFT", self.elements.texMain, "TOPLEFT", 0, 1)
+	
 	-- select the skin from template/grid/self
 	local skinType, bfSkin, bfGloss, g
 	if onGrid and self.db.skinSource == "Grid" then
@@ -409,6 +418,9 @@ function prototype:UpdateLayout()
 	local udl = self.db.udLabel
 	if udl == "" then udl = "Icon" .. self.index end
 	self.label:SetText(udl)
+	
+	-- enable/disable
+	self:UpdateEnabled()
 end
 
 -- update the exec function and perform cleanup
@@ -461,7 +473,7 @@ function prototype:UpdateExec()
   	print("in:", self.db.execAlert)
   end
   
-  self:SetScript("OnUpdate", OnUpdate)
+  self:UpdateEnabled()
 end
 
 -- show/hide only elements
@@ -558,6 +570,7 @@ function mod:GetDefault()
 	local y = (UIParent:GetHeight() - ICON_DEFAULT_HEIGHT) / 2
 	
 	return {
+		enabled = true,
 		udLabel = "", -- user defined label
 	
 		x = x,

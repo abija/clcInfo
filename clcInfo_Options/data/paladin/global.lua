@@ -66,4 +66,4 @@ local function LoadModuleActiveTemplate()
 		},
 	}
 end
-clcInfo.optionsCMLoadersActiveTemplate[#(clcInfo.optionsCMLoadersActiveTemplate) + 1] = LoadModuleActiveTemplate
+clcInfo_Options.optionsCMLoadersActiveTemplate[#(clcInfo_Options.optionsCMLoadersActiveTemplate) + 1] = LoadModuleActiveTemplate

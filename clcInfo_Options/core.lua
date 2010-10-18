@@ -2,6 +2,10 @@ clcInfo_Options = { templates = { icons = {}, bars = {}, micons = {}, mbars = {}
 local mod = clcInfo_Options
 local AceDialog, AceRegistry, AceGUI, SML, registered, options
 
+-- have them here too for my options to not create them unnecesarry when options aren't loaded
+clcInfo_Options.optionsCMLoaders = {} -- class module options loaders
+clcInfo_Options.optionsCMLoadersActiveTemplate = {} -- special list for the ones who need options based on active template
+
 AceDialog = AceDialog or LibStub("AceConfigDialog-3.0")
 AceRegistry = AceRegistry or LibStub("AceConfigRegistry-3.0")
 AceSerializer = AceSerializer or LibStub("AceSerializer-3.0")
@@ -33,11 +37,17 @@ function mod:LoadClassModules()
 	for i = 1, #(clcInfo.optionsCMLoaders) do
 		clcInfo.optionsCMLoaders[i]()
 	end
+	for i = 1, #(clcInfo_Options.optionsCMLoaders) do
+		clcInfo_Options.optionsCMLoaders[i]()
+	end
 	
 	-- update all the class modules that save options in templates
 	if clcInfo.activeTemplate then
   	for i = 1, #(clcInfo.optionsCMLoadersActiveTemplate) do
 			clcInfo.optionsCMLoadersActiveTemplate[i]()
+		end
+		for i = 1, #(clcInfo_Options.optionsCMLoadersActiveTemplate) do
+			clcInfo_Options.optionsCMLoadersActiveTemplate[i]()
 		end
 	end
 end

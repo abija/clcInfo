@@ -1,0 +1,1 @@
+- clcInfo is really getting stable now. How about changing the Zealotry template so that it will only darken (due to not having 3 Holy Power) when it is up, rather than constantly lighting and dimming when it is on cooldown?

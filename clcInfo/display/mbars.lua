@@ -511,6 +511,8 @@ function prototype:Unlock()
   -- alpha, r, g, b, a, texture, minValue, maxValue, value, mode, t1, t2, t3
   self.___dc = 0
  	self:___AddBar(nil, nil, nil, nil, nil, nil, "Interface\\Icons\\ABILITY_SEAL", 1, 100, 50, nil, "left", "center", "right")
+ 	
+ 	self.unlock = true
 end
 
 -- disables control of the frame
@@ -518,7 +520,24 @@ function prototype:Lock()
   self:EnableMouse(false)
   self.bg:Hide()
   self.label:Hide()
-  self:SetScript("OnUpdate", OnUpdate)
+  self.unlock = false
+  
+  self:UpdateEnabled()
+end
+
+function prototype:UpdateEnabled()
+	if self.db.enabled then
+		if not self.unlock then
+			self:SetScript("OnUpdate", OnUpdate)
+		end
+	else
+		if self.unlock then
+			self:Unlock()
+		else
+			self:SetScript("OnUpdate", nil)
+			self:ReleaseBars()
+		end
+	end
 end
 
 -- display the elements according to the settings
@@ -576,6 +595,8 @@ function prototype:UpdateLayout()
 	if udl == "" then udl = "MBar" .. self.index end
 	self.label:SetText(udl)
 	
+	self:UpdateEnabled()
+	
 	-- update children
 	self:UpdateBarsLayout()	
 end
@@ -627,7 +648,7 @@ function prototype:UpdateExec()
   -- release the bars
   self:ReleaseBars()
   
-  self:SetScript("OnUpdate", OnUpdate)
+  self:UpdateEnabled()
 end
 
 -- caaaaaaaaaaaaaaaaaaareful
@@ -760,6 +781,7 @@ function mod:GetDefault()
 	
 	-- mbar default settings
 	return {
+		enabled = true,
 		udLabel = "", -- user defined label
 	
 		growth = "up", -- up or down
