@@ -206,7 +206,7 @@ function mod.FrostRotation.single()
 	end
 		
 	-- [8] HoW
-	local cdStart, cdDuration = GetSpellCooldown(spellHoW)
+	cdStart, cdDuration = GetSpellCooldown(spellHoW)
 	if cdDuration and gcd < 0.5 then
 		if (cdStart + cdDuration - ctime - gcd) < 1.5 then 
 			dq1 = spellHoW
@@ -321,7 +321,7 @@ function mod.FrostRotation.aoe()
 	end
 
 	-- [7] HoW
-	local cdStart, cdDuration = GetSpellCooldown(spellHoW)
+	cdStart, cdDuration = GetSpellCooldown(spellHoW)
 	if cdDuration and gcd < 0.5 then
 		if (cdStart + cdDuration - ctime - gcd) < 1.5 then 
 			dq1 = spellHoW

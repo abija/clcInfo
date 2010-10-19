@@ -258,11 +258,11 @@ function mod:UpdateMIconList()
 							order = 1,  type = "group", inline = true, name = "Position in grid and size of the icons in cells",
 							args = {
 								gridX = {
-									order = 1, name = "Column", type = "range", min = 1, max = 200, step = 1,
+									order = 1, name = "Column", type = "range", min = -200, max = 200, step = 1,
 									get = Get, set = Set,
 								},
 								gridY = {
-									order = 2, name = "Row", type = "range", min = 1, max = 200, step = 1,
+									order = 2, name = "Row", type = "range", min = -200, max = 200, step = 1,
 									get = Get, set = Set,
 								},
 								_s1 = {

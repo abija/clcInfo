@@ -1,5 +1,4 @@
 - frost dk: easier mode selection, table of funcs
-- change dq[i] for ret and prot
 - tags on curse
 
 - exorcism duration

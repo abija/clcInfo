@@ -35,6 +35,6 @@ data\paladin\custom.lua
 data\deathknight\global.lua
 data\deathknight\blood.lua
 data\deathknight\frost.lua
-data\deathknight\blood.lua
+data\deathknight\unholy.lua
 
 fixandclean.lua

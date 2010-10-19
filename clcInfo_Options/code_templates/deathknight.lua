@@ -44,16 +44,9 @@ return IconSpell("%s", nil, "ready")
 
 
 -- Frost Rotation Skill 1
-name = "Frost Rotation Skill 1"
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
-return IconFrost1()
-]])
-}
+mod.icons[#mod.icons+1] = { name = "Frost Rotation Skill 1", exec = "return IconFrost1()" }
+mod.texts[#mod.texts+1] = { name = "Frost Mode", exec = "return FrostMode()" }
 
-name = "Frost Mode"
-mod.texts[#mod.texts+1] =  {
-name = name, exec = format([[
-return FrostMode()
-]])
-}
+-- Unholy Rotation Skill 1
+mod.icons[#mod.icons+1] = { name = "Unholy Rotation Skill 1", exec = "return IconUnholy1()" }
+mod.texts[#mod.texts+1] = { name = "Unholy Mode", exec = "return UnholyMode()" }
