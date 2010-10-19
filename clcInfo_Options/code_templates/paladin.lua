@@ -58,7 +58,7 @@ return visible, texture, start, duration, enable, reversed
 name = spells["Divine Plea"].name
 mod.icons[#mod.icons+1] = {
 name = name, exec = format([[
-return IconSpell("%s", true, "ready")
+return IconSpell("%s", nil, "ready")
 ]], name)
 }
 
@@ -90,7 +90,7 @@ return visible, texture, start, duration, enable, reversed
 name = spells["Divine Favor"].name
 mod.icons[#mod.icons+1] = {
 name = name, exec = format([[
-return IconSpell("%s", true, "ready")
+return IconSpell("%s", nil, "ready")
 ]], name)
 }
 -- Holy Shock and World of Glory
@@ -102,6 +102,21 @@ else
   return IconSpell("%s")
 end
 ]], spells["Word of Glory"].name, spells["Holy Shock"].name)
+}
+
+-- Protection Rotation Skill 1
+name = "Protection Rotation Skill 1"
+mod.icons[#mod.icons+1] = {
+name = name, exec = format([[
+return IconProtection1()
+]])
+}
+-- Protection Rotation Skill 2
+name = "Protection Rotation Skill 2"
+mod.icons[#mod.icons+1] = {
+name = name, exec = format([[
+return IconProtection2()
+]])
 }
 
 -- [H] Whispering Fanged Skull

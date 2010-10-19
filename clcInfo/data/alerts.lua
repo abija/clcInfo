@@ -1,5 +1,8 @@
 local mod = clcInfo.env
 
+-- expose the play function
+mod.Alert = clcInfo.display.alerts.Play
+
 --------------------------------------------------------------------------------
 function mod.AddAlertIconExpiration(alertIndex, timeLeft, sound)
 	local e = mod.___e

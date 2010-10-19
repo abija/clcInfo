@@ -38,7 +38,7 @@ local pq
 -- number of spells in the queue
 local numSpells
 -- display queue
-local dq = { "", "" }
+local dq1, dq2
 
 -- spells used
 local spells = {
@@ -233,16 +233,16 @@ function mod.RetRotation(csBoost, useInq, preInq)
 		end
 	end
 	
-	dq[1] = pq[index].name
+	dq1 = pq[index].name
 	
 	-- adjust hp for next skill
-	if dq[1] == spellCS then
+	if dq1 == spellCS then
 		if zeal then
 			hp = hp + 3
 		else
 			hp = hp + 1
 		end
-	elseif (dq[1] == spellTV or dq[1] == spellDS) and not hol then
+	elseif (dq1 == spellTV or dq1 == spellDS) and not hol then
 		hp = 0
 	end
 	pq[index].cd = 101 -- put first one at end of queue
@@ -272,7 +272,7 @@ function mod.RetRotation(csBoost, useInq, preInq)
 			cd = v.cd
 		end
 	end
-	dq[2] = pq[index].name
+	dq2 = pq[index].name
 	
 	-- inquisition, if active and needed -> change first tv in dq1 or dq2 with inquisition
 	if useInq then
@@ -285,10 +285,10 @@ function mod.RetRotation(csBoost, useInq, preInq)
 		-- test time for 2nd skill
 		-- check for spell gcd?
 		if (inqLeft - 1.5) <= preInq then
-			if (dq[1] == spellTV or dq[1] == spellDS) and (inqLeft <= preInq) then
-				dq[1] = spellInq
-			elseif (dq[2] == spellTV or dq[2] == spellDS) and ((inqLeft - 1.5) <= preInq) then
-				dq[2] = spellInq
+			if (dq1 == spellTV or dq1 == spellDS) and (inqLeft <= preInq) then
+				dq1 = spellInq
+			elseif (dq2 == spellTV or dq2 == spellDS) and ((inqLeft - 1.5) <= preInq) then
+				dq2 = spellInq
 			end
 		end
 	end
@@ -304,7 +304,7 @@ end
 -- function to be executed when OnUpdate is called manually
 local function S2Exec()
 	if not enabled then return end
-	return emod.IconSpell(dq[2], db.rangePerSkill or spellCS)
+	return emod.IconSpell(dq2, db.rangePerSkill or spellCS)
 end
 -- cleanup function for when exec changes
 local function ExecCleanup()
@@ -318,7 +318,7 @@ function emod.IconRet1(...)
 	
 	if s2 then UpdateS2(s2, 100) end	-- update with a big "elapsed" so it's updated on call
 	if gotskill then
-		return emod.IconSpell(dq[1], db.rangePerSkill or spellCS)
+		return emod.IconSpell(dq1, db.rangePerSkill or spellCS)
 	end
 end
 function emod.IconRet2()
@@ -363,6 +363,6 @@ function emod.IconRet1Ex(rotation, ...)
 	
 	if s2 then UpdateS2(s2, 100) end	-- update with a big "elapsed" so it's updated on call
 	if gotskill then
-		return emod.IconSpell(dq[1], db.rangePerSkill or spellCS)
+		return emod.IconSpell(dq1, db.rangePerSkill or spellCS)
 	end
 end

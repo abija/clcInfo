@@ -1,8 +1,3 @@
-local function bprint(...)
-	if true then return end	-- lazy debug disable
-	print(...)
-end
-
 clcInfo.__version = 62
 
 --------------------------------------------------------------------------------
@@ -23,12 +18,11 @@ local function HasKey(t, key)
 end
 -- IMPOTANT: does not delete not found keys due to the way it's called
 local function AdaptConfig(info, t1, t2)
-	if t1 == nil or type(t1) ~= "table" then bprint(info, "t1 is not a table") return end
-	if t2 == nil or type(t2) ~= "table" then bprint(info, "t2 is not a table") return end
+	if t1 == nil or type(t1) ~= "table" then return end
+	if t2 == nil or type(t2) ~= "table" then return end
 	
 	for k, v in pairs(t2) do
 		if not HasKey(t1, k) then
-			bprint("not found: " .. info .. ":" .. tostring(k))
 			-- go recursive for tables
 			if type(v) == "table" then
 				t1[k] = {}
@@ -37,7 +31,6 @@ local function AdaptConfig(info, t1, t2)
 				t1[k] = v
 			end
 		else
-			bprint("found: " .. info .. ":" .. tostring(k))
 			if type(v) == "table" then
 				if type(t1[k]) ~= "table" then t1[k] = {} end
 				if not AdaptConfig(info .. "." .. tostring(k), t1[k], t2[k]) then return end
@@ -49,8 +42,8 @@ local function AdaptConfig(info, t1, t2)
 end
 
 local function AdaptConfigAndClean(info, t1, t2)
-	if t1 == nil or type(t1) ~= "table" then bprint(info, "t1 is not a table") return end
-	if t2 == nil or type(t2) ~= "table" then bprint(info, "t2 is not a table") return end
+	if t1 == nil or type(t1) ~= "table" then return end
+	if t2 == nil or type(t2) ~= "table" then return end
 	
 	-- adapt first
 	if not AdaptConfig(info, t1, t2) then return end
@@ -59,7 +52,6 @@ local function AdaptConfigAndClean(info, t1, t2)
 	for k, v in pairs(t1) do
 		if not HasKey(t2, k) then
 			-- not found so delete
-			bprint("deleting: " .. info .. "." .. tostring(k))
 			t1[k] = nil
 		else
 			if type(v) == "table" then
@@ -80,23 +72,7 @@ local function CleanConfig()
 	end
 end
 
--- NOT FINISHED
-function clcInfo:FixSavedData()
-	-- check last version
-	
-	if not clcInfo.cdb.version then clcInfo.cdb.version = 0 end
-	if clcInfo.cdb.version == clcInfo.__version then return true end
-	
-	if clcInfo.cdb.version < 44 then
-		print("clcInfo:", "Made some changes to templates to reflect new way talent trees are handled. Please make sure you edit your settings (/clcInfo -> templates)!")
-	end
-	
-	if clcInfo.cdb.version < 59 then
-		clcInfo.SPD("clcInfo:\nNew skin settings for bars and multi bars elements. Also your UI scale settings will be applied to clcInfo elements.\nPlease adjust your configuration.\nSorry for the inconvenience.")
-	end
-	
-	bprint("performing db maintenace")
-	
+function clcInfo:CleanCDB()
 	AdaptConfig("cdb", clcInfo.cdb, clcInfo:GetDefault())
 	
 	-- skined elements
@@ -129,4 +105,26 @@ function clcInfo:FixSavedData()
 	clcInfo.cdb.version = clcInfo.__version
 	return true
 end
+
+-- NOT FINISHED
+function clcInfo:FixSavedData()
+	-- check last version
+	
+	if not clcInfo.cdb.version then clcInfo.cdb.version = 0 end
+	if clcInfo.cdb.version == clcInfo.__version then return true end
+	
+	if clcInfo.cdb.version < 44 then
+		print("clcInfo:", "Made some changes to templates to reflect new way talent trees are handled. Please make sure you edit your settings (/clcInfo -> templates)!")
+	end
+	
+	if clcInfo.cdb.version < 59 then
+		clcInfo.SPD("clcInfo:\nNew skin settings for bars and multi bars elements. Also your UI scale settings will be applied to clcInfo elements.\nPlease adjust your configuration.\nSorry for the inconvenience.")
+	end
+	
+	return self:CleanCDB()
+end
+
+-- expose the 2 functions for other modules
+clcInfo.AdaptConfig = AdaptConfig
+clcInfo.AdaptConfigAndClean = AdaptConfigAndClean
 --------------------------------------------------------------------------------

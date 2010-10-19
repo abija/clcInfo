@@ -37,7 +37,7 @@ local pq
 -- number of spells in the queue
 local numSpells
 -- display queue
-local dq = { "", "" }
+local dq1, dq2
 
 -- spells used
 local spells = {
@@ -215,12 +215,12 @@ function mod.ProtRotation(useInq, preInq)
 		end
 	end
 	
-	dq[1] = pq[index].name
+	dq1 = pq[index].name
 	
 	-- adjust hp for next skill
-	if dq[1] == spellCS or dq[1] == spellHotR then
+	if dq1 == spellCS or dq1 == spellHotR then
 		hp = hp + 1
-	elseif dq[1] == spellSoR or dq[1] == spellInq then
+	elseif dq1 == spellSoR or dq1 == spellInq then
 		hp = 0
 	end
 	pq[index].cd = 101 -- put first one at end of queue
@@ -250,7 +250,7 @@ function mod.ProtRotation(useInq, preInq)
 			cd = v.cd
 		end
 	end
-	dq[2] = pq[index].name
+	dq2 = pq[index].name
 
 	return true	-- if not true, addon does nothing
 end
@@ -263,7 +263,7 @@ end
 -- function to be executed when OnUpdate is called manually
 local function S2Exec()
 	if not enabled then return end
-	return emod.IconSpell(dq[2], db.rangePerSkill or spellCS)
+	return emod.IconSpell(dq2, db.rangePerSkill or spellCS)
 end
 -- cleanup function for when exec changes
 local function ExecCleanup()
@@ -277,7 +277,7 @@ function emod.IconProtection1(...)
 	
 	if s2 then UpdateS2(s2, 100) end	-- update with a big "elapsed" so it's updated on call
 	if gotskill then
-		return emod.IconSpell(dq[1], db.rangePerSkill or spellCS)
+		return emod.IconSpell(dq1, db.rangePerSkill or spellCS)
 	end
 end
 function emod.IconProtection2()

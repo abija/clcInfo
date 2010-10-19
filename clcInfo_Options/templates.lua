@@ -124,8 +124,6 @@ StaticPopupDialogs["CLCINFO_CONFIRM_IMPORT_TEMPLATE"] = {
 		if not importString or importString == "" then return end
 		local success, t = AceSerializer:Deserialize(importString)
 		if success then
-			clcInfo.spew = t
-			
 			mod.SafeCopyTable(t, clcInfo.cdb.templates[importId])
 			
 			-- now we need to add the elements

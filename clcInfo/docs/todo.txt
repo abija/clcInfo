@@ -1,3 +1,14 @@
+- frost dk: easier mode selection, table of funcs
+- change dq[i] for ret and prot
+- tags on curse
+
+- exorcism duration
+- lock/unlock - to 1 toggle
+- rename alert to animation in the displayed stuff
+- make alert available in env
+
+
+
 -- tutorial: skins
 --------------------------------------------------------------------------------
 
@@ -44,14 +55,3 @@
 ----------------------------------------------
 - presets?
 - sort a proper way to fix db whenever is needed
-
--- protection
-
-
-""
---[[
-
---]]
-
-
--- dk

@@ -8,7 +8,7 @@ local modAlerts = clcInfo.display.alerts  -- link to the module
 -- static popup to make sure
 local deleteObj = nil
 StaticPopupDialogs["CLCINFO_CONFIRM_DELETE_ALERT"] = {
-	text = "Are you sure you want to delete this alert?",
+	text = "Are you sure you want to delete this animation?",
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function (self)
@@ -75,7 +75,7 @@ local SmoothingValues = { IN = "IN", IN_OUT = "IN_OUT", NONE = "NONE", OUT = "OU
 -- get label
 local function GetUDLabel(info)
 	local name = modAlerts.active[tonumber(info[3])].db.udLabel
-	if name == "" then name = "Alert" .. info[3] end
+	if name == "" then name = "Animation" .. info[3] end
 	return "[" .. info[3] .. "]" .. name
 end
 

@@ -274,7 +274,7 @@ function clcInfo.ChangeShowWhen()
 	
 	-- show in combat
 	if val == "combat" then
-		if UnitAffectingCombat("player") then
+		if InCombatLockdown() then
 			mf:Show()
 		else
 			mf:Hide()

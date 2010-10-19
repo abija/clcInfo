@@ -7,49 +7,63 @@ local mod = clcInfo_Options
 local AceRegistry = mod.AceRegistry
 local options = mod.options
 
-local baseMod = clcInfo.classModules.global
+-- lower case module name
+local modName = "global"
+
+local baseMod = clcInfo.classModules[modName]
+clcInfo.spew = baseMod
 local baseTDB
 
 local function Get(info)
 	return baseTDB[info[#info]]
 end
-
 local function Set(info, val)
 	baseTDB[info[#info]] = val
-	baseMod.UpdateRuneBar()
+	baseMod.UpdateRBar()
+end
+
+local function GetLocked(info)
+	return baseMod.locked
+end
+local function SetLocked(info, val)
+	baseMod.locked = val
+	baseMod.UpdateRBar()
 end
 
 local function LoadModuleActiveTemplate()
-	baseTDB = clcInfo.activeTemplate.classModules.global
-	
-	options.args.classModules.args.global = {
+	baseTDB = clcInfo.activeTemplate.classModules[modName]
+
+	options.args.classModules.args[modName] = {
 		order = 1, type = "group", childGroups = "tab", name = "Global",
 		args = {
 			tabGeneral = {
 				order = 1, type = "group", name = "General", args = {
-					moveRuneBar = {
-						order = 1, type = "group", inline = true, name = "Rune Bar Position",
+					moveRB = {
+						order = 1, type = "group", inline = true, name = "Custom Rune Bar",
 						args = {
-							moveRuneBar = {
-								order = 1, type = "toggle", width = "full",
-								name = "Move RuneBar (relative to center of the screen).",
-								get = Get, set = Set,
+							moveRB = {
+								order = 1, type = "toggle", name = "Use own bar", get = Get, set = Set,
+							},
+							moveRBLock = {
+								order = 2, type = "toggle", name = "Locked own bar", get = GetLocked, set = SetLocked,
+							},
+							hideBlizzRB = {
+								order = 3, type = "toggle", width="double", name = "Hide Blizzard", get = Get, set = Set,
+							},
+							_s1 = {
+								order = 11, type = "description", name = "",
 							},
 							rbX = {
-								order = 2, type = "range", min = -2000, max = 2000, step = 1, name = "X",
-								get = Get, set = Set,
+								order = 12, type = "range", min = -2000, max = 2000, step = 1, name = "X", get = Get, set = Set,
 							},
 							rbY = {
-								order = 3, type = "range", min = -2000, max = 2000, step = 1, name = "Y",
-								get = Get, set = Set,
+								order = 13, type = "range", min = -2000, max = 2000, step = 1, name = "Y", get = Get, set = Set,
 							},
 							rbScale = {
-								order = 4, type = "range", min = 0.1, max = 10, step = 0.1, name = "Scale",
-								get = Get, set = Set,
+								order = 14, type = "range", min = 0.1, max = 10, step = 0.1, name = "Scale", get = Get, set = Set,
 							},
 							rbAlpha = {
-								order = 5, type = "range", min = 0, max = 1, step = 0.01, name = "Alpha",
-								get = Get, set = Set,
+								order = 15, type = "range", min = 0, max = 1, step = 0.01, name = "Alpha", get = Get, set = Set,
 							},
 						},
 					},
@@ -58,5 +72,4 @@ local function LoadModuleActiveTemplate()
 		},
 	}
 end
--- these modules are loaded whenever template changes
-clcInfo_Options.optionsCMLoadersActiveTemplate[#(clcInfo_Options.optionsCMLoadersActiveTemplate) + 1] = LoadModuleActiveTemplate
+table.insert(clcInfo_Options.optionsCMLoadersActiveTemplate, LoadModuleActiveTemplate)

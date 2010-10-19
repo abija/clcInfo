@@ -130,7 +130,7 @@ function prototype:UpdateLayout()
 	
 	-- change the text of the label
 	local udl = opt.udLabel
-	if udl == "" then udl = "Alert" .. self.index end
+	if udl == "" then udl = "Animation" .. self.index end
 	self.label:SetText(udl)
 end
 

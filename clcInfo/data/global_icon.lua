@@ -414,13 +414,13 @@ function mod.IconAction(slot, checkRange, showWhen)
 		end
 	end
 	
-		local timeLeft = start + duration - GetTime()
+	local timeLeft = start + duration - GetTime()
+	
+	local count  = GetActionCount(slot)
+	if count <= 1 then count = nil end
 	
 	-- modify vertex only when out of cooldow
 	if timeLeft < 1.5 then
-		local count  = GetActionCount(slot)
-		if count <= 1 then count = nil end
-		
 		if checkRange and ActionHasRange(slot) and (IsActionInRange(slot) == 0) then
 			return true, texture, start, duration, enable, nil, count, nil, true, 0.8, 0.1, 0.1, 1
 		end

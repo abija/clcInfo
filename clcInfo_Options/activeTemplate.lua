@@ -1080,9 +1080,9 @@ function mod:LoadActiveTemplate()
   	},
   	
   	alerts = {
-  		order = 110, type = "group", name = "Alerts",
+  		order = 110, type = "group", name = "Animations",
   		args = {
-  			addAlert = { order = 1, type = "execute", name = "Add Alert", func = AddAlert },
+  			addAlert = { order = 1, type = "execute", name = "Add Animation", func = AddAlert },
   		},
   	},
   }

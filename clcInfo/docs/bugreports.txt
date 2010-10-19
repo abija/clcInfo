@@ -1,0 +1,1 @@
+I seem to have a small problem with it tho, sometimes after leaving combat the addon keeps showing even tho i have selected "Show: In Combat". The only way to get it working properly is to change the settings and change it back after. Anything i'm doing wrong?

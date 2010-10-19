@@ -2,12 +2,16 @@
 local _, class = UnitClass("player")
 if class ~= "PALADIN" then return end
 
+local version = 2
+
 local defaults = {
 	movePPBar = false,
 	hideBlizPPB = false,
 	-- paladin power bar coords
 	ppbX = 0,
 	ppbY = 0,
+	ppbPoint = "CENTER",
+  ppbRelativePoint = "CENTER",
 	ppbScale = 1,
 	ppbAlpha = 1,
 	
@@ -21,18 +25,19 @@ local db -- ! it's a tdb, change if needed
 local emod = clcInfo.env
 
 local myppb -- my hp bar
+mod.locked = true
 
 -- this function, if it exists, will be called at init
 function mod.OnInitialize()
 	db = clcInfo:RegisterClassModuleTDB("global", defaults)
 	if db then
-		-- small fix
-		-- major changes should be handled in another way
-		if not db.ppbAlpha then db.ppbAlpha = 1 end
-		if not db.version then db.version = 1 end
+		if not db.version or db.version < version then
+			-- fix stuff
+			clcInfo.AdaptConfigAndClean("globalTDB", db, defaults)
+			db.version = version
+		end
 		
 		if not myppb then mod.CreatePPB() end
-		
 		mod.UpdatePPBar()
 	end
 end
@@ -40,6 +45,8 @@ mod.OnTemplatesUpdate = mod.OnInitialize
 
 function mod.UpdatePPBar()
 	if db.movePPBar then
+		myppb:EnableMouse(not mod.locked)
+	
 		myppb:Show()
 		myppb:ClearAllPoints()
 		myppb:SetScale(db.ppbScale)
@@ -216,5 +223,18 @@ function mod.CreatePPB()
 	myppb:SetScript("OnEvent", PaladinPowerBar_OnEvent)
 	myppb:Hide()
 	PaladinPowerBar_OnLoad(myppb)
+	
+	-- register for drag
+	myppb:SetMovable(true)
+	myppb:RegisterForDrag("LeftButton")
+	myppb:SetScript("OnDragStart", function(self)
+      self:StartMoving()
+  end)
+	myppb:SetScript("OnDragStop", function(self)
+		self:StopMovingOrSizing()
+		db.ppbPoint, _, db.ppbRelativePoint, db.ppbX, db.ppbY = self:GetPoint()
+    -- update the data in options also
+    clcInfo:UpdateOptions()
+	end)
 end
 --------------------------------------------------------------------------------

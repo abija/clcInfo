@@ -33,12 +33,9 @@ mod.cacheIcons = {}
 local db
 
 -- some defaults used for skinning
-local STACK_DEFAULT_WIDTH 		= 36
-local STACK_DEFAULT_HEIGHT 		= 10
-local STACK_DEFAULT_OFFSETX 	= -2
-local STACK_DEFAULT_OFFSETY 	= -11
-local ICON_DEFAULT_WIDTH 			= 30
-local ICON_DEFAULT_HEIGHT			= 30
+local ICON_DEFAULT_WIDTH 			= 36
+local ICON_DEFAULT_HEIGHT			= 36
+local defaultFontFace, defaultFontSize, defaultFontFlags = _G["NumberFontNormal"]:GetFont()
 
 -- local bindings
 local GetTime = GetTime
@@ -54,10 +51,8 @@ local modAlerts = clcInfo.display.alerts
 -- reduce number of frames?
 function iconPrototype:Init()
 	self.texMain = self:CreateTexture(nil, "BORDER")
-	self.texMain:SetAllPoints()
 	-- cooldown
 	self.cooldown = CreateFrame("Cooldown", nil, self)
-	self.cooldown:SetAllPoints(self)
 	
 	-- special frame so it's on top of cooldown
 	local skinFrame = CreateFrame("Frame", nil, self)
@@ -65,27 +60,20 @@ function iconPrototype:Init()
 	-- normal and gloss on top of the cooldown
 	self.texNormal = skinFrame:CreateTexture(nil, "ARTWORK")
 	self.texGloss = skinFrame:CreateTexture(nil, "OVERLAY")
-	
-	-- put the fonts on a frame and scale it?
-	self.stackFrame = CreateFrame("Frame", nil, self)
-	self.stackFrame:SetFrameLevel(self.cooldown:GetFrameLevel() + 2)
-	self.stackFrame:SetWidth(STACK_DEFAULT_WIDTH)
-	self.stackFrame:SetHeight(STACK_DEFAULT_HEIGHT)
-	
-	self.stack = self.stackFrame:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
-	self.stack:SetJustifyH("RIGHT")
-	self.stack:SetPoint("RIGHT", self.stackFrame, "RIGHT", 0, 0)
+
+	self.count = skinFrame:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
+	self.count:SetJustifyH("RIGHT")
 	
 	self:Hide()
 end
 
-local function BFPosition(e, p, layer, scalex, scaley)
+-- button facade helper functions
+local function BFPosition(e, p, layer, xScale, yScale)
+	e:SetSize(xScale * (layer.Scale or 1) * (layer.Width or 36), yScale * (layer.Scale or 1) * (layer.Height or 36))
 	e:ClearAllPoints()
-	e:SetWidth(scalex * (layer.Width or 36))
-	e:SetHeight(scaley * (layer.Height or 36))
-	e:SetPoint("CENTER", p, "CENTER", scalex * (layer.OffsetX or 0), scaley * (layer.OffsetY or 0))
+	e:SetPoint("CENTER", p, "CENTER", xScale * (layer.Scale or 1) * (layer.OffsetX or 0), yScale * (layer.Scale or 1) * (layer.OffsetY or 0))
 end
-local function BFTexture(t, tx, layer, scalex, scaley)
+local function BFLayer(t, tx, layer, scalex, scaley)
 	if not layer then t:Hide() return end
 	t:Show()
 	t:SetTexture(layer.Texture or "")
@@ -96,7 +84,7 @@ local function BFTexture(t, tx, layer, scalex, scaley)
 end
 function ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
 	local opt = self.parent.db
-
+	
 	skin = (lbf:GetSkins())[bfSkin]
 	if not skin then
 		-- try with blizzard
@@ -109,58 +97,77 @@ function ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
 		end
 	end
 	
-	local scalex = opt.width / (skin.Icon.Width or 36)
-	local scaley = opt.height / (skin.Icon.Height or 36)
+	local xScale = opt.width / 36
+	local yScale = opt.height / 36
 	
-	-- adjust tex coords for icon
+	-- main texture
+	local t = self.texMain
+	local l = skin.Icon
+	t:SetSize((l.Width or 36) * (l.Scale or 1) * xScale, (l.Height or 36) * (l.Scale or 1) * yScale)
+	t:ClearAllPoints()
+	t:SetPoint("CENTER", self, "CENTER", xScale * (l.Scale or 1) * (l.OffsetX or 0), yScale * (l.Scale or 1) * (l.OffsetY or 0))
 	self.texMain:SetTexCoord(unpack(skin.Icon.TexCoords or { 0, 1, 0, 1 }))
 	
 	-- normal, gloss textures
-	BFTexture(self.texNormal, self, skin.Normal, scalex, scaley) 
-	BFTexture(self.texGloss, self, skin.Gloss, scalex, scaley)
+	BFLayer(self.texNormal, self, skin.Normal, xScale, yScale) 
+	BFLayer(self.texGloss, self, skin.Gloss, xScale, yScale)
 	self.texGloss:SetAlpha(bfGloss / 100)
 	
-	-- rest of elements
-	local layer, e
 	-- cooldown
-	if skin.Cooldown then BFPosition(self.cooldown, self, skin.Cooldown, scalex, scaley) end
+	self.cooldown:SetSize(opt.width * xScale, opt.height * yScale)
+	if skin["Cooldown"] then BFPosition(self.cooldown, self, skin["Cooldown"], xScale, yScale) end
 	
-	-- stack is scaled so use default values
+	-- adjust the text size
+	local count = self.count
 	if skin.Count then
-		self.stackFrame:SetWidth(skin.Count.Width or 36)
-		self.stackFrame:SetHeight(skin.Count.Height or 36)
-		self.stackFrame:SetPoint("CENTER", self, "CENTER", skin.Count.OffsetX or 0, skin.Count.OffsetY or 0)
+		l = skin.Count
+		count:SetSize((l.Width or 36) * (l.Scale or 1) * xScale, (l.Height or 36) * (l.Scale or 1) * yScale)
+		count:ClearAllPoints()
+		count:SetPoint("CENTER", self, "CENTER", xScale * (l.Scale or 1) * (l.OffsetX or 0), yScale * (l.Scale or 1) * (l.OffsetY or 0))
+		count:SetFont(defaultFontFace, defaultFontSize * yScale * (l.Scale or 1), defaultFontFlags)
 	else
-		self.stackFrame:SetWidth(STACK_DEFAULT_WIDTH)
-		self.stackFrame:SetHeight(STACK_DEFAULT_HEIGHT)
-		self.stackFrame:SetPoint("CENTER", self, "CENTER", STACK_DEFAULT_OFFSETX, STACK_DEFAULT_OFFSETY)
+		count:SetSize(40 * xScale, 10 * yScale)
+		count:ClearAllPoints()
+		count:SetPoint("CENTER", self, "CENTER", -2 * xScale, -8 * yScale)
+		local fontFamily, _, fontFlags = count:GetFont()
+		count:SetFont(defaultFontFace, defaultFontSize * yScale, defaultFontFlags)
 	end
 end
 
 function ApplyMySkin(self)
-	self.texMain:SetTexCoord(0, 1, 0, 1)
-
 	local opt = self.parent.db
 
-	local t = self.texNormal
-	local scalex = opt.width / 34
-	local scaley = opt.height / 34
+	local xScale = opt.width / 36
+	local yScale = opt.height / 36
+
+	local t = self.texMain
+	t:SetSize(34 * xScale, 34 * yScale)
+	t:ClearAllPoints()
+	t:SetPoint("CENTER", self, "CENTER", 0, 0)
+	t:SetTexCoord(0, 1, 0, 1)
+
+	t = self.texNormal
 	
 	t:SetTexture("Interface\\AddOns\\clcInfo\\textures\\IconNormal")
+	t:SetSize(opt.width, opt.height)
 	t:ClearAllPoints()
-	t:SetWidth(scalex * 36)
-	t:SetHeight(scaley * 36)
-	t:SetPoint("CENTER", self)
+	t:SetPoint("CENTER", self, "CENTER", 0, 0)
 	t:Show()
 	
 	t = self.texGloss
 	t:Hide()
 	
-	self.cooldown:SetAllPoints(self)
+	local t = self.cooldown
+	t:SetSize(opt.width, opt.height)
+	t:ClearAllPoints()
+	t:SetPoint("CENTER", self, "CENTER", 0, 0)
 	
-	self.stackFrame:SetWidth(STACK_DEFAULT_WIDTH)
-	self.stackFrame:SetHeight(STACK_DEFAULT_HEIGHT)
-	self.stackFrame:SetPoint("CENTER", self, "CENTER", STACK_DEFAULT_OFFSETX, STACK_DEFAULT_OFFSETY)
+	-- adjust the text size
+	local count = self.count
+	count:SetSize(40 * xScale, 10 * yScale)
+	count:ClearAllPoints()
+	count:SetPoint("CENTER", self, "CENTER", -2 * xScale, -8 * yScale)
+	count:SetFont(defaultFontFace, defaultFontSize * yScale, defaultFontFlags)
 end
 
 function iconPrototype:UpdateLayout(i, skin)
@@ -187,8 +194,6 @@ function iconPrototype:UpdateLayout(i, skin)
 	else
 		ApplyMySkin(self)
 	end
-	
-	self.stackFrame:SetScale(opt.height / ICON_DEFAULT_HEIGHT)
 end
 
 --------------------------------------------------------------------------------
@@ -252,8 +257,8 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 		icon.lastDuration = duration
 	end
 	
-	-- stack
-	local e = icon.stack
+	-- count
+	local e = icon.count
 	if count then
 		e:SetText(count)
 		e:Show()
