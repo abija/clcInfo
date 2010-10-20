@@ -1,0 +1,39 @@
+<link href="css.css" rel="stylesheet" type="text/css" />
+<p class="h2">Icons</p>
+
+<p class="t1">Spell cooldown.</p>
+<p class="c1">return IconSpell("Avenging Wrath")</p>
+
+<p class="t1">Spell cooldown that checks range of the spell.</p>
+<p class="c1">return IconSpell("Judgement of Light", true)</p>
+
+<p class="t1">Spell cooldown that checks if you are in melee range (as long as you have a melee range only ability).</p>
+<p class="c1">return IconSpell("Judgement of Light", "Crusader Strike")</p>
+
+<p class="t1">Spell that doesn't check range and is shown only when not on cooldown.</p>
+<p class="c1">return IconSpell("Avenging Wrath", nil, "ready")</p>
+
+<p class="t1">Buff on player.</p>
+<p class="c1">return IconAura("HELPFUL", "player", 71187)</p>
+<p class="ti11">or</p>
+<p class="c1">return IconAura("HELPFUL", "player", "Formidable")</p>
+
+<p class="t1">Display the buff when it's active and the ability cooldown when it expires.</p>
+<p class="c1">local visible, texture, start, duration, enable, reversed = IconAura("HELPFUL", "player", "Icy Veins")
+if not visible then return IconSpell("Icy Veins") end
+return visible, texture, start, duration, enable, reversed </p>
+
+<p class="t1">Debuff on target.</p>
+<p class="c1">return IconAura("HARMFUL", "target", "Stormstrike")</p>
+
+<p class="t1">Debuff on target cast by the player.</p>
+<p class="c1">return IconAura("HARMFUL", "target", "Stormstrike", "player")</p>
+
+<p class="t1">Item that is equiped in slot 1 (head).</p>
+<p class="c1">return IconItem(GetInventoryItemID("player", 1))</p>
+
+<p class="t1">Internal Cooldown for Whispering Fang Skull (H).</p>
+<p class="c1">return IconICD(71541, 45, 0, 1, 0.3)</p>
+
+<p class="t1">Internal Cooldown for Ashen Band of Endless Vengeance</p>
+<p class="c1">return IconICD(72412, 60, 0, 1, 0.3)</p>

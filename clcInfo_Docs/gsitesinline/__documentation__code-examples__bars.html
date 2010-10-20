@@ -1,0 +1,13 @@
+<p style="font-family: Verdana, Geneva, sans-serif; font-size: 16px; font-weight: bold; color: #004080; margin: 0px 0px 15px 0px; padding: 0px 0px 5px 0px; border-bottom: 1px solid #999;">Bars</p>
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Track some buff.</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return BarAura("HELPFUL", "player", "Judgements of the Pure", nil, false, true)</p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Holy Power bar (for Cataclysm).</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return true, nil, 0, 3, UnitPower("player", SPELL_POWER_HOLY_POWER)</p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">A mana bar (make sure to use advanced settings and hide the icon)</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">local cm = UnitPower("player").
+return true, nil, 0, UnitPowerMax("player"), cm, nil, cm</p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Track something like Beacon of Light, Earth Shield or Prayer of Mending.</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return BarSingleTargetRaidBuff("Beacon of Light", false, true)</p>

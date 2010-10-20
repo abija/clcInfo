@@ -1,0 +1,38 @@
+<p style="font-family: Verdana, Geneva, sans-serif; font-size: 16px; font-weight: bold; color: #004080; margin: 0px 0px 15px 0px; padding: 0px 0px 5px 0px; border-bottom: 1px solid #999;">Icons</p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Spell cooldown.</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconSpell("Avenging Wrath")</p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Spell cooldown that checks range of the spell.</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconSpell("Judgement of Light", true)</p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Spell cooldown that checks if you are in melee range (as long as you have a melee range only ability).</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconSpell("Judgement of Light", "Crusader Strike")</p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Spell that doesn't check range and is shown only when not on cooldown.</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconSpell("Avenging Wrath", nil, "ready")</p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Buff on player.</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconAura("HELPFUL", "player", 71187)</p>
+<p style="margin: 5px 0px 0px 40px; padding: 0px 0px 0px 5px; font-family: Verdana, Geneva, sans-serif; font-size:11px;">or</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconAura("HELPFUL", "player", "Formidable")</p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Display the buff when it's active and the ability cooldown when it expires.</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">local visible, texture, start, duration, enable, reversed = IconAura("HELPFUL", "player", "Icy Veins")
+if not visible then return IconSpell("Icy Veins") end
+return visible, texture, start, duration, enable, reversed </p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Debuff on target.</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconAura("HARMFUL", "target", "Stormstrike")</p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Debuff on target cast by the player.</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconAura("HARMFUL", "target", "Stormstrike", "player")</p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Item that is equiped in slot 1 (head).</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconItem(GetInventoryItemID("player", 1))</p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Internal Cooldown for Whispering Fang Skull (H).</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconICD(71541, 45, 0, 1, 0.3)</p>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Internal Cooldown for Ashen Band of Endless Vengeance</p>
+<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconICD(72412, 60, 0, 1, 0.3)</p>

@@ -1,0 +1,20 @@
+.h1 { font-family: Verdana, Geneva, sans-serif; font-size: 16px; font-weight: bold; color: #004080; margin: 0px 0px 0px 0px; padding: 0px 0px 5px 0px; border-bottom: 1px solid #999; }
+.h2 { font-family: Verdana, Geneva, sans-serif; font-size: 16px; font-weight: bold; color: #004080; margin: 0px 0px 15px 0px; padding: 0px 0px 5px 0px; border-bottom: 1px solid #999; }
+.h3 { font-family: Verdana, Geneva, sans-serif; font-size: 16px; font-weight: bold; color: #004080; margin: 0px 0px 20px 0px; padding: 0px 0px 5px 0px; border-bottom: 1px solid #999; }
+.h1u { margin: 0px 0px 20px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:10px; }
+.t1 { margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px; }
+.t2 { margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:11px; }
+.c1 { margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B; }
+.c2 { margin: 10px 0px 0px 0px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:13px; font-weight: bold; color: #00602B; }
+.ti1 { margin: 5px 0px 0px 40px; padding: 0px 0px 0px 5px; font-family: Verdana, Geneva, sans-serif; font-size:11px; border-left: 1px solid #777; line-height: 17px;  }
+.ti11 { margin: 5px 0px 0px 40px; padding: 0px 0px 0px 5px; font-family: Verdana, Geneva, sans-serif; font-size:11px; }
+.ti2 { margin: 5px 0px 0px 20px; padding: 0px 0px 0px 5px; font-family: Verdana, Geneva, sans-serif; font-size:11px; border-left: 1px solid #777; line-height: 17px; }
+.cv1 { color: #f0f; font-family: Consolas, 'Courier New', mononspace; }
+.ts1 { color: #900; }
+.ilc1 { font-family: Consolas, 'Courier New', mononspace; font-size:12px; }
+.ilc2 { font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B; }
+.ilc3 { font-family: Consolas, 'Courier New', mononspace; font-size:14px; font-weight: bold; color: #00602B; }
+.ul1 { margin: 0px 0px 0px 20px; padding: 0px 0px 0px 10px; list-style-type: circle; }
+.color_code { color: #00602B; }
+.color_sample { color: #900; }
+.color_value { color: #fof; }

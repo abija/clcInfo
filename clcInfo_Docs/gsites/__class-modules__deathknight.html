@@ -1,0 +1,95 @@
+<link href="css.css" rel="stylesheet" type="text/css" />
+<p class="h1">
+Frost</p>
+<p class="h1u">
+First draft, based on: <a href="http://elitistjerks.com/f72/t105701-frost_dps_cataclysm_countdown/#Rotation">http://elitistjerks.com/f72/t105701-frost_dps_cataclysm_countdown/#Rotation</a>
+</p>
+<p class="t1">
+Icon code:
+</p>
+<p class="c1">
+return IconFrost1()
+</p>
+<p class="t1">
+Command line:
+</p>
+<p class="c1">
+/clcinfo frost_mode single<br />
+/clcinfo frost_mode aoe
+</p>
+<p class="ti1">
+Switch between single target and aoe modes.
+</p>
+<p class="t1">
+Functions to get information about the settings:
+</p>
+<p class="c1">
+FrostMode()
+</p>
+<p class="ti1">
+Returns <span class="cv1">"single"</span> or <span class="cv1">"aoe"</span>.
+</p>
+
+<br /><br />
+
+<p class="h1">
+Unholy
+</p>
+<p class="h1u">
+First draft, based on: <a href="http://elitistjerks.com/f72/t105521-unholy_dps_cataclysm_ordinary_days/#Rotation">http://elitistjerks.com/f72/t105521-unholy_dps_cataclysm_ordinary_days/#Rotation</a>
+</p>
+<p class="t1">
+Icon code:
+</p>
+<p class="c1">
+return IconUnholy1(diseaseClip)
+</p>
+<p class="ti1">
+<strong>diseaseClip</strong>: how many seconds before expiration to try and refresh diseases, defaults to 0
+</p>
+<p class="t1">
+Command line:
+</p>
+<p class="c1">
+/clcinfo unholy_mode single
+/clcinfo unholy_mode aoe
+</p>
+<p class="ti1">
+Switch between single target and aoe modes.
+</p>
+<p class="c1">
+/clcinfo unholy_dt enabled
+/clcinfo unholy_dt disabled
+</p>
+<p class="ti1">
+Toggle suggestion of Dark Transformation.
+</p>
+<p class="c1">
+/clcinfo unholy_pest enabled
+/clcinfo unholy_pest disabled
+</p>
+<p class="ti1">
+Toggle suggestion of Pestilence.
+</p>
+<p class="t1">
+Functions to get information about the settings:
+</p>
+<p class="c1">
+UnholyMode()
+</p>
+<p class="ti1">
+Returns <span class="cv1">"single"</span> or <span class="cv1">"aoe"</span>.
+</p>
+<p class="c1">
+UnholyDT()
+</p>
+<p class="ti1">
+Returns <span class="cv1">true</span> or <span class="cv1">false</span>.
+</p>
+<p class="c1">
+UnholyPest()
+</p>
+<p class="ti1">
+Returns <span class="cv1">true</span> or <span class="cv1">false</span>.
+</p>
+

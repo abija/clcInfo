@@ -1,0 +1,1 @@
+G:\xampp\php\php.exe -f "G:\clcInfo_Docs\makegsites.php"

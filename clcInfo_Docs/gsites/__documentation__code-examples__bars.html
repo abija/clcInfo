@@ -1,0 +1,14 @@
+<link href="css.css" rel="stylesheet" type="text/css" />
+<p class="h2">Bars</p>
+<p class="t1">Track some buff.</p>
+<p class="c1">return BarAura("HELPFUL", "player", "Judgements of the Pure", nil, false, true)</p>
+
+<p class="t1">Holy Power bar (for Cataclysm).</p>
+<p class="c1">return true, nil, 0, 3, UnitPower("player", SPELL_POWER_HOLY_POWER)</p>
+
+<p class="t1">A mana bar (make sure to use advanced settings and hide the icon)</p>
+<p class="c1">local cm = UnitPower("player").
+return true, nil, 0, UnitPowerMax("player"), cm, nil, cm</p>
+
+<p class="t1">Track something like Beacon of Light, Earth Shield or Prayer of Mending.</p>
+<p class="c1">return BarSingleTargetRaidBuff("Beacon of Light", false, true)</p>
