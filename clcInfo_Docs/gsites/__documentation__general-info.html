@@ -1,0 +1,30 @@
+<link href="css.css" rel="stylesheet" type="text/css" />
+<h1 class="h2"><span class="color_gray">Documentation \ </span><span>General information</span></h1>
+<p class="t1">Return expected for Icon code: <span class="font_code_12_bold">visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a</span></p>
+<pre class="ti2">visible: if the icon should be displayed or not
+texture: texture used for the icon
+start, duration, enable, reversed: control the display of the cooldown (if enable ~= 1 then cooldown is not displayed)
+count: stack value, nil if lower than 2
+alpha: alpha of the icon
+svc: true if we want to change the vertex color
+r, g, b, a: new vertex color parameters</pre>
+
+<br />
+
+<p class="t1">Return expected for Bar code: <span class="font_code_12_bold">visible, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight</span></p>
+<pre class="ti2"><span>visible: if the bar should be displayed or not
+texture: texture used for the icon
+minValue, maxValue, value: control the display of the bar
+mode: controls how bar is updated when updates are faster than the update throttle on the element (changes might happen on this part)</span><ul class="ul1"><li>"normal": bar decreases by elapsed</li><li>"reversed": bar increases by elapsed</li><li>anything else: bar updates only on the element throttled update</li></ul>
+<span>textLeft, textCenter, textRight: values for the 3 text elements</span></pre>
+
+<br />
+
+<p class="t1">
+Return expected for Text code: <span class="font_code_12_bold">text, alpha, scale, svc, r, g, b, a</span>
+</p>
+<pre class="ti2">text: text to be displayed
+alpha: alpha setting for the text (can be useful to animate it)
+scale: scaling of the text (can be useful to animate it)
+svc: true if we want to change the vertex color
+r, g, b, a: new vertex color parameters</pre>

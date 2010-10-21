@@ -1,0 +1,59 @@
+<link href="css.css" rel="stylesheet" type="text/css" />
+<h1 class="h2"><span class="color_gray">Code examples \ </span><span>Icons</span></h1>
+
+<p class="t1">Spell cooldown.</p>
+<pre class="c1">return IconSpell("Avenging Wrath")</pre>
+
+<p class="t1">Spell cooldown that checks range of the spell.</p>
+<pre class="c1">return IconSpell("Judgement of Light", true)</pre>
+
+<p class="t1">Spell cooldown that checks if you are in melee range (as long as you have a melee range only ability).</p>
+<pre class="c1">return IconSpell("Judgement of Light", "Crusader Strike")</pre>
+
+<p class="t1">Spell that doesn't check range and is shown only when not on cooldown.</p>
+<pre class="c1">return IconSpell("Avenging Wrath", nil, "ready")</pre>
+
+<p class="t1">Buff on player.</p>
+<pre class="c1">return IconAura("HELPFUL", "player", 71187)</pre>
+<p class="ti11">or</p>
+<pre class="c1">return IconAura("HELPFUL", "player", "Formidable")</pre>
+
+<p class="t1">Display the buff when it's active and the ability cooldown when it expires.</p>
+<pre class="c1">local visible, texture, start, duration, enable, reversed = IconAura("HELPFUL", "player", "Icy Veins")
+if not visible then return IconSpell("Icy Veins") end
+return visible, texture, start, duration, enable, reversed </pre>
+
+<p class="t1">Debuff on target.</p>
+<pre class="c1">return IconAura("HARMFUL", "target", "Stormstrike")</pre>
+
+<p class="t1">Debuff on target cast by the player.</p>
+<pre class="c1">return IconAura("HARMFUL", "target", "Stormstrike", "player")</pre>
+
+<p class="t1">Item that is equiped in slot 1 (head).</p>
+<pre class="c1">return IconItem(GetInventoryItemID("player", 1))</pre>
+
+<p class="t1">Internal Cooldown for Whispering Fang Skull (H).</p>
+<pre class="c1">return IconICD(71541, 45, 0, 1, 0.3)</pre>
+
+<p class="t1">Internal Cooldown for Ashen Band of Endless Vengeance</p>
+<pre class="c1">return IconICD(72412, 60, 0, 1, 0.3)</pre>
+
+<p class="t1">Display an aura when there are x seconds left on it.</p>
+<pre class="c1">local visible, texture, start, duration, enable, reversed = IconAura("HELPFUL|PLAYER", "player", "Judgements of the Pure")
+if duration and (start + duration - GetTime()) &lt;= 10 then
+  return visible, texture, start, duration, enable, reversed
+end</pre>
+
+<p class="t1">Display a buff when it's not active on you.</p>
+<pre class="c1">local name, _, icon = GetSpellInfo(89901)
+if not UnitBuff("player", name) then return true, icon end</pre>
+
+<p class="t1">Show a spell when affected by a list of debuffs.</p>
+<pre class="c1">local visible = IconMAura("HARMFUL", "player", "Hamstring", "Frost Nova")
+if visible then return IconSpell("Hand of Freedom") end</pre>
+
+<p class="t1">Show a spell when threat situation is dangerous.</p>
+<pre class="c1">local _, status = UnitDetailedThreatSituation("player", "target")
+if status and status &gt; 1 then
+  return IconSpell("Hand of Salvation")
+end</pre>

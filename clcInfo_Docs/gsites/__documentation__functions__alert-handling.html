@@ -1,0 +1,35 @@
+<link href="css.css" rel="stylesheet" type="text/css" />
+<h1 class="h2"><span class="color_gray">Documentation \ Functions \ </span><span>Alert handling</span></h1>
+<pre class="c2">Alert(animationIndex, texture, sound)</pre>
+<pre class="ti2">
+<span class="normal">animationIndex: index of an alert element where the icon will be displayed with respective animation
+texture: texture to be displayed in the animation
+sound: string representing a LibSharedMedia sound entry, for example: </span>
+<span class="color_value">"clcInfo: explosion"</span>
+<span class="normal">.</span>
+<span class="color_sample">
+
+Careful when you call it, it will restart play on every call.</span>
+</pre>
+<br />
+<hr />
+<p class="t1">The following functions go into the alert edit box not the code one. Their usage is described in their name format.</p>
+<pre class="ti2">...Expiration: triggers when element cooldown has less than timeLeft seconds
+...Start: triggers when cooldown starts</pre>
+<p class="t1">Arguments:</p>
+<pre class="ti2">id: used for multi bars or icons to trigger on respective element in the group
+animationIndex: index of an alert element where the icon will be displayed with respective animation
+timeLeft: how long on cooldown until it triggers
+sound: string representing a sound from the list available under the code box</pre>
+<br /> 
+<pre class="c2">AddAlertIconExpiration(animationIndex, timeLeft, sound)
+AddAlertIconStart(animationIndex, sound)</pre>
+
+<pre class="c2">AddAlertMIconExpiration(id, animationIndex, timeLeft, sound)
+AddAlertMIconStart(id, animationIndex, sound)</pre>
+
+<pre class="c2">AddAlertBarExpiration(animationIndex, timeLeft, sound)
+AddAlertBarStart(animationIndex, sound)</pre>
+
+<pre class="c2">AddAlertMBarExpiration(id, animationIndex, timeLeft, sound)
+AddAlertMBarStart(id, animationIndex, sound)</pre>

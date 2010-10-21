@@ -1,0 +1,14 @@
+<link href="css.css" rel="stylesheet" type="text/css" />
+<h1 class="h2"><span class="color_gray">Code examples \ </span><span>Multi Bars</span></h1>
+
+<p class="t1">Holy Power Bar.</p>
+<pre class="c1">local c = UnitPower("player", SPELL_POWER_HOLY_POWER)
+for i = 1, c do AddMBar(nil, nil, nil, nil, nil, nil, true, nil, 0, 1, 1) end
+for i = c + 1, 3 do AddMBar(nil, nil, nil, nil, nil, nil, true, nil, 0, 1, 0) end</pre>
+
+<p class="t1">Track stacks from a buff.</p>
+<pre class="c1">local maxC = 3
+local _ , _, _, c = UnitBuff("player", "Lightning Shield")
+c = c or 0
+for i = 1, c do AddMBar(nil, nil, nil, nil, nil, nil, true, nil, 0, 1, 1) end
+for i = c + 1, maxC do AddMBar(nil, nil, nil, nil, nil, nil, true, nil, 0, 1, 0) end</pre>

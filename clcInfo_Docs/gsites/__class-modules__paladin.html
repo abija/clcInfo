@@ -1,94 +1,53 @@
 <link href="css.css" rel="stylesheet" type="text/css" />
-<p class="h2">
-Global
-</p>
-<p class="t1">
-Censure <span color="#f00">multi bar</span> code:
-</p>
-<p class="c1">
-MBarSoV(1, 0.5, "before", true)
-</p>
+<p class="h2">Global</p>
+
+
+<p class="t1">Censure <span color="#f00">multi bar</span> code:</p>
+<pre class="c1">MBarSoV(1, 0.5, "before", true)</pre>
 
 <br /><br />
 
-<p class="h1">
-Protection
-</p>
-<p class="h1u">
-Based on: <a href="http://elitistjerks.com/f76/t106477-4_0_1_tanking_protection_field_manual_fordrings_groupies/#Mechanics__amp__Rotation">http://elitistjerks.com/f76/t106477-4_0_1_tanking_protection_field_manual_fordrings_groupies/#Mechanics__amp__Rotation</a>
-</p>
-<p class="t1">
-Icon codes:
-</p>
-<p class="c1">
-return IconProtection1()<br />
-return IconProtection2()
-</p>
-<p class="t1">
-Command line:
-</p>
-<p class="c1">
-/clcInfo prot_fillers args
-</p>
-<p class="ti1">
-Change filler priority.
+<p class="h1">Protection</p>
+<p class="h1u">Based on: <a href="http://elitistjerks.com/f76/t106477-4_0_1_tanking_protection_field_manual_fordrings_groupies/#Mechanics__amp__Rotation">http://elitistjerks.com/f76/t106477-4_0_1_tanking_protection_field_manual_fordrings_groupies/#Mechanics__amp__Rotation</a></p>
+
+<p class="t1">Icon codes.</p>
+<pre class="c1">return IconProtection1()
+return IconProtection2()</pre>
+
+<p class="t1">Command line.</p>
+<pre class="c1">/clcInfo prot_fillers args</pre>
+<p class="ti1">Change filler priority.
 Valid fillers: sor, hotr, j, cs, as, how, hw, cons.<br />
-<span class="ts1">Example: <span class="ilc1">/clcInfo prot_fillers sor, cs, j, as, hw</span></span>
-</p>
+<span class="ts1">Example: <span class="ilc1">/clcInfo prot_fillers sor, cs, j, as, hw</span></span></p>
 
 <br /><br />
 
-<p class="h1">
-Retribution
-</p>
-<p class="h1u">
-Based on: <a href="http://elitistjerks.com/f76/t106276-retribution_concordance_4_0_1_a/#Rotation">http://elitistjerks.com/f76/t106276-retribution_concordance_4_0_1_a/#Rotation</a>
-</p>
-<p class="t1">
-Icon codes:
-</p>
-<p class="c1">
-return IconRet1(csBoost [, useInq [, preInq]])
-</p>
-<p class="ti1">
-<strong>csBoost:</strong> if CS cooldown in seconds is lower than this value, it will be prioritized over next filler<br />
-<strong>useInq:</strong> if true, Inquisiton will be used<br />
-<strong>preInq:</strong> seconds left on Inquisition buff before trying to refresh at 3HP<br />
-<br />
-On live you should only use first argument, csBoost.<br />
-<span class="ts1">Example: <span class="ilc1">return IconRet1(0.5)</span></span>
-</p>
-<p class="c1">
-return IconRet2()
-</p>
-<p class="t1">
-Command line:
-</p>
-<p class="c1">
-/clcInfo ret_fillers args
-</p>
-<p class="ti1">
-Change filler priority.
-Valid fillers: j, exo, how, hw, cons.<br />
-<span class="ts1">Example: <span class="ilc1">/clcInfo ret_fillers j exo how hw</span></span>
-</p>
+<p class="h1">Retribution</p>
+<p class="h1u">Based on: <a href="http://elitistjerks.com/f76/t106276-retribution_concordance_4_0_1_a/#Rotation">http://elitistjerks.com/f76/t106276-retribution_concordance_4_0_1_a/#Rotation</a></p>
+
+<p class="t1">Icon codes.</p>
+<pre class="c1">return IconRet1(csBoost [, useInq [, preInq]])</pre>
+<ul class="list2"><li>csBoost: if CS cooldown in seconds is lower than this value, it will be prioritized over next filler</li>
+<li>useInq: if true, Inquisiton will be used</li>
+<li>preInq: seconds left on Inquisition buff before trying to refresh at 3HP</li>
+<li class="moreinfo">On live you should only use first argument, csBoost.</li>
+<li class="color_sample">Example: <pre class="code_inline_12">return IconRet1(0.5)</pre></li></ul>
+<pre class="c1">return IconRet2()</pre>
+
+<p class="t1">Command line.</p>
+<pre class="c1">/clcInfo ret_fillers args</pre>
+<ul class="list2"><li>Change filler priority. Valid fillers: j, exo, how, hw, cons.</li>
+<li class="color_sample">Example: <pre class="code_inline_12">/clcInfo ret_fillers j exo how hw</pre></li></ul>
+
 
 <br /><br />
 
-<p class="h3">
-Function reference
-</p>
-<p class="c2">
-MBarSoV(alphaTarget, alphaRest [, showStack [, timeRight]])
-</p>
-<div class="ti2">
-<strong>alphaTarget:</strong> alpha for the bar displaying debuff on your current target<br />
-<strong>alphaRest:</strong> alpha for rest of the bars<br />
-<strong>showStack:</strong> specifies where the stack value is positioned<br />
-<ul class="ul1">
-<li>false/nil: hidden</li>
+<p class="h3">Function reference</p>
+<pre class="c2">MBarSoV(alphaTarget, alphaRest [, showStack [, timeRight]])</pre>
+<ul class="list1"><li>alphaTarget: alpha for the bar displaying debuff on your current target</li>
+<li>alphaRest: alpha for rest of the bars</li>
+<li>showStack: specifies where the stack value is positioned</li>
+<ul class="list1_indent"><li>false/nil: hidden</li>
 <li>"before": before name</li>
-<li>not false/nil: after name</li>
-</ul>
-<strong>timeRight:</strong> if true, timer will be displayed on the right side in seconds
-</div>
+<li>not false/nil: after name</li></ul>
+<li>timeRight: if true, timer will be displayed on the right side in seconds</li></ul>

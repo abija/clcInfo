@@ -1,0 +1,20 @@
+<link href="css.css" rel="stylesheet" type="text/css" />
+<h1 class="h2"><span class="color_gray">Code examples \ </span><span>Bars</span></h1>
+<p class="t1">Track some buff.</p>
+<pre class="c1">return BarAura("HELPFUL", "player", "Judgements of the Pure", nil, false, true)</pre>
+
+<p class="t1">Holy Power bar (for Cataclysm).</p>
+<pre class="c1">return true, nil, 0, 3, UnitPower("player", SPELL_POWER_HOLY_POWER)</pre>
+
+<p class="t1">A mana bar (make sure to use advanced settings and hide the icon)</p>
+<pre class="c1">local cm = UnitPower("player").
+return true, nil, 0, UnitPowerMax("player"), cm, nil, cm</pre>
+
+<p class="t1">Track something like Beacon of Light, Earth Shield or Prayer of Mending.</p>
+<pre class="c1">return BarSingleTargetRaidBuff("Beacon of Light", false, true)</pre>
+
+<p class="t1">Track stacks from a buff.</p>
+<pre class="c1">local maxC = 3
+local _ , _, _, c = UnitBuff("player", "Lightning Shield")
+c = c or 0
+return true, nil, 0, maxC, c, nil</pre>

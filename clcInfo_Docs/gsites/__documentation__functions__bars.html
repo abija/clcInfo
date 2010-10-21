@@ -1,0 +1,56 @@
+<link href="css.css" rel="stylesheet" type="text/css" />
+<h1 class="h2"><span class="color_gray">Documentation \ Functions \ </span><span>Bars</span></h1>
+
+<pre class="c2">BarAura(filter, unitTarget, spell [, unitCaster [, showStack [, timeRight ]]])</pre>
+<ul class="list1">
+<li>filter: a list of filters to use separated by the pipe '|' character; e.g. "RAID|PLAYER" will query group buffs cast by the player (string)</li>
+<ul class="list1_indent"><li>HARMFUL: show debuffs only</li>
+<li>HELPFUL: show buffs only</li>
+<li>CANCELABLE: show auras that can be cancelled</li>
+<li>NOT_CANCELABLE: show auras that cannot be cancelled</li>
+<li>PLAYER: show auras the player has cast</li>
+<li>RAID: when used with a HELPFUL filter it will show auras the player can cast on party/raid members (as opposed to self buffs). If used with a HARMFUL filter it will return debuffs the player can cure</li></ul>
+<li>unitTarget: unit on witch to check the auras</li>
+<li>spell: name or id of the aura</li>
+<li>unitCaster: if specified, it will check caster of the buff against this unit</li>
+<li>showStack: specifies where the stack value is positioned</li>
+<ul class="list1_indent"><li>false/nil: hidden</li>
+<li>"before": before name</li>
+<li>not false/nil: after name</li></ul>
+<li>timeRight: if true, timer will be displayed on the right side in seconds</li>
+</ul>
+
+<br />
+
+<pre class="c2">BarSingleTargetRaidBuff(spell [, showStack [, timeRight ]])<span class="color_red">*</span></pre>
+<ul class="list1">
+<li>spell: name or id of the aura</li>
+<li>showStack: specifies where the stack value is positioned</li>
+<ul class="list1_indent">
+<li>false/nil: hidden</li>
+<li>"before": before name</li>
+<li>not false/nil: after name</li>
+</ul>
+<li class="intent">Intent: track buffs like Beacon of Light or Earth Shield on party/raid members.</li>
+</ul>
+
+<br />
+
+<pre class="c2">BarSpell(spell [, timeRight ])</pre>
+<ul class="list1">
+<li>spell: name or id of the spell to track</li>
+<li>timeRight: if true, timer will be displayed on the right side in seconds</li>
+</ul>
+
+<br />
+
+<pre class="c2">BarItem(itemId [, equipped [, timeRight ]])</pre>
+<ul class="list1">
+<li>itemId: id of the item</li>
+<li>equipped: if true, the item must be equipped or it will be ignored</li>
+<li>timeRight: if true, timer will be displayed on the right side in seconds</li>
+</ul>
+
+<br />
+<hr />
+<span class="font_normal_11"><span class="color_red">*</span><span> experimental functions</span></span>

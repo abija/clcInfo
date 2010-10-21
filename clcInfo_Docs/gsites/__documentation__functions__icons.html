@@ -1,0 +1,78 @@
+<link href="css.css" rel="stylesheet" type="text/css" />
+<h1 class="h2"><span class="color_gray">Documentation \ Functions \ </span><span>Icons</span></h1>
+
+<pre class="c2">IconAura(filter, unitTarget, spell [, unitCaster ])</pre>
+<ul class="list1"><li>filter: a list of filters to use separated by the pipe '|' character; e.g. "RAID|PLAYER" will query group buffs cast by the player (string)</li>
+<ul class="list1_indent"><li>HARMFUL: show debuffs only</li>
+<li>HELPFUL: show buffs only</li>
+<li>CANCELABLE: show auras that can be cancelled</li>
+<li>NOT_CANCELABLE: show auras that cannot be cancelled</li>
+<li>PLAYER: show auras the player has cast</li>
+<li>RAID: when used with a HELPFUL filter it will show auras the player can cast on party/raid members (as opposed to self buffs). If used with a HARMFUL filter it will return debuffs the player can cure</li></ul>
+<li>unitTarget: unit on witch to check the auras</li>
+<li>spell: name or id of the aura</li>
+<li>unitCaster: if specified, it will check caster of the buff against this unit</li></ul>
+
+<br />
+
+<pre class="c2">IconMAura(filter, unitTarget, ...)<span class="color_red">*</span></pre>
+<ul class="list1"><li>filter: a list of filters to use separated by the pipe '|' character; e.g. "RAID|PLAYER" will query group buffs cast by the player (string) ...</li>
+<li>unitTarget: unit on witch to check the auras</li>
+<li>...: the list of auras</li>
+<li class="intent">Intent: track buffs/debuffs that override each other, like Demoralizing Shout|Demoralizing Roar|Vindication</li>
+<li class="color_sample">Example: return IconMAura("HARMFUL", "target", "Demoralizing Shout", "Demoralizing Roar", "Vindication")</li></ul>
+
+<br />
+
+<pre class="c2">IconSpell(spell [, checkRange [, showWhen ]])</pre>
+<ul class="list1"><li>spell: name or id of the spell to track</li>
+<li>checkRange:</li>
+<ul class="list1_indent"><li>nil or false: do nothing</li>
+<li>true: display range of spell specified in spellName</li>
+<li>string: display range of spell specified in string</li></ul>
+<li>showWhen:</li>
+<ul class="list1_indent"><li>nil or false: do nothing</li>
+<li>"ready": display spell only when ready</li>
+<li>"not ready": display spell only when not ready</li></ul></ul>
+
+<br />
+
+<pre class="c2">IconSingleTargetRaidBuff(spell)<span class="color_red">*</span></pre>
+<ul class="list1"><li>spell: name or id of the spell to track</li>
+<li class="intent">Intent: used with spells like Beacon of Light, Earth Shield, etc</li></ul>
+
+<br />
+
+<pre class="c2">IconItem(itemId [, equipped [, showWhen ]])</pre>
+<ul class="list1"><li>item: id of the item</li>
+<li>equipped: if true, the item must be equipped or it will be ignored</li>
+<li>showWhen:</li>
+<ul class="list1_indent"><li>nil or false: do nothing</li>
+<li>"ready": display spell only when ready</li>
+<li>"not ready": display spell only when not ready</li></ul></ul>
+
+<br />
+
+<pre class="c2">IconICD(spellId, icd, alpha1, alpha2, alpha3)</pre>
+<ul class="list1"><li>spellId: id of the buff to track</li>
+<li>icd: duration of the internal cooldown</li>
+<li>alpha1, alpha2, alpha3: alpha values of the 3 states</li>
+<ul class="list1_indent"><li>1: ready to proc</li>
+<li>2: proc active</li>
+<li>3: proc on cooldown</li></ul></ul>
+
+<br />
+
+<pre class="c2">IconMICD(icd, alpha1, alpha2, alpha3, ...)<span class="color_red">**</span></pre>
+<ul class="list1"><li>icd: duration of the internal cooldown</li>
+<li>alpha1, alpha2, alpha3: alpha values of the 3 states</li>
+<ul class="list1_indent"><li>1: ready to proc</li>
+<li>2: proc active</li>
+<li>3: proc on cooldown</li></ul>
+<li>...: list of ids for the buffs generated</li>
+<li>Intent: used with items that generate variable procs, like DBW</li></ul>
+
+<br />
+<hr />
+<span class="font_normal_11"><span class="color_red">*</span><span> experimental functions</span></span><br />
+<span class="font_normal_11"><span class="color_red">**</span><span> I can't test it because I don't have those specific items</span></span>
