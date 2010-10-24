@@ -317,12 +317,12 @@ function prototype:___HideBar(id)
 		if a.mode == "normal" then
 			if a.last > a.timeLeft then
 				a.last = 0
-				modAlerts:Play(a.alertIndex, a.texture, a.sound)
+				modAlerts.Play(a.alertIndex, a.texture, a.sound)
 			end
 		elseif a.mode == "reversed" then
 			if a.last < a.timeLeft then
 				a.last = 10000
-				modAlerts:Play(a.alertIndex, a.texture, a.sound)
+				modAlerts.Play(a.alertIndex, a.texture, a.sound)
 			end
 		end
 	end
@@ -363,11 +363,11 @@ function prototype:___AddBar(id, alpha, r, g, b, a, texture, minValue, maxValue,
 				-- mode selection
 				if mode == "normal" then
 					if value <= a.timeLeft and a.timeLeft < a.last then
-						modAlerts:Play(a.alertIndex, texture, a.sound)
+						modAlerts.Play(a.alertIndex, texture, a.sound)
 					end
 				elseif mode == "reversed" then
 					if value >= a.timeLeft and a.timeLeft > a.last then
-						modAlerts:Play(a.alertIndex, texture, a.sound)
+						modAlerts.Play(a.alertIndex, texture, a.sound)
 					end
 				end
 				a.last = value
@@ -380,11 +380,11 @@ function prototype:___AddBar(id, alpha, r, g, b, a, texture, minValue, maxValue,
 				-- mode selection
 				if mode == "normal" then
 					if value > a.last then
-						modAlerts:Play(a.alertIndex, texture, a.sound)
+						modAlerts.Play(a.alertIndex, texture, a.sound)
 					end
 				elseif mode == "reversed" then
 					if value < a.lastReversed then
-						modAlerts:Play(a.alertIndex, texture, a.sound)
+						modAlerts.Play(a.alertIndex, texture, a.sound)
 					end
 				end
 				a.last = value
@@ -471,6 +471,10 @@ local function OnDragStop(self)
 end
 
 function prototype:Init()
+	self.etype = "mbar"
+	-- event dispatcher
+	self:SetScript("OnEvent", clcInfo.DisplayElementsEventDispatch)
+	
 	-- bg texture and label
 	self.bg = self:CreateTexture(nil, "BACKGROUND")
 	self.bg:SetAllPoints()
@@ -527,10 +531,12 @@ end
 
 function prototype:UpdateEnabled()
 	if self.db.enabled then
+		clcInfo.UpdateExecEvent(self)	-- reenable event code
 		if not self.unlock then
 			self:SetScript("OnUpdate", OnUpdate)
 		end
 	else
+		self:UnregisterAllEvents()
 		if self.unlock then
 			self:Unlock()
 		else
@@ -602,48 +608,8 @@ function prototype:UpdateLayout()
 end
 
 function prototype:UpdateExec()
-	-- updates per second
-	self.freq = 1/self.db.ups
-	self.elapsed = 100 --> force instant update
-	
-	-- clear error codes
-	self.errExec = ""
-	self.errExecAlert = ""
-	
-	local err
-	-- exec
-	self.exec, err = loadstring(self.db.exec)
-	-- apply DoNothing if we have an error
-	if not self.exec then
-		self.exec = loadstring("")
-		print("code error:", err)
-		print("in:", self.db.exec)
-	end
-  setfenv(self.exec, clcInfo.env)
-  
-  self.externalUpdate = false
-  if self.ExecCleanup then
-  	self.ExecCleanup()
-  	self.ExecCleanup = nil
-  end
-  
-  -- handle alert exec
-   
-  -- defaults
-  self.alerts = {}
-  self.hasAlerts = 0
-  
-  -- execute the code
-  local f, err = loadstring(self.db.execAlert or "")
-  if f then
-  	setfenv(f, clcInfo.env)
-  	clcInfo.env.___e = self
-  	local status, err = pcall(f)
-  	if not status then self.errExecAlert = err end
-  else
-  	print("alert code error:", err)
-  	print("in:", self.db.execAlert)
-  end
+	clcInfo.UpdateExec(self)
+  clcInfo.UpdateExecAlert(self)
   
   -- release the bars
   self:ReleaseBars()
@@ -796,6 +762,7 @@ function mod:GetDefault()
 		height = 30,
 		exec = "",
 		alertExec = "",
+		eventExec = "",
 		ups = 5,
 		gridId = 0,
 		gridX = 1,	-- column

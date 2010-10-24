@@ -53,6 +53,8 @@ function iconPrototype:Init()
 	self.texMain = self:CreateTexture(nil, "BORDER")
 	-- cooldown
 	self.cooldown = CreateFrame("Cooldown", nil, self)
+	-- icon for omnicc pulse
+	self.icon = self.texMain
 	
 	-- special frame so it's on top of cooldown
 	local skinFrame = CreateFrame("Frame", nil, self)
@@ -212,7 +214,7 @@ function prototype:___HideIcon(id)
 			local a = self.alerts[id].expiration
 			if a.last > a.timeLeft then
 				a.last = 0
-				modAlerts:Play(a.alertIndex, a.texture, a.sound)
+				modAlerts.Play(a.alertIndex, a.texture, a.sound)
 			end
 		end
 		if self.alerts[id].start then
@@ -236,6 +238,9 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 		icon = self.___c[self.___dc]
 	end
 	
+	-- fix the nil vars that you don't want nill
+	duration = duration or 0
+	
 	-- texture
 	if icon.lastTexture ~= texture then
 		icon.texMain:SetTexture(texture)
@@ -250,11 +255,13 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 		icon.lastReversed = reversed
 	end
 	
-	if start ~= icon.lastStart or duration ~= icon.lastDuration then
-		e:StopAnimating()
-		CooldownFrame_SetTimer(e, start, duration, enable)
-		icon.lastStart = start
-		icon.lastDuration = duration
+	if duration > 0 then
+		if start ~= icon.lastStart or duration ~= icon.lastDuration then
+			e:StopAnimating()
+			CooldownFrame_SetTimer(e, start, duration, enable)
+			icon.lastStart = start
+			icon.lastDuration = duration
+		end
 	end
 	
 	-- count
@@ -292,7 +299,7 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 			if self.alerts[id].expiration then
 				local a = self.alerts[id].expiration
 				if v <= a.timeLeft and a.timeLeft < a.last then
-					modAlerts:Play(a.alertIndex, texture, a.sound)
+					modAlerts.Play(a.alertIndex, texture, a.sound)
 				end
 				a.last = v
 				a.texture = texture
@@ -301,7 +308,7 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 			if self.alerts[id].start then
 				local a = self.alerts[id].start
 				if (v ~= -1 and a.last == -1) or (v > 0 and v > a.last) then
-					modAlerts:Play(a.alertIndex, texture, a.sound)
+					modAlerts.Play(a.alertIndex, texture, a.sound)
 				end
 				a.last = v
 			end
@@ -374,6 +381,9 @@ local function OnDragStop(self)
 end
 
 function prototype:Init()
+	self.etype = "micon"
+	-- event dispatcher
+	self:SetScript("OnEvent", clcInfo.DisplayElementsEventDispatch)
 	-- bg texture and label
 	self.bg = self:CreateTexture(nil, "BACKGROUND")
 	self.bg:SetAllPoints()
@@ -424,10 +434,12 @@ end
 
 function prototype:UpdateEnabled()
 	if self.db.enabled then
+		clcInfo.UpdateExecEvent(self)	-- reenable event code
 		if not self.unlock then
 			self:SetScript("OnUpdate", OnUpdate)
 		end
 	else
+		self:UnregisterAllEvents()
 		self:SetScript("OnUpdate", nil)
 		self:ReleaseIcons()
 	end
@@ -492,52 +504,11 @@ function prototype:UpdateLayout()
 end
 
 function prototype:UpdateExec()
-	-- updates per second
-	self.freq = 1/self.db.ups
-	self.elapsed = 100 --> force instant update
-	
-	-- clear error codes
-	self.errExec = ""
-	self.errExecAlert = ""
-	
-	local err
-	-- exec
-	self.exec, err = loadstring(self.db.exec)
-	-- apply DoNothing if we have an error
-	if not self.exec then
-		self.exec = loadstring("")
-		print("code error:", err)
-		print("in:", self.db.exec)
-	end
-  setfenv(self.exec, clcInfo.env)
-  
-  self.externalUpdate = false
-  if self.ExecCleanup then
-  	self.ExecCleanup()
-  	self.ExecCleanup = nil
-  end
-  
-  -- handle alert exec
-   
-  -- defaults
-  self.alerts = {}
-  self.hasAlerts = 0
-  
-  -- execute the code
-  local f, err = loadstring(self.db.execAlert or "")
-  if f then
-  	setfenv(f, clcInfo.env)
-  	clcInfo.env.___e = self
-  	local status, err = pcall(f)
-  	if not status then self.errExecAlert = err end
-  else
-  	print("alert code error:", err)
-  	print("in:", self.db.execAlert)
-  end
+	clcInfo.UpdateExec(self)  
+  clcInfo.UpdateExecAlert(self)
   
   -- release the icons
   self:ReleaseIcons()
-  
   self:UpdateEnabled()
 end
 
@@ -685,6 +656,7 @@ function mod:GetDefault()
 		height = ICON_DEFAULT_HEIGHT,
 		exec = "",
 		execAlert = "",
+		eventExec = "",
 		ups = 5,
 		gridId = 0,
 		gridX = 1,	-- column

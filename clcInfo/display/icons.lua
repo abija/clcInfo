@@ -33,6 +33,18 @@ local modAlerts = clcInfo.display.alerts
 -- called for each of the icons
 local function OnUpdate(self, elapsed)
 	self.elapsed = self.elapsed + elapsed
+	
+	if self.waitForCooldownEffect then
+		if self.elapsed > 0.5 then
+			self.waitForCooldownEffect = false
+			self.elapsed = self.freq -- force update
+			-- self.elements.cooldown:StopAnimating()
+			CooldownFrame_SetTimer(self.elements.cooldown, self.lastStart, self.lastDuration, self.lastEnable)
+		else
+			return
+		end
+	end
+	
 	if self.elapsed < self.freq then return end
 	-- manual set updates per second for dev testing
 	-- if self.elapsed < 0.2 then return end
@@ -62,8 +74,14 @@ local function OnUpdate(self, elapsed)
 		visible = false
 	end
 	
+	-- fix the nil vars that you don't want nill
+	duration = duration or 0
+	
 	-- hide when not visible
 	if not visible then
+		-- set lastDuration to 0
+		self.lastDuration = 0
+		
 		-- check for alerts
 		if self.hasAlerts == 1 then
 			-- expiration alert
@@ -71,7 +89,7 @@ local function OnUpdate(self, elapsed)
 				local a = self.alerts.expiration
 				if a.last > a.timeLeft then
 					a.last = 0
-					modAlerts:Play(a.alertIndex, self.lastTexture, a.sound)
+					modAlerts.Play(a.alertIndex, self.lastTexture, a.sound)
 				end
 			end
 			-- start alert
@@ -100,11 +118,19 @@ local function OnUpdate(self, elapsed)
 	
 	-- TODO
 	-- check if this is working properly, don't want to miss timers
-	if start ~= self.lastStart or duration ~= self.lastDuration then
-		e:StopAnimating()
-		CooldownFrame_SetTimer(e, start, duration, enable)
-		self.lastStart = start
-		self.lastDuration = duration
+	if duration > 0 then
+		if start ~= self.lastStart or duration ~= self.lastDuration then
+			if self.lastDuration > 0 and duration > 1.5 then
+				self.waitForCooldownEffect = true
+			else
+				CooldownFrame_SetTimer(e, start, duration, enable)
+			end
+			self.lastStart = start
+			self.lastDuration = duration
+			self.lastEnable = enable
+		end
+	else
+		self.lastDuration = 0
 	end
 	
 	
@@ -137,13 +163,13 @@ local function OnUpdate(self, elapsed)
 	-- alert handling
 	if self.hasAlerts == 1 then
 		local v 
-		if duration and duration > 0 then v = duration + start - GetTime()
+		if duration > 0 then v = duration + start - GetTime()
 		else v = -1 end
 		-- expiration alert
 		if self.alerts.expiration then
 			local a = self.alerts.expiration
 			if v <= a.timeLeft and a.timeLeft < a.last then
-				modAlerts:Play(a.alertIndex, texture, a.sound)
+				modAlerts.Play(a.alertIndex, texture, a.sound)
 			end
 			a.last = v
 		end
@@ -151,7 +177,7 @@ local function OnUpdate(self, elapsed)
 		if self.alerts.start then
 			local a = self.alerts.start
 			if (v ~= -1 and a.last == -1) or (v > 0 and v > a.last) then
-				modAlerts:Play(a.alertIndex, self.lastTexture, a.sound)
+				modAlerts.Play(a.alertIndex, self.lastTexture, a.sound)
 			end
 			a.last = v
 		end
@@ -187,6 +213,10 @@ local function OnDragStop(self)
 end
 
 function prototype:Init()
+	self.etype = "icon"
+	-- event dispatcher
+	self:SetScript("OnEvent", clcInfo.DisplayElementsEventDispatch)
+	
 	-- create a child frame that holds all the elements and it's hidden/shown instead of main one that has update function
 	self.elements = CreateFrame("Frame", nil, self)
 
@@ -194,6 +224,8 @@ function prototype:Init()
 	self.elements.texMain = self.elements:CreateTexture(nil, "BORDER")
 	-- cooldown
 	self.elements.cooldown = CreateFrame("Cooldown", nil, self.elements)
+	-- icon for omnicc pulse
+	self.elements.icon = self.elements.texMain
 	
 	-- normal and gloss on top of cooldown
 	local skinFrame = CreateFrame("Frame", nil, self.elements)
@@ -245,8 +277,10 @@ end
 
 function prototype:UpdateEnabled()
 	if self.db.enabled then
+		clcInfo.UpdateExecEvent(self)	-- reenable event code
 		self:SetScript("OnUpdate", OnUpdate)
 	else
+		self:UnregisterAllEvents()
 		self:SetScript("OnUpdate", nil)
 		self:FakeHide()
 	end
@@ -428,53 +462,14 @@ end
 
 -- update the exec function and perform cleanup
 function prototype:UpdateExec()
-	-- updates per second
-	self.freq = 1/self.db.ups
-	self.elapsed = 100 -- force instant update
-	
-	-- clear error codes
-	self.errExec = ""
-	self.errExecAlert = ""
-
-	local err
-	-- exec
-	self.exec, err = loadstring(self.db.exec)
-	-- apply DoNothing if we have an error
-	if not self.exec then
-		self.exec = loadstring("")
-		print("code error:", err)
-		print("in:", self.db.exec)
-	end
-  setfenv(self.exec, clcInfo.env)
-  
-  -- reset alpha
-  self.elements:SetAlpha(1)
-  self.lastAlpha = 1
-  
-  -- cleanup if required
-  self.externalUpdate = false
-  if self.ExecCleanup then
-  	self.ExecCleanup()
-  	self.ExecCleanup = nil
-  end
-  
-  -- handle alert exec
+	clcInfo.UpdateExec(self)
+  clcInfo.UpdateExecAlert(self)
   
   -- defaults
-  self.alerts = {}
-  self.hasAlerts = 0
-  
-  -- execute the code
-  local f, err = loadstring(self.db.execAlert or "")
-  if f then
-  	setfenv(f, clcInfo.env)
-  	clcInfo.env.___e = self
-  	local status, err = pcall(f)
-  	if not status then self.errExecAlert = err end
-  else
-  	print("alert code error:", err)
-  	print("in:", self.db.execAlert)
-  end
+  self.waitForCooldownEffect = false
+  self.lastDuration = 0
+  self.elements:SetAlpha(1)
+  self.lastAlpha = 1
   
   self:UpdateEnabled()
 end
@@ -585,6 +580,7 @@ function mod:GetDefault()
 		height = ICON_DEFAULT_HEIGHT,
 		exec = "",
 		alertExec = "",
+		eventExec = "",
 		ups = 5,
 		gridId = 0,
 		gridX = 1,	-- column

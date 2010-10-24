@@ -57,3 +57,11 @@ if visible then return IconSpell("Hand of Freedom") end</pre>
 if status and status &gt; 1 then
   return IconSpell("Hand of Salvation")
 end</pre>
+
+<p class="t1">Icon that is displayed only when target is an enemy at under x% hp.</p>
+<pre class="c1">if UnitExists("target") and UnitCanAttack("player", "target") and not UnitIsDead("target") then
+  local c = floor(UnitHealth("target") / UnitHealthMax("target") * 100)
+  if c &lt;= 25 then
+    return IconSpell("Shadow Word: Death", true)
+  end
+end</pre>

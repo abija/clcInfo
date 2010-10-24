@@ -96,6 +96,7 @@ end
 -- used to change error strings
 local function GetErrExec(info) return modTexts.active[tonumber(info[3])].errExec or "" end
 local function GetErrExecAlert(info) return modTexts.active[tonumber(info[3])].errExecAlert or "" end
+local function GetErrExecEvent(info) return modTexts.active[tonumber(info[3])].errExecEvent or "" end
 
 -- template code
 --------------------------------------------------------------------------------
@@ -273,11 +274,11 @@ function mod:UpdateTextList()
 							order = 20, type = "group", inline = true, name = "Size",
 							args = {
 								width = {
-									order = 1, type = "range", min = 1, max = 200, step = 1, name = "Width",
+									order = 1, type = "range", min = 1, max = 2000, step = 1, name = "Width",
 									get = Get, set = Set,
 								},
 								height = {
-									order = 2, type = "range", min = 1, max = 200, step = 1, name = "Height", 
+									order = 2, type = "range", min = 1, max = 1000, step = 1, name = "Height", 
 									get = Get, set = Set,
 								},
 							},
@@ -382,6 +383,16 @@ function mod:UpdateTextList()
 									type = "range", min = 1, max = 100, step = 1, name = "", 
 									get = Get, set = SetExec,
 								},
+							},
+						},
+						events = {
+							order = 4, type = "group", inline = true, name = "Events",
+							args = {
+								eventExec = {
+									order = 1, type = "input", multiline = true, name = "", width = "full",
+									get = Get, set = SetExec,
+								},
+								err = { order = 2, type = "description", name = GetErrExecEvent },
 							},
 						},
 					},

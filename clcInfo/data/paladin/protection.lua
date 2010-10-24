@@ -163,7 +163,7 @@ function mod.ProtRotation(useInq, preInq)
 	local hp = UnitPower("player", SPELL_POWER_HOLY_POWER)
 	
 	-- gcd
-	cdStart, cdDuration = GetSpellCooldown(spellCleanse)
+	cdStart, cdDuration = GetSpellCooldown(20154)	-- Seal of Righteousness used for GCD
 	if cdStart > 0 then
 		gcd = cdStart + cdDuration - ctime
 	else

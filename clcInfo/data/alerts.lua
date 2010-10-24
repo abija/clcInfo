@@ -1,11 +1,12 @@
 local mod = clcInfo.env
+local mod2 = clcInfo.env2
 
 -- expose the play function
 mod.Alert = clcInfo.display.alerts.Play
 
 --------------------------------------------------------------------------------
-function mod.AddAlertIconExpiration(alertIndex, timeLeft, sound)
-	local e = mod.___e
+function mod2.AddAlertIconExpiration(alertIndex, timeLeft, sound)
+	local e = mod2.___e
 	e.hasAlerts = 1
 	e.alerts.expiration = {
 		alertIndex = alertIndex,
@@ -15,8 +16,8 @@ function mod.AddAlertIconExpiration(alertIndex, timeLeft, sound)
 		last = 0,
 	}
 end
-function mod.AddAlertIconStart(alertIndex, sound)
-	local e = mod.___e
+function mod2.AddAlertIconStart(alertIndex, sound)
+	local e = mod2.___e
 	e.hasAlerts = 1
 	e.alerts.start = {
 		alertIndex = alertIndex,
@@ -28,8 +29,8 @@ end
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
-function mod.AddAlertMIconExpiration(id, alertIndex, timeLeft, sound)
-	local e = mod.___e
+function mod2.AddAlertMIconExpiration(id, alertIndex, timeLeft, sound)
+	local e = mod2.___e
 	e.hasAlerts = 1
 	if not e.alerts[id] then e.alerts[id] = {} end
 	e.alerts[id].expiration = {
@@ -40,8 +41,8 @@ function mod.AddAlertMIconExpiration(id, alertIndex, timeLeft, sound)
 		last = 0,
 	}
 end
-function mod.AddAlertMIconStart(id, alertIndex, sound)
-	local e = mod.___e
+function mod2.AddAlertMIconStart(id, alertIndex, sound)
+	local e = mod2.___e
 	e.hasAlerts = 1
 	if not e.alerts[id] then e.alerts[id] = {} end
 	e.alerts[id].start = {
@@ -55,8 +56,8 @@ end
 
 
 --------------------------------------------------------------------------------
-function mod.AddAlertBarExpiration(alertIndex, timeLeft, sound)
-	local e = mod.___e
+function mod2.AddAlertBarExpiration(alertIndex, timeLeft, sound)
+	local e = mod2.___e
 	e.hasAlerts = 1
 	e.alerts.expiration = {
 		alertIndex = alertIndex,
@@ -66,8 +67,8 @@ function mod.AddAlertBarExpiration(alertIndex, timeLeft, sound)
 		last = 0,
 	}
 end
-function mod.AddAlertBarStart(alertIndex, sound)
-	local e = mod.___e
+function mod2.AddAlertBarStart(alertIndex, sound)
+	local e = mod2.___e
 	e.hasAlerts = 1
 	e.alerts.start = {
 		alertIndex = alertIndex,
@@ -80,8 +81,8 @@ end
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
-function mod.AddAlertMBarExpiration(id, alertIndex, timeLeft, sound)
-	local e = mod.___e
+function mod2.AddAlertMBarExpiration(id, alertIndex, timeLeft, sound)
+	local e = mod2.___e
 	e.hasAlerts = 1
 	if not e.alerts[id] then e.alerts[id] = {} end
 	e.alerts[id].expiration = {
@@ -92,8 +93,8 @@ function mod.AddAlertMBarExpiration(id, alertIndex, timeLeft, sound)
 		last = 0,
 	}
 end
-function mod.AddAlertMBarStart(id, alertIndex, sound)
-	local e = mod.___e
+function mod2.AddAlertMBarStart(id, alertIndex, sound)
+	local e = mod2.___e
 	e.hasAlerts = 1
 	if not e.alerts[id] then e.alerts[id] = {} end
 	e.alerts[id].start = {

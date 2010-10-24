@@ -142,7 +142,7 @@ function mod.UnholyRotation.single(diseaseClip)
 	diseaseClip = diseaseClip or 0
 
 	-- needs target
-	if not UnitExists("target") then return end
+	if not (UnitExists("target") and UnitCanAttack("player", "target") and not UnitIsDead("target")) then return end
 
 	local ctime, gcd, cd, cdStart, cdDuration, cdReady, runeType
 	ctime = GetTime()
@@ -307,7 +307,7 @@ function mod.UnholyRotation.aoe(diseaseClip)
 	diseaseClip = diseaseClip or 0
 
 	-- needs target
-	if not UnitExists("target") then return end
+	if not (UnitExists("target") and UnitCanAttack("player", "target") and not UnitIsDead("target")) then return end
 
 	local ctime, gcd, cd, cdStart, cdDuration, cdReady, runeType
 	ctime = GetTime()

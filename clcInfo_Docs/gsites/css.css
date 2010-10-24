@@ -34,4 +34,7 @@
 .list1 { margin: 10px 0px 0px 20px; padding: 0px 0px 0px 10px; list-style-type: none; font-family: Verdana, Geneva, sans-serif; font-size: 11px; border-left: 1px solid #777; line-height: 17px; }
 .list1_indent { margin: 0px 0px 5px 20px; padding: 0px 0px 0px 10px; list-style-type: circle; font-family: Verdana, Geneva, sans-serif; font-size: 11px; }
 .list2 { margin: 10px 0px 0px 40px; padding: 0px 0px 0px 10px; list-style-type: none; font-family: Verdana, Geneva, sans-serif; font-size: 11px; border-left: 1px solid #777; line-height: 17px; }
+.list2_indent { margin: 10px 0px 0px 20px; padding: 0px 0px 0px 10px; list-style-type: circle; font-family: Verdana, Geneva, sans-serif; font-size: 11px; }
 .code_inline_12 { display:inline; font-family: Consolas, 'Courier New', mononspace; font-size:12px; }
+.indent { margin: 5px 0px 0px 20px; padding: 0px; }
+.img1 { margin: 5px 0px 5px 0px; padding: 0px; }

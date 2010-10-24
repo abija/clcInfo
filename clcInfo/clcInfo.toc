@@ -19,6 +19,7 @@ display\micons.lua
 display\mbars.lua
 display\texts.lua
 
+data\core.lua
 data\global_icon.lua
 data\global_bar.lua
 data\global_micon.lua
@@ -36,5 +37,11 @@ data\deathknight\global.lua
 data\deathknight\blood.lua
 data\deathknight\frost.lua
 data\deathknight\unholy.lua
+
+data\priest\shadow.lua
+
+data\warrior\arms.lua
+data\warrior\fury.lua
+data\warrior\protection.lua
 
 fixandclean.lua

@@ -65,12 +65,12 @@ local function OnUpdate(self, elapsed)
 				if self.mode == "normal" then
 					if a.last > a.timeLeft then
 						a.last = 0
-						modAlerts:Play(a.alertIndex, self.lastTexture, a.sound)
+						modAlerts.Play(a.alertIndex, self.lastTexture, a.sound)
 					end
 				elseif self.mode == "reversed" then
 					if a.last < a.timeLeft then
 						a.last = 10000
-						modAlerts:Play(a.alertIndex, self.lastTexture, a.sound)
+						modAlerts.Play(a.alertIndex, self.lastTexture, a.sound)
 					end
 				end
 			end
@@ -103,11 +103,11 @@ local function OnUpdate(self, elapsed)
 				-- mode selection
 				if mode == "normal" then
 					if value <= a.timeLeft and a.timeLeft < a.last then
-						modAlerts:Play(a.alertIndex, texture, a.sound)
+						modAlerts.Play(a.alertIndex, texture, a.sound)
 					end
 				elseif mode == "reversed" then
 					if value >= a.timeLeft and a.timeLeft > a.last then
-						modAlerts:Play(a.alertIndex, texture, a.sound)
+						modAlerts.Play(a.alertIndex, texture, a.sound)
 					end
 				end
 				a.last = value
@@ -117,11 +117,11 @@ local function OnUpdate(self, elapsed)
 				local a = self.alerts.start
 				if mode == "normal" then
 					if value > a.last then
-						modAlerts:Play(a.alertIndex, texture, a.sound)
+						modAlerts.Play(a.alertIndex, texture, a.sound)
 					end
 				elseif mode == "reversed" then
 					if value < a.lastReversed then
-						modAlerts:Play(a.alertIndex, texture, a.sound)
+						modAlerts.Play(a.alertIndex, texture, a.sound)
 					end
 				end
 				a.last = value
@@ -177,6 +177,9 @@ end
 
 -- create the object
 function prototype:Init()
+	self.etype = "bar"
+	-- event dispatcher
+	self:SetScript("OnEvent", clcInfo.DisplayElementsEventDispatch)
 	-- create a child frame that holds all the elements and it's hidden/shown instead of main one that has update function
 	self.elements = CreateFrame("Frame", nil, self)
 	local ex = self.elements
@@ -276,10 +279,12 @@ end
 
 function prototype:UpdateEnabled()
 	if self.db.enabled then
+		clcInfo.UpdateExecEvent(self)	-- reenable event code
 		if not self.unlock then
 			self:SetScript("OnUpdate", OnUpdate)
 		end
 	else
+		self:UnregisterAllEvents()
 		self:SetScript("OnUpdate", nil)
 		if not self.unlock then
 			self:FakeHide()
@@ -569,54 +574,8 @@ end
 
 -- update the exec function and related stuff
 function prototype:UpdateExec()
-	-- updates per second
-	self.freq = 1/self.db.ups
-	self.elapsed = 100 --> forc instant update
-	
-	self.visible = false
-	self.mode = nil
-	self.value = 0
-	
-	-- clear error codes
-	self.errExec = ""
-	self.errExecAlert = ""
-	
-	local err
-	-- exec
-	self.exec, err = loadstring(self.db.exec)
-	-- use a blank exec if we get an error
-	if not self.exec then
-		self.exec = loadstring("")
-		print("code error:", err)
-		print("in:", self.db.exec)
-	end
-  setfenv(self.exec, clcInfo.env)
-  
-  -- perform additional cleaning if required
-  self.externalUpdate = false
-  if self.ExecCleanup then
-  	self.ExecCleanup()
-  	self.ExecCleanup = nil
-  end
-  
-  -- handle alert exec
-  
-  -- defaults
-  self.alerts = {}
-  self.hasAlerts = 0
-  
-  -- execute the code
-  local f, err = loadstring(self.db.execAlert or "")
-  if f then
-  	setfenv(f, clcInfo.env)
-  	clcInfo.env.___e = self
-  	local status, err = pcall(f)
-  	if not status then self.errExecAlert = err end
-  else
-  	print("alert code error:", err)
-  	print("in:", self.db.execAlert)
-  end
-  
+	clcInfo.UpdateExec(self)
+  clcInfo.UpdateExecAlert(self)
   self:UpdateEnabled()
 end
 
@@ -816,6 +775,7 @@ function mod.GetDefault()
 		height = 30,
 		exec = "",
 		alertExec = "",
+		eventExec = "",
 		ups = 5,
 		gridId = 0,
 		gridX = 1,	-- column

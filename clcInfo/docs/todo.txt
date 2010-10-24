@@ -1,10 +1,11 @@
-- frost dk: easier mode selection, table of funcs
-- tags on curse
+- rething multi icons and bars to not update so much?
 
-- exorcism duration
+- track paladin shield from prot wog?
+- better use of animation and sounds
+- animation that doesnt override prev one
+
+- ret module: exorcism duration
 - lock/unlock - to 1 toggle
-- rename alert to animation in the displayed stuff
-- make alert available in env
 
 
 

@@ -105,7 +105,7 @@ mod.FrostRotation = {}
 
 function mod.FrostRotation.single()
 	-- needs target
-	if not UnitExists("target") then return end
+	if not (UnitExists("target") and UnitCanAttack("player", "target") and not UnitIsDead("target")) then return end
 
 	local ctime, gcd, cd, cdStart, cdDuration, cdReady, runeType
 	ctime = GetTime()
@@ -233,7 +233,7 @@ end
 --------------------------------------------------------------------------------
 function mod.FrostRotation.aoe()
 	-- needs target
-	if not UnitExists("target") then return end
+	if not (UnitExists("target") and UnitCanAttack("player", "target") and not UnitIsDead("target")) then return end
 
 	local ctime, gcd, cd, cdStart, cdDuration, cdReady, runeType
 	ctime = GetTime()

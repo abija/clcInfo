@@ -11,7 +11,6 @@ local options = mod.options
 local modName = "global"
 
 local baseMod = clcInfo.classModules[modName]
-clcInfo.spew = baseMod
 local baseTDB
 
 local function Get(info)

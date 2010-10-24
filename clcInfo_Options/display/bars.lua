@@ -102,6 +102,7 @@ local function SetSound(info, val) sound = val end
 -- used to change error strings
 local function GetErrExec(info) return modBars.active[tonumber(info[3])].errExec or "" end
 local function GetErrExecAlert(info) return modBars.active[tonumber(info[3])].errExecAlert or "" end
+local function GetErrExecEvent(info) return modBars.active[tonumber(info[3])].errExecEvent or "" end
 
 -- user defined label
 local function GetUDLabel(info)
@@ -744,6 +745,16 @@ function mod:UpdateBarList()
 									order = 3, type = 'select', dialogControl = 'LSM30_Sound', width="full", name = 'List of available sounds',
 									values = LSM:HashTable("sound"), get = GetSound, set = SetSound,
 								},
+							},
+						},
+						events = {
+							order = 4, type = "group", inline = true, name = "Events",
+							args = {
+								eventExec = {
+									order = 1, type = "input", multiline = true, name = "", width = "full",
+									get = Get, set = SetExec,
+								},
+								err = { order = 2, type = "description", name = GetErrExecEvent },
 							},
 						},
 					},

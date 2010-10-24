@@ -112,6 +112,11 @@ local function OnDragStop(self)
 end
 
 function prototype:Init()
+	-- type of the object could be useful
+	self.etype = "text"
+	-- event dispatcher
+	self:SetScript("OnEvent", clcInfo.DisplayElementsEventDispatch)
+	
 	-- black texture to display when unlocked
 	self.bg = self:CreateTexture(nil, "BACKGROUND")
 	self.bg:SetAllPoints()
@@ -161,17 +166,18 @@ end
 
 function prototype:UpdateEnabled()
 	if self.db.enabled then
+		clcInfo.UpdateExecEvent(self)	-- reenable event code
 		if not self.unlock then
 			self:SetScript("OnUpdate", OnUpdate)
 		end
 	else
+		self:UnregisterAllEvents()	-- disable event code basically
 		self:SetScript("OnUpdate", nil)
 		if not self.unlock then
 			self:FakeHide()
 		end
 	end
 end
-
 
 -- try to position on grid
 local function TryGridPositioning(self)
@@ -245,34 +251,10 @@ end
 
 -- update the exec function and perform cleanup
 function prototype:UpdateExec()
-	-- updates per second
-	self.freq = 1/self.db.ups
-	self.elapsed = 100 -- force instant update
-	
-	-- clear error codes
-	self.errExec = ""
-
-	local err
-	-- exec
-	self.exec, err = loadstring(self.db.exec)
-	-- apply DoNothing if we have an error
-	if not self.exec then
-		self.exec = loadstring("")
-		print("code error:", err)
-		print("in:", self.db.exec)
-	end
-  setfenv(self.exec, clcInfo.env)
-  
+	clcInfo.UpdateExec(self)
   -- reset alpha
   self.text:SetAlpha(1)
   self.lastAlpha = 1
-  
-  -- cleanup if required
-  self.externalUpdate = false
-  if self.ExecCleanup then
-  	self.ExecCleanup()
-  	self.ExecCleanup = nil
-  end
   
 	self:UpdateEnabled()
 end
@@ -392,6 +374,7 @@ function mod:GetDefault()
 		width = 100,
 		height = 30,
 		exec = "",
+		eventExec = "",
 		ups = 5,
 		gridId = 0,
 		gridX = 1,	-- column

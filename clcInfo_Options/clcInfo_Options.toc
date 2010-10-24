@@ -11,7 +11,6 @@ embeds.xml
 
 core.lua
 
-code_templates\global.lua
 code_templates\deathknight.lua
 code_templates\druid.lua
 code_templates\hunter.lua
@@ -22,6 +21,7 @@ code_templates\rogue.lua
 code_templates\shaman.lua
 code_templates\warlock.lua
 code_templates\warrior.lua
+code_templates\global.lua
 
 templates.lua
 activeTemplate.lua
@@ -47,4 +47,10 @@ data\deathknight\global.lua
 data\deathknight\blood.lua
 data\deathknight\frost.lua
 data\deathknight\unholy.lua
+
+data\priest\shadow.lua
+
+data\warrior\arms.lua
+data\warrior\fury.lua
+data\warrior\protection.lua
 

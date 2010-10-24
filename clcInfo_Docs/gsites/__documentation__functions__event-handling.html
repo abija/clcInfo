@@ -1,0 +1,26 @@
+<link href="css.css" rel="stylesheet" type="text/css" />
+<h1 class="h2"><span class="color_gray">Documentation \ Functions \ </span><span>Event handling</span></h1>
+<p class="t1">Active display elements (icons, multi icons, bars, multi bars and texts) have a way of hooking event calls. In order to catch events for a specific element you must add at least one event through the edit box in Behavior Tab, Events section (attention, for some of the elements is located under the Alerts section, so you need to scroll down).</p>
+<p class="t1">The function used to add event listeners is:</p>
+<div class="indent"><pre class="c2">AddEventListener(EventHandler, ...)</pre>
+<ul class="list1"><li>eventHandler: function that handles the event calls</li>
+<li>...: list of events that will be associated with eventHandler</li></ul></div>
+
+<p class="t1">EventHandler should have the following format:</p>
+<div class="indent"><pre class="c2">local FunctionName(storage, event, ...)</pre>
+<ul class="list1"><li>storage: table where you can store data to be used in the main code by the element</li>
+<li>event: name of the event that triggered the call</li>
+<li>...: list of arguments passed to the event by the game</li></ul></div>
+
+<p class="t1"><div>In the main code of the element (the one entered in the Code section) you can access storage data with:
+<pre class="code_inline_12"><span class="font_code_12_bold">GetStorage()</span></pre><span>.</span></div></p>
+
+
+<p class="t1"><span class="color_sample">Example:</span><span> display combat events sent to your client in a text element.</span></p>
+<ul class="list2_indent"><li>Create a new text element. Go to the Behavior Tab in it's options. In the Code section add the following code:
+<pre class="c1">return GetStorage().v</pre></li></ul>
+<ul class="list2_indent"><li>In the Events section add the following code:
+<pre class="c1">local function f(storage, event, ...)
+	storage.v = select(2, ...)
+end
+AddEventListener(f, "COMBAT_LOG_EVENT_UNFILTERED")</pre></li></ul>

@@ -173,15 +173,18 @@ function mod.RetRotation(csBoost, useInq, preInq)
 	local ctime, cdStart, cdDuration, cs, gcd
 	ctime = GetTime()
 	
+	local startCS, startHp
+	
 	local preCS = true -- skils before CS are boosted too
 
 	-- get HP, HoL
 	local hp = UnitPower("player", SPELL_POWER_HOLY_POWER)
+	startHp = hp
 	local hol = UnitBuff("player", buffHandOfLight) or false
 	local zeal = UnitBuff("player", buffZealotry) or false
 	
 	-- gcd
-	cdStart, cdDuration = GetSpellCooldown(spellCleanse)
+	cdStart, cdDuration = GetSpellCooldown(20154) -- Seal of Righteousness used for GCD
 	if cdStart > 0 then
 		gcd = cdStart + cdDuration - ctime
 	else
@@ -213,6 +216,7 @@ function mod.RetRotation(csBoost, useInq, preInq)
 				v.cd = 15
 			end
 		elseif v.alias == "cs" then
+			startCS = v.cd + csBoost - 0.1
 			preCS = false
 		elseif v.alias == "exo" then
 			if UnitBuff("player", buffTheArtOfWar) == nil then v.cd = 100 end
@@ -273,6 +277,12 @@ function mod.RetRotation(csBoost, useInq, preInq)
 		end
 	end
 	dq2 = pq[index].name
+	
+	-- check for hol + hp < 2 
+	if hol and startHp < 3 and startCS <= 0 then
+		dq1 = spellCS
+		dq2 = spellTV
+	end
 	
 	-- inquisition, if active and needed -> change first tv in dq1 or dq2 with inquisition
 	if useInq then

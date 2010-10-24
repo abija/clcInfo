@@ -28,19 +28,6 @@ for k, v in pairs(spells) do
 	spells[k] = { id = v, name = name }
 end
 
--- list of items used to get localized versions
-local items = {
-	["Whispering Fanged Skull"] = 50342,
-	["[H] Whispering Fanged Skull"] = 50343,
-	["Death's Verdict"] = 47115,
-}
--- get the real names
-for k, v in pairs(items) do
-	local name = GetItemInfo(v)
-	if not name then name = "Unknown Item" end
-	items[k] = { id = v, name = name }
-end
-
 --------------------------------------------------------------------------------
 -- icons
 --------------------------------------------------------------------------------
@@ -116,19 +103,6 @@ name = "Protection Rotation Skill 2"
 mod.icons[#mod.icons+1] = {
 name = name, exec = format([[
 return IconProtection2()
-]])
-}
-
--- [H] Whispering Fanged Skull
-mod.icons[#mod.icons+1] = {
-name = "Item: [H] " .. items["[H] Whispering Fanged Skull"].name, exec = format([[
-return IconICD(71541, 45, 0, 1, 0.3)
-]])
-}
--- Death's Verdict
-mod.icons[#mod.icons+1] = {
-name = "Item: " .. items["Death's Verdict"].name, exec = format([[
-return IconICD(67708, 45, 0, 1, 0.3)
 ]])
 }
 

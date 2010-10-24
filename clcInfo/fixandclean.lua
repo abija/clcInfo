@@ -1,5 +1,3 @@
-clcInfo.__version = 62
-
 --------------------------------------------------------------------------------
 -- TODO, make this GOOD
 -- !!! think properly about this shit

@@ -1,4 +1,6 @@
 clcInfo = {}	-- the addon
+clcInfo.__version = 64
+
 clcInfo.display = {}	-- display elements go here
 clcInfo.templates = {}	-- the templates
 clcInfo.classModules = {}  -- stuff loaded per class
@@ -24,6 +26,7 @@ clcInfo.mf.unit = "player" -- fix parent unit for when we have to parent bars he
 clcInfo.frameLevel = clcInfo.mf:GetFrameLevel()
 
 clcInfo.env = setmetatable({}, {__index = _G})  -- add all data functions in this environment and pass them to the exec calls
+clcInfo.env2 = setmetatable({}, {__index = _G})  -- use a different one for alerts, events etc
 
 clcInfo.LSM = LibStub("LibSharedMedia-3.0")  -- SharedMedia
 clcInfo.lbf = LibStub("LibButtonFacade", true)  -- ButtonFacade
@@ -120,6 +123,7 @@ end
 --------------------------------------------------------------------------------
 function clcInfo:OnInitialize()
 	self:ReadSavedData()
+	
 	if not self:FixSavedData() then return end
 	
 	-- init the class modules
@@ -210,6 +214,7 @@ end
 -- defaults for the db
 function clcInfo:GetDefault()
 	local data = {
+		version = clcInfo.__version,
 		options = {
 			enforceTemplate = 0,
 		},
@@ -375,5 +380,7 @@ function clcInfo.SPD(s)
 	StaticPopupDialogs.CLCINFO.text = s
 	StaticPopup_Show("CLCINFO")
 end
+
+
 
 

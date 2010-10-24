@@ -90,8 +90,6 @@ function prototype:Init()
     -- update the data in options also
     clcInfo:UpdateOptions()
 	end)
-	
-	self:Show()
 end
 
 -- update display according to options
@@ -141,6 +139,7 @@ function prototype:Unlock()
   self.bg:Show()
   self.label:Show()
   self:EnableMouse(true)
+  self.unlock = true
 end
 
 -- disables
@@ -148,6 +147,7 @@ function prototype:Lock()
   self.bg:Hide()
   self.label:Hide()
   self:EnableMouse(false)
+  self.unlock = false
 end
 
 -- caaaaaaaaaaaaaaaaaaareful
@@ -185,6 +185,7 @@ function mod:New(index)
 	end
 	
 	self.active[index] = alert
+	alert:Show()
 	
 	alert:UpdateLayout()
 	if self.unlock then
@@ -220,9 +221,9 @@ function mod:InitElements()
 	end
 end
 
-function mod:Play(index, texture, sound)
-	if self.active[index] then
-		self.active[index]:StartAnim(texture)
+function mod.Play(index, texture, sound)
+	if mod.active[index] then
+		mod.active[index]:StartAnim(texture)
 	end
 	if sound then PlaySoundFile(LSM:Fetch("sound", sound)) end
 end
