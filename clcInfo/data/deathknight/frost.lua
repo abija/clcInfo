@@ -6,10 +6,11 @@ local GetTime = GetTime
 
 -- mod name in lower case
 local modName = "_frost"
+local version = 1
 
 -- default settings for this module
 local defaults = {
-	version = 1,
+	version = version,
 	
 	rangePerSkill = false,
 }

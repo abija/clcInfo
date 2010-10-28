@@ -15,7 +15,7 @@ local defaults = {
 	rbScale = 1,
 	rbAlpha = 1,
 	
-	version = 1,
+	version = version,
 }
 
 -- lower case module name
@@ -39,14 +39,17 @@ function mod.OnInitialize()
 			db.version = version
 		end
 		
-		if not myrb then mod.CreateRB() end
 		mod.UpdateRBar()
+	else
+		if myrb then myrb:Hide() end
 	end
 end
 mod.OnTemplatesUpdate = mod.OnInitialize
 
 function mod.UpdateRBar()
 	if db.moveRB then
+		if not myrb then mod.CreateRB() end
+	
 		myrb:EnableMouse(not mod.locked)
 	
 		myrb:Show()
@@ -55,7 +58,7 @@ function mod.UpdateRBar()
 		myrb:SetAlpha(db.rbAlpha)
 		myrb:SetPoint("CENTER", UIParent, "CENTER", db.rbX, db.rbY)
 	else
-		myrb:Hide()
+		if myrb then myrb:Hide() end
 	end
 	
 	if db.hideBlizzRB then

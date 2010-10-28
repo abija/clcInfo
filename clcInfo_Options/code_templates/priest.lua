@@ -23,7 +23,8 @@ local spells = {
 	["Circle of Healing"] = 34861, 
 	["Holy Word: Chastise"] = 88625,
 	["Guardian Spirit"] = 47788,
-	
+	-- shadow
+	["Shadow Word: Death"] = 32379,
 }
 
 -- get the real names
@@ -122,5 +123,17 @@ return visible, texture, start, duration, enable, reversed, nil, nil, true, 1, 1
 ]], name, spells["Heal"].name, name, spells["Renew"].name, name, spells["Prayer of Healing"].name, name, spells["Smite"].name, name)
 }
 
-
 --------------------------------------------------------------------------------
+
+-- Shadow Word: Death
+name = spells["Shadow Word: Death"].name
+mod.icons[#mod.icons+1] = {
+name = name, exec = format([[
+if UnitExists("target") and UnitCanAttack("player", "target") and not UnitIsDead("target") then
+  local c = floor(UnitHealth("target") / UnitHealthMax("target") * 100)
+  if c <= 25 then
+    return IconSpell("%s", true)
+  end
+end
+]], name)
+}

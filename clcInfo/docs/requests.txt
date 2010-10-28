@@ -1,1 +1,1 @@
-- clcInfo is really getting stable now. How about changing the Zealotry template so that it will only darken (due to not having 3 Holy Power) when it is up, rather than constantly lighting and dimming when it is on cooldown?
+If you have the time, could you maybe add the party/raid size as a template option? Because I'd like to use different placements for the icons in my Holy spec when in a party/10 men raid and when in a 25 men raid. Right now I'm using the "force template" option for this, which of course works, but automatic switching would be better

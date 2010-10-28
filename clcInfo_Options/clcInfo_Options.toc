@@ -37,20 +37,4 @@ display\texts.lua
 data\global.lua
 data\custom.lua
 
-data\paladin\global.lua
-data\paladin\retribution.lua
-data\paladin\protection.lua
-data\paladin\holy.lua
-data\paladin\custom.lua
-
-data\deathknight\global.lua
-data\deathknight\blood.lua
-data\deathknight\frost.lua
-data\deathknight\unholy.lua
-
-data\priest\shadow.lua
-
-data\warrior\arms.lua
-data\warrior\fury.lua
-data\warrior\protection.lua
-
+data\classes.xml

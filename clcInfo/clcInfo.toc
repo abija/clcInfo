@@ -10,7 +10,9 @@ embeds.xml
 
 core.lua
 templates.lua
+fixandclean.lua
 
+display\core.lua
 display\alerts.lua
 display\grids.lua
 display\icons.lua
@@ -19,7 +21,6 @@ display\micons.lua
 display\mbars.lua
 display\texts.lua
 
-data\core.lua
 data\global_icon.lua
 data\global_bar.lua
 data\global_micon.lua
@@ -27,21 +28,4 @@ data\global_mbar.lua
 data\alerts.lua
 data\custom.lua
 
-data\paladin\global.lua
-data\paladin\retribution.lua
-data\paladin\protection.lua
-data\paladin\holy.lua
-data\paladin\custom.lua
-
-data\deathknight\global.lua
-data\deathknight\blood.lua
-data\deathknight\frost.lua
-data\deathknight\unholy.lua
-
-data\priest\shadow.lua
-
-data\warrior\arms.lua
-data\warrior\fury.lua
-data\warrior\protection.lua
-
-fixandclean.lua
+data\classes.xml

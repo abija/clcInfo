@@ -1,38 +1,58 @@
 <p style="font-family: Verdana, Geneva, sans-serif; font-size: 16px; font-weight: bold; color: #004080; margin: 0px 0px 15px 0px; padding: 0px 0px 5px 0px; border-bottom: 1px solid #999;">Icons</p>
 
 <p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Spell cooldown.</p>
-<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconSpell("Avenging Wrath")</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconSpell("Avenging Wrath")</pre>
 
 <p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Spell cooldown that checks range of the spell.</p>
-<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconSpell("Judgement of Light", true)</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconSpell("Judgement of Light", true)</pre>
 
 <p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Spell cooldown that checks if you are in melee range (as long as you have a melee range only ability).</p>
-<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconSpell("Judgement of Light", "Crusader Strike")</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconSpell("Judgement of Light", "Crusader Strike")</pre>
 
 <p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Spell that doesn't check range and is shown only when not on cooldown.</p>
-<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconSpell("Avenging Wrath", nil, "ready")</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconSpell("Avenging Wrath", nil, "ready")</pre>
 
 <p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Buff on player.</p>
-<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconAura("HELPFUL", "player", 71187)</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconAura("HELPFUL", "player", 71187)</pre>
 <p style="margin: 5px 0px 0px 40px; padding: 0px 0px 0px 5px; font-family: Verdana, Geneva, sans-serif; font-size:11px;">or</p>
-<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconAura("HELPFUL", "player", "Formidable")</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconAura("HELPFUL", "player", "Formidable")</pre>
 
 <p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Display the buff when it's active and the ability cooldown when it expires.</p>
-<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">local visible, texture, start, duration, enable, reversed = IconAura("HELPFUL", "player", "Icy Veins")
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">local visible, texture, start, duration, enable, reversed = IconAura("HELPFUL", "player", "Icy Veins")
 if not visible then return IconSpell("Icy Veins") end
-return visible, texture, start, duration, enable, reversed </p>
+return visible, texture, start, duration, enable, reversed </pre>
 
 <p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Debuff on target.</p>
-<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconAura("HARMFUL", "target", "Stormstrike")</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconAura("HARMFUL", "target", "Stormstrike")</pre>
 
 <p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Debuff on target cast by the player.</p>
-<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconAura("HARMFUL", "target", "Stormstrike", "player")</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconAura("HARMFUL", "target", "Stormstrike", "player")</pre>
 
 <p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Item that is equiped in slot 1 (head).</p>
-<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconItem(GetInventoryItemID("player", 1))</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconItem(GetInventoryItemID("player", 1))</pre>
 
 <p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Internal Cooldown for Whispering Fang Skull (H).</p>
-<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconICD(71541, 45, 0, 1, 0.3)</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconICD(71541, 45, 0, 1, 0.3)</pre>
 
 <p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Internal Cooldown for Ashen Band of Endless Vengeance</p>
-<p style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconICD(72412, 60, 0, 1, 0.3)</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return IconICD(72412, 60, 0, 1, 0.3)</pre>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Display an aura when there are x seconds left on it.</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">local visible, texture, start, duration, enable, reversed = IconAura("HELPFUL|PLAYER", "player", "Judgements of the Pure")
+if duration and (start + duration - GetTime()) &lt;= 10 then
+  return visible, texture, start, duration, enable, reversed
+end</pre>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Display a buff when it's not active on you.</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">local name, _, icon = GetSpellInfo(89901)
+if not UnitBuff("player", name) then return true, icon end</pre>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Show a spell when affected by a list of debuffs.</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">local visible = IconMAura("HARMFUL", "player", "Hamstring", "Frost Nova")
+if visible then return IconSpell("Hand of Freedom") end</pre>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Show a spell when threat situation is dangerous.</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">local _, status = UnitDetailedThreatSituation("player", "target")
+if status and status &gt; 1 then
+  return IconSpell("Hand of Salvation")
+end</pre>

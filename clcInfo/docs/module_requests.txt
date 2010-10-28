@@ -1,3 +1,40 @@
+-- ehnahncement
+I have really 2 good guide ([URL="http://forums.worldofwarcraft.com/thread.html?topicId=27026379015&sid=1"]1[/URL]\[URL="http://www.myrddin.de/2010/10/09/the-enhancement-shaman-4-0/"]2[/URL]). But a normal rotation only in 1 guide:
+1. Searing Totem (if not active) 
+2. Maelstrom Weapon 5-Stack Lightning Bolt 
+3. Feral Spirits 
+4. Stormstrike 
+5. Lava Lash 
+6. Flame Shock 
+7. Earth Shock 
+8. Shamanistic Rage (w/ 2pct10 bonus.)
+(wowinterface)
+--------------------------------------------------------------------------------
+
+-- destruction
+I'm mainly looking for a module for destruction, but the topics I have linked below give good detail on the other specs priority systems as well.
+
+http://elitistjerks.com/f80/t106168-4_0_pre_cataclysm_raiding/
+http://www.wowhead.com/forums&topic=170964&p=2339114#p2339040
+
+There's also a detailed list on affilction here: http://www.wowhead.com/forums&topic=100050#p1126784
+
+For destruction the priority is as follows:
+
+    * Improved Soul Fire (If target is above 80%, make sure this buff is up)
+    * Immolate
+    * Conflagrate
+    * Bane of Doom
+    * Shadowflame
+    * Corruption
+    * Chaos Bolt
+    * Soul Burn -> Soul Fire
+    * Soul Fire (If Empowered Imp has procced)
+    * Incinerate
+(curse mail)
+--------------------------------------------------------------------------------
+
+
 --------------------------------------------------------------------------------
 Paladin
 --------------------------------------------------------------------------------

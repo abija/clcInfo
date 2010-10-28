@@ -8,13 +8,13 @@ local AceRegistry = mod.AceRegistry
 local options = mod.options
 
 local baseMod = clcInfo.classModules.global
-local baseTDB
+local baSetPPBDB
 
-local function Get(info)
-	return baseTDB[info[#info]]
+local function GetPPB(info)
+	return baSetPPBDB[info[#info]]
 end
-local function Set(info, val)
-	baseTDB[info[#info]] = val
+local function SetPPB(info, val)
+	baSetPPBDB[info[#info]] = val
 	baseMod.UpdatePPBar()
 end
 
@@ -27,7 +27,7 @@ local function SetLocked(info, val)
 end
 
 local function LoadModuleActiveTemplate()
-	baseTDB = clcInfo.activeTemplate.classModules.global
+	baSetPPBDB = clcInfo.activeTemplate.classModules.global
 
 	options.args.classModules.args.global = {
 		order = 1, type = "group", childGroups = "tab", name = "Global",
@@ -38,28 +38,31 @@ local function LoadModuleActiveTemplate()
 						order = 1, type = "group", inline = true, name = "Custom Holy Power Bar",
 						args = {
 							movePPBar = {
-								order = 1, type = "toggle", name = "Use own bar", get = Get, set = Set,
+								order = 1, type = "toggle", name = "Use own bar", get = GetPPB, set = SetPPB,
 							},
 							movePPBarLock = {
 								order = 2, type = "toggle", name = "Locked own bar", get = GetLocked, set = SetLocked,
 							},
 							hideBlizPPB = {
-								order = 3, type = "toggle", width="double", name = "Hide Blizzard", get = Get, set = Set,
+								order = 3, type = "toggle", width="double", name = "Hide Blizzard", get = GetPPB, set = SetPPB,
 							},
 							_s1 = {
 								order = 11, type = "description", name = "",
 							},
 							ppbX = {
-								order = 12, type = "range", min = -2000, max = 2000, step = 1, name = "X", get = Get, set = Set,
+								order = 12, type = "range", min = -2000, max = 2000, step = 1, name = "X", get = GetPPB, set = SetPPB,
 							},
 							ppbY = {
-								order = 13, type = "range", min = -2000, max = 2000, step = 1, name = "Y", get = Get, set = Set,
+								order = 13, type = "range", min = -2000, max = 2000, step = 1, name = "Y", get = GetPPB, set = SetPPB,
 							},
 							ppbScale = {
-								order = 14, type = "range", min = 0.1, max = 10, step = 0.1, name = "Scale", get = Get, set = Set,
+								order = 14, type = "range", min = 0.1, max = 10, step = 0.1, name = "Scale", get = GetPPB, set = SetPPB,
 							},
 							ppbAlpha = {
-								order = 15, type = "range", min = 0, max = 1, step = 0.01, name = "Alpha", get = Get, set = Set,
+								order = 15, type = "range", min = 0, max = 1, step = 0.01, name = "Alpha", get = GetPPB, set = SetPPB,
+							},
+							ppbUps = {
+								order = 16, type = "range", min = 1, max = 100, step = 1, name = "Updates per second", get = GetPPB, set = SetPPB,
 							},
 						},
 					},

@@ -1,0 +1,15 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+<Include file="deathknight\index.xml"/>
+<Include file="druid\index.xml"/>
+<Include file="hunter\index.xml"/>
+<Include file="mage\index.xml"/>
+<Include file="paladin\index.xml"/>
+<Include file="priest\index.xml"/>
+<Include file="rogue\index.xml"/>
+<Include file="shaman\index.xml"/>
+<Include file="warlock\index.xml"/>
+<Include file="warrior\index.xml"/>
+
+</Ui>

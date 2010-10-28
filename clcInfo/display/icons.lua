@@ -35,10 +35,9 @@ local function OnUpdate(self, elapsed)
 	self.elapsed = self.elapsed + elapsed
 	
 	if self.waitForCooldownEffect then
-		if self.elapsed > 0.5 then
+		if self.elapsed > 0.05 then
 			self.waitForCooldownEffect = false
 			self.elapsed = self.freq -- force update
-			-- self.elements.cooldown:StopAnimating()
 			CooldownFrame_SetTimer(self.elements.cooldown, self.lastStart, self.lastDuration, self.lastEnable)
 		else
 			return
@@ -79,25 +78,29 @@ local function OnUpdate(self, elapsed)
 	
 	-- hide when not visible
 	if not visible then
-		-- set lastDuration to 0
-		self.lastDuration = 0
-		
-		-- check for alerts
-		if self.hasAlerts == 1 then
-			-- expiration alert
-			if self.alerts.expiration then
-				local a = self.alerts.expiration
-				if a.last > a.timeLeft then
-					a.last = 0
-					modAlerts.Play(a.alertIndex, self.lastTexture, a.sound)
+		if self.elements:IsShown() then
+			-- set lastDuration to 0
+			self.lastDuration = 0
+			self.lastStart = 0
+			CooldownFrame_SetTimer(self.elements.cooldown, 0, 0, self.lastEnable or 1)
+			
+			-- check for alerts
+			if self.hasAlerts == 1 then
+				-- expiration alert
+				if self.alerts.expiration then
+					local a = self.alerts.expiration
+					if a.last > a.timeLeft then
+						a.last = 0
+						modAlerts.Play(a.alertIndex, self.lastTexture, a.sound)
+					end
+				end
+				-- start alert
+				if self.alerts.start then
+					self.alerts.start.last = -1
 				end
 			end
-			-- start alert
-			if self.alerts.start then
-				self.alerts.start.last = -1
-			end
+			self.elements:Hide() -- IMPORTANT, if you change FakeHide change this too
 		end
-		self:FakeHide()
 		return
 	end
 	
@@ -120,7 +123,8 @@ local function OnUpdate(self, elapsed)
 	-- check if this is working properly, don't want to miss timers
 	if duration > 0 then
 		if start ~= self.lastStart or duration ~= self.lastDuration then
-			if self.lastDuration > 0 and duration > 1.5 then
+			-- e:StopAnimating()
+			if self.lastDuration > 2 then
 				self.waitForCooldownEffect = true
 			else
 				CooldownFrame_SetTimer(e, start, duration, enable)
@@ -183,7 +187,10 @@ local function OnUpdate(self, elapsed)
 		end
 	end
 
-	self:FakeShow()
+	if not self.elements:IsShown() then self.elements:Show() end
+end
+function prototype:DoUpdate()
+	OnUpdate(self, 100)
 end
 
 local function OnDragStop(self)

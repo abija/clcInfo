@@ -1,0 +1,25 @@
+<h1 style="font-family: Verdana, Geneva, sans-serif; font-size: 16px; font-weight: bold; color: #004080; margin: 0px 0px 15px 0px; padding: 0px 0px 5px 0px; border-bottom: 1px solid #999;"><span style="color: #999; text-decoration: none;">Documentation \ Functions \ </span><span>Event handling</span></h1>
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Active display elements (icons, multi icons, bars, multi bars and texts) have a way of hooking event calls. In order to catch events for a specific element you must add at least one event through the edit box in Behavior Tab, Events section (attention, for some of the elements is located under the Alerts section, so you need to scroll down).</p>
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">The function used to add event listeners is:</p>
+<div style="margin: 5px 0px 0px 20px; padding: 0px;"><pre style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:13px; font-weight: bold; color: #00602B;">AddEventListener(EventHandler, ...)</pre>
+<ul style="margin: 10px 0px 0px 20px; padding: 0px 0px 0px 10px; list-style-type: none; font-family: Verdana, Geneva, sans-serif; font-size: 11px; border-left: 1px solid #777; line-height: 17px;"><li>eventHandler: function that handles the event calls</li>
+<li>...: list of events that will be associated with eventHandler</li></ul></div>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">EventHandler should have the following format:</p>
+<div style="margin: 5px 0px 0px 20px; padding: 0px;"><pre style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:13px; font-weight: bold; color: #00602B;">local FunctionName(storage, event, ...)</pre>
+<ul style="margin: 10px 0px 0px 20px; padding: 0px 0px 0px 10px; list-style-type: none; font-family: Verdana, Geneva, sans-serif; font-size: 11px; border-left: 1px solid #777; line-height: 17px;"><li>storage: table where you can store data to be used in the main code by the element</li>
+<li>event: name of the event that triggered the call</li>
+<li>...: list of arguments passed to the event by the game</li></ul></div>
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;"><div>In the main code of the element (the one entered in the Code section) you can access storage data with:
+<pre style="display:inline; font-family: Consolas, 'Courier New', mononspace; font-size:12px;"><span style="font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B; font-weight: bold;">GetStorage()</span></pre><span>.</span></div></p>
+
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;"><span style="color: #900;">Example:</span><span> display combat events sent to your client in a text element.</span></p>
+<ul style="margin: 10px 0px 0px 20px; padding: 0px 0px 0px 10px; list-style-type: circle; font-family: Verdana, Geneva, sans-serif; font-size: 11px;"><li>Create a new text element. Go to the Behavior Tab in it's options. In the Code section add the following code:
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">return GetStorage().v</pre></li></ul>
+<ul style="margin: 10px 0px 0px 20px; padding: 0px 0px 0px 10px; list-style-type: circle; font-family: Verdana, Geneva, sans-serif; font-size: 11px;"><li>In the Events section add the following code:
+<pre style="margin: 5px 0px 0px 20px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B;">local function f(storage, event, ...)
+	storage.v = select(2, ...)
+end
+AddEventListener(f, "COMBAT_LOG_EVENT_UNFILTERED")</pre></li></ul>

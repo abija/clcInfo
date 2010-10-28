@@ -3,11 +3,12 @@ local _, class = UnitClass("player")
 if class ~= "PALADIN" then return end
 
 local GetTime = GetTime
+local version = 2
 
 -- default settings for this module
 --------------------------------------------------------------------------------
 local defaults = {
-	version = 2,
+	version = version,
 	
 	rangePerSkill = false,
 	fillers = { "how", "tv", "cs", "exo", "j", "hw" },
@@ -165,6 +166,7 @@ clcInfo.cmdList["ret_fillers"] = CmdRetFillers
 --------------------------------------------------------------------------------
 -- rotation: priority system
 --------------------------------------------------------------------------------
+local cstv = 0
 function mod.RetRotation(csBoost, useInq, preInq)
 	csBoost = csBoost or 0
 	useInq = useInq or false
@@ -173,13 +175,14 @@ function mod.RetRotation(csBoost, useInq, preInq)
 	local ctime, cdStart, cdDuration, cs, gcd
 	ctime = GetTime()
 	
-	local startCS, startHp
+	local csStart, hpStart, csTrueCD, tvIndex
+	csTrueCD = 0
 	
 	local preCS = true -- skils before CS are boosted too
 
 	-- get HP, HoL
 	local hp = UnitPower("player", SPELL_POWER_HOLY_POWER)
-	startHp = hp
+	hpStart = hp
 	local hol = UnitBuff("player", buffHandOfLight) or false
 	local zeal = UnitBuff("player", buffZealotry) or false
 	
@@ -215,9 +218,11 @@ function mod.RetRotation(csBoost, useInq, preInq)
 			if not (hol or hp == 3) then
 				v.cd = 15
 			end
+			tvIndex = i
 		elseif v.alias == "cs" then
-			startCS = v.cd + csBoost - 0.1
+			csStart = v.cd + csBoost - 0.1
 			preCS = false
+			csTrueCD = v.cd + csBoost + gcd
 		elseif v.alias == "exo" then
 			if UnitBuff("player", buffTheArtOfWar) == nil then v.cd = 100 end
 		end
@@ -226,7 +231,15 @@ function mod.RetRotation(csBoost, useInq, preInq)
 		if v.cd < 0 then v.cd = 0 end
 	end
 	
-	-- sort cooldowns once, get min cd and the index in the table
+	-- sort cooldowns once, get min cd and index in the table
+	
+	-- HACK
+	-- check for cs -> tv situation
+	-- print(GetTime(), csTrueCD, ctime - cstv, hpStart)
+	if (hp == 2 or zeal) and csTrueCD > 2 and ((ctime - cstv) < 1) then
+		pq[tvIndex].cd = 0
+	end
+	
 	index = 1
 	cd = pq[1].cd
 	for i = 1, #pq do
@@ -245,6 +258,11 @@ function mod.RetRotation(csBoost, useInq, preInq)
 			hp = hp + 3
 		else
 			hp = hp + 1
+		end
+		-- HACK
+		if hp >= 3 then
+			-- last time when we got this situation
+			cstv = ctime
 		end
 	elseif (dq1 == spellTV or dq1 == spellDS) and not hol then
 		hp = 0
@@ -279,7 +297,7 @@ function mod.RetRotation(csBoost, useInq, preInq)
 	dq2 = pq[index].name
 	
 	-- check for hol + hp < 2 
-	if hol and startHp < 3 and startCS <= 0 then
+	if hol and hpStart < 3 and csStart <= 0 then
 		dq1 = spellCS
 		dq2 = spellTV
 	end
@@ -326,7 +344,7 @@ function emod.IconRet1(...)
 		gotskill = mod.RetRotation(...)
 	end
 	
-	if s2 then UpdateS2(s2, 100) end	-- update with a big "elapsed" so it's updated on call
+	if s2 then s2:DoUpdate() end	-- update with a big "elapsed" so it's updated on call
 	if gotskill then
 		return emod.IconSpell(dq1, db.rangePerSkill or spellCS)
 	end

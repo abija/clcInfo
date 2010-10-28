@@ -1,0 +1,34 @@
+<p style="font-family: Verdana, Geneva, sans-serif; font-size: 16px; font-weight: bold; color: #004080; margin: 0px 0px 15px 0px; padding: 0px 0px 5px 0px; border-bottom: 1px solid #999;">Alert Handling</p>
+<pre style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:13px; font-weight: bold; color: #00602B;">Alert(animationIndex, texture, sound)</pre>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px 0px 0px 5px; font-family: Verdana, Geneva, sans-serif; font-size:11px; border-left: 1px solid #777; line-height: 17px;">
+<span class="normal">animationIndex: index of an alert element where the icon will be displayed with respective animation
+texture: texture to be displayed in the animation
+sound: string representing a LibSharedMedia sound entry, for example: </span>
+<span style="color: #f0f;">"clcInfo: explosion"</span>
+<span class="normal">.</span>
+<span style="color: #900;">
+
+Careful when you call it, it will restart play on every call.</span>
+</pre>
+<br />
+<hr />
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">The following functions go into the alert edit box not the code one. Their usage is described in their name format.</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px 0px 0px 5px; font-family: Verdana, Geneva, sans-serif; font-size:11px; border-left: 1px solid #777; line-height: 17px;">...Expiration: triggers when element cooldown has less than timeLeft seconds
+...Start: triggers when cooldown starts</pre>
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Arguments:</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px 0px 0px 5px; font-family: Verdana, Geneva, sans-serif; font-size:11px; border-left: 1px solid #777; line-height: 17px;">id: used for multi bars or icons to trigger on respective element in the group
+animationIndex: index of an alert element where the icon will be displayed with respective animation
+timeLeft: how long on cooldown until it triggers
+sound: string representing a sound from the list available under the code box</pre>
+<br /> 
+<pre style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:13px; font-weight: bold; color: #00602B;">AddAlertIconExpiration(animationIndex, timeLeft, sound)
+AddAlertIconStart(animationIndex, sound)</pre>
+
+<pre style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:13px; font-weight: bold; color: #00602B;">AddAlertMIconExpiration(id, animationIndex, timeLeft, sound)
+AddAlertMIconStart(id, animationIndex, sound)</pre>
+
+<pre style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:13px; font-weight: bold; color: #00602B;">AddAlertBarExpiration(animationIndex, timeLeft, sound)
+AddAlertBarStart(animationIndex, sound)</pre>
+
+<pre style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:13px; font-weight: bold; color: #00602B;">AddAlertMBarExpiration(id, animationIndex, timeLeft, sound)
+AddAlertMBarStart(id, animationIndex, sound)</pre>

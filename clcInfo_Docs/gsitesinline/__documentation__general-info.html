@@ -1,0 +1,29 @@
+<h1 style="font-family: Verdana, Geneva, sans-serif; font-size: 16px; font-weight: bold; color: #004080; margin: 0px 0px 15px 0px; padding: 0px 0px 5px 0px; border-bottom: 1px solid #999;"><span style="color: #999; text-decoration: none;">Documentation \ </span><span>General information</span></h1>
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Return expected for Icon code: <span style="font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B; font-weight: bold;">visible, texture, start, duration, enable, reversed, count, alpha, svc, r, g, b, a</span></p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px 0px 0px 5px; font-family: Verdana, Geneva, sans-serif; font-size:11px; border-left: 1px solid #777; line-height: 17px;">visible: if the icon should be displayed or not
+texture: texture used for the icon
+start, duration, enable, reversed: control the display of the cooldown (if enable ~= 1 then cooldown is not displayed)
+count: stack value, nil if lower than 2
+alpha: alpha of the icon
+svc: true if we want to change the vertex color
+r, g, b, a: new vertex color parameters</pre>
+
+<br />
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">Return expected for Bar code: <span style="font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B; font-weight: bold;">visible, texture, minValue, maxValue, value, mode, textLeft, textCenter, textRight</span></p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px 0px 0px 5px; font-family: Verdana, Geneva, sans-serif; font-size:11px; border-left: 1px solid #777; line-height: 17px;"><span>visible: if the bar should be displayed or not
+texture: texture used for the icon
+minValue, maxValue, value: control the display of the bar
+mode: controls how bar is updated when updates are faster than the update throttle on the element (changes might happen on this part)</span><ul style="margin: 0px 0px 0px 20px; padding: 0px 0px 0px 10px; list-style-type: circle; font-family: Verdana, Geneva, sans-serif; font-size: 11px;"><li>"normal": bar decreases by elapsed</li><li>"reversed": bar increases by elapsed</li><li>anything else: bar updates only on the element throttled update</li></ul>
+<span>textLeft, textCenter, textRight: values for the 3 text elements</span></pre>
+
+<br />
+
+<p style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Verdana, Geneva, sans-serif; font-size:12px;">
+Return expected for Text code: <span style="font-family: Consolas, 'Courier New', mononspace; font-size:12px; color: #00602B; font-weight: bold;">text, alpha, scale, svc, r, g, b, a</span>
+</p>
+<pre style="margin: 5px 0px 0px 20px; padding: 0px 0px 0px 5px; font-family: Verdana, Geneva, sans-serif; font-size:11px; border-left: 1px solid #777; line-height: 17px;">text: text to be displayed
+alpha: alpha setting for the text (can be useful to animate it)
+scale: scaling of the text (can be useful to animate it)
+svc: true if we want to change the vertex color
+r, g, b, a: new vertex color parameters</pre>

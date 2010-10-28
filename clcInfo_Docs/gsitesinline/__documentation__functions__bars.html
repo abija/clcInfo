@@ -1,0 +1,55 @@
+<h1 style="font-family: Verdana, Geneva, sans-serif; font-size: 16px; font-weight: bold; color: #004080; margin: 0px 0px 15px 0px; padding: 0px 0px 5px 0px; border-bottom: 1px solid #999;"><span style="color: #999; text-decoration: none;">Documentation \ Functions \ </span><span>Bars</span></h1>
+
+<pre style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:13px; font-weight: bold; color: #00602B;">BarAura(filter, unitTarget, spell [, unitCaster [, showStack [, timeRight ]]])</pre>
+<ul style="margin: 10px 0px 0px 20px; padding: 0px 0px 0px 10px; list-style-type: none; font-family: Verdana, Geneva, sans-serif; font-size: 11px; border-left: 1px solid #777; line-height: 17px;">
+<li>filter: a list of filters to use separated by the pipe '|' character; e.g. "RAID|PLAYER" will query group buffs cast by the player (string)</li>
+<ul style="margin: 0px 0px 5px 20px; padding: 0px 0px 0px 10px; list-style-type: circle; font-family: Verdana, Geneva, sans-serif; font-size: 11px;"><li>HARMFUL: show debuffs only</li>
+<li>HELPFUL: show buffs only</li>
+<li>CANCELABLE: show auras that can be cancelled</li>
+<li>NOT_CANCELABLE: show auras that cannot be cancelled</li>
+<li>PLAYER: show auras the player has cast</li>
+<li>RAID: when used with a HELPFUL filter it will show auras the player can cast on party/raid members (as opposed to self buffs). If used with a HARMFUL filter it will return debuffs the player can cure</li></ul>
+<li>unitTarget: unit on witch to check the auras</li>
+<li>spell: name or id of the aura</li>
+<li>unitCaster: if specified, it will check caster of the buff against this unit</li>
+<li>showStack: specifies where the stack value is positioned</li>
+<ul style="margin: 0px 0px 5px 20px; padding: 0px 0px 0px 10px; list-style-type: circle; font-family: Verdana, Geneva, sans-serif; font-size: 11px;"><li>false/nil: hidden</li>
+<li>"before": before name</li>
+<li>not false/nil: after name</li></ul>
+<li>timeRight: if true, timer will be displayed on the right side in seconds</li>
+</ul>
+
+<br />
+
+<pre style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:13px; font-weight: bold; color: #00602B;">BarSingleTargetRaidBuff(spell [, showStack [, timeRight ]])<span style="color: #f00;">*</span></pre>
+<ul style="margin: 10px 0px 0px 20px; padding: 0px 0px 0px 10px; list-style-type: none; font-family: Verdana, Geneva, sans-serif; font-size: 11px; border-left: 1px solid #777; line-height: 17px;">
+<li>spell: name or id of the aura</li>
+<li>showStack: specifies where the stack value is positioned</li>
+<ul style="margin: 0px 0px 5px 20px; padding: 0px 0px 0px 10px; list-style-type: circle; font-family: Verdana, Geneva, sans-serif; font-size: 11px;">
+<li>false/nil: hidden</li>
+<li>"before": before name</li>
+<li>not false/nil: after name</li>
+</ul>
+<li style="color: #039; margin-top: 15px;">Intent: track buffs like Beacon of Light or Earth Shield on party/raid members.</li>
+</ul>
+
+<br />
+
+<pre style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:13px; font-weight: bold; color: #00602B;">BarSpell(spell [, timeRight ])</pre>
+<ul style="margin: 10px 0px 0px 20px; padding: 0px 0px 0px 10px; list-style-type: none; font-family: Verdana, Geneva, sans-serif; font-size: 11px; border-left: 1px solid #777; line-height: 17px;">
+<li>spell: name or id of the spell to track</li>
+<li>timeRight: if true, timer will be displayed on the right side in seconds</li>
+</ul>
+
+<br />
+
+<pre style="margin: 10px 0px 0px 0px; padding: 0px; font-family: Consolas, 'Courier New', mononspace; font-size:13px; font-weight: bold; color: #00602B;">BarItem(itemId [, equipped [, timeRight ]])</pre>
+<ul style="margin: 10px 0px 0px 20px; padding: 0px 0px 0px 10px; list-style-type: none; font-family: Verdana, Geneva, sans-serif; font-size: 11px; border-left: 1px solid #777; line-height: 17px;">
+<li>itemId: id of the item</li>
+<li>equipped: if true, the item must be equipped or it will be ignored</li>
+<li>timeRight: if true, timer will be displayed on the right side in seconds</li>
+</ul>
+
+<br />
+<hr />
+<span style="font-family: Verdana, Geneva, sans-serif; font-size: 11px;"><span style="color: #f00;">*</span><span> experimental functions</span></span>

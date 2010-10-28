@@ -3,13 +3,14 @@ local _, class = UnitClass("player")
 if class ~= "WARRIOR" then return end
 
 local GetTime = GetTime
+local version = 1
 
 
 -- mod name in lower case
 local modName = "_fury"
 
 local defaults = {
-	version = 1,
+	version = version,
 	priorityList = {},
 }
 
@@ -31,6 +32,7 @@ local spellHS			= 78		-- heroic strike
 local spellSL			= 1464	-- Slam
 local spellBS			= 6673	-- Battle Shout
 local spellBR			= 18499	-- Berserker Rage
+local spellEX			= 5308	-- Execute
 -- buff
 local buffSurge		= GetSpellInfo(46915)		-- Bloodsurge
 local buffEnrage	= GetSpellInfo(13046)		-- Enrage
@@ -72,6 +74,7 @@ local _ragesl = 0
 local _surge = 0			-- bloodsurge duration
 local _enrage = 0			-- enrage duration
 local _br	= 0 				-- have br cooldown in status
+local _hs = 0					-- used to not call actions.hs multiple times
 --------------------------------------------------------------------------------
 
 local pq, dq1, dq2
@@ -127,6 +130,8 @@ function actions.sl()
 end
 
 function actions.bs()
+	if _rage > 80 then return 5 end  -- rage check
+	
 	local start, duration = GetSpellCooldown(spellBS)
 	local cd = start + duration - _ctime - _gcd
 	if cd < 0 then cd = 0 end
@@ -136,6 +141,7 @@ function actions.hs()
 	local start, duration = GetSpellCooldown(spellHS)
 	local cd = start + duration - _ctime
 	if cd < 0 then cd = 0 end
+	_hs = cd
 	return cd
 end
 --------------------------------------------------------------------------------
@@ -170,27 +176,38 @@ function mod.Rotation.single(ragehs, ragesl)
 		if expires then _enrage = expires - _ctime - _gcd else _enrage = 0 end
 	end
 	
-	for i, v in ipairs(pq) do
-		v.cd = actions[v.alias]()
-	end
-	
-	local sel = 1
-	local cd = pq[1].cd
-	
-	for i = 2, #pq do
-		if pq[i].cd < pq[sel].cd then
-			sel = i
-			cd = pq[i].cd
+	if IsUsableSpell(spellEX) then
+		dq1 = spellEX
+		
+		dq2 = 0
+		if _rage >= (_ragehs - 20) and actions.hs() == 0 then
+			dq2 = spellHS
+		elseif _enrage <= 0 and _br == 0 then
+			dq2 = spellBR
 		end
-	end
-	
-	dq1 = pq[sel].id
-	
-	dq2 = 0
-	if _enrage <= 0 and _br == 0 then
-		dq2 = spellBR
-	elseif _rage >= _ragehs and actions.hs() == 0 then
-		dq2 = spellHS
+	else
+		for i, v in ipairs(pq) do
+			v.cd = actions[v.alias]()
+		end
+		
+		local sel = 1
+		local cd = pq[1].cd
+		
+		for i = 2, #pq do
+			if pq[i].cd < pq[sel].cd then
+				sel = i
+				cd = pq[i].cd
+			end
+		end
+		
+		dq1 = pq[sel].id
+		
+		dq2 = 0
+		if _rage >= _ragehs and _hs == 0 then
+			dq2 = spellHS
+		elseif _enrage <= 0 and _br == 0 then
+			dq2 = spellBR
+		end
 	end
 		
 	return true

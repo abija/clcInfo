@@ -2,7 +2,7 @@
 local _, class = UnitClass("player")
 if class ~= "PALADIN" then return end
 
-local version = 2
+local version = 3
 
 local defaults = {
 	movePPBar = false,
@@ -14,8 +14,9 @@ local defaults = {
   ppbRelativePoint = "CENTER",
 	ppbScale = 1,
 	ppbAlpha = 1,
+	ppbUps = 100,
 	
-	version = 1,
+	version = version,
 }
 
 -- create a module in the main addon
@@ -37,23 +38,29 @@ function mod.OnInitialize()
 			db.version = version
 		end
 		
-		if not myppb then mod.CreatePPB() end
 		mod.UpdatePPBar()
+	else
+		if myppb then myppb:Hide() end
 	end
 end
 mod.OnTemplatesUpdate = mod.OnInitialize
 
 function mod.UpdatePPBar()
 	if db.movePPBar then
-		myppb:EnableMouse(not mod.locked)
+		if not myppb then mod.CreatePPB() end
 	
-		myppb:Show()
 		myppb:ClearAllPoints()
 		myppb:SetScale(db.ppbScale)
 		myppb:SetAlpha(db.ppbAlpha)
 		myppb:SetPoint("CENTER", UIParent, "CENTER", db.ppbX, db.ppbY)
+		
+		myppb:EnableMouse(not mod.locked)
+		myppb.timer.a:SetDuration(1 / db.ppbUps)
+		myppb:Show()
 	else
-		myppb:Hide()
+		if myppb then
+			myppb:Hide()
+		end
 	end
 	
 	if db.hideBlizPPB then
@@ -142,6 +149,26 @@ end
 --------------------------------------------------------------------------------
 -- create a hp bar similar to blizzard's xml code
 --------------------------------------------------------------------------------
+local PPB_OnUpdate
+do
+	local lhp = -1
+	PPB_OnUpdate = function()
+		local hp = UnitPower( "player", SPELL_POWER_HOLY_POWER )
+		if hp ~= lhp then
+			lhp = hp
+			if hp > 2 then myppb.rune3:SetAlpha(1) else myppb.rune3:SetAlpha(0) end
+			if hp > 1 then myppb.rune2:SetAlpha(1) else myppb.rune2:SetAlpha(0) end
+			if hp > 0 then myppb.rune1:SetAlpha(1) else myppb.rune1:SetAlpha(0) end
+			
+			if hp == MAX_HOLY_POWER then
+				myppb.glow.pulse:Play()
+			else
+				myppb.glow:StopAnimating()
+			end
+		end
+	end
+end
+
 function mod.CreatePPB()
 	local tfile = [[Interface\AddOns\clcInfo\data\paladin\PaladinPowerTextures]]
 	myppb = CreateFrame("Frame", "clcInfoPaladinPowerBar", clcInfo.mf)
@@ -154,6 +181,7 @@ function mod.CreatePPB()
 	t:SetTexCoord(0.00390625, 0.53515625, 0.32812500, 0.63281250)
 	-- glow
 	myppb.glow = CreateFrame("Frame", "clcInfoPaladinPowerBarGlowBG", myppb)
+	myppb.glow:SetAlpha(0)
 	myppb.glow:SetAllPoints()
 	t = myppb.glow:CreateTexture("clcInfoPaladinPowerBarGlowBGTexture", "BACKGROUND", nil, -1)
 	t:SetPoint("TOP")
@@ -161,11 +189,11 @@ function mod.CreatePPB()
 	t:SetTexture(tfile)
 	t:SetTexCoord(0.00390625, 0.53515625, 0.00781250, 0.31250000)
 	myppb.glow.pulse = myppb.glow:CreateAnimationGroup()
+	myppb.glow.pulse:SetLooping("REPEAT")
 	local a = myppb.glow.pulse:CreateAnimation("Alpha")
 	a:SetChange(1) a:SetDuration(0.5) a:SetOrder(1)
 	a = myppb.glow.pulse:CreateAnimation("Alpha")
 	a:SetChange(-1) a:SetStartDelay(0.3) a:SetDuration(0.6) a:SetOrder(2)
-	myppb.glow.pulse:SetScript("OnFinished", function(self) if not self.stopPulse then self:Play() end end)
 	-- rune1
 	myppb.rune1 = CreateFrame("Frame", "clcInfoPaladinPowerBarRune1", myppb)
 	myppb.rune1:SetPoint("TOPLEFT", 21, -11)
@@ -220,9 +248,16 @@ function mod.CreatePPB()
 	a:SetChange(1) a:SetDuration(0.5) a:SetOrder(1)
 	myppb.showAnim:SetScript("OnFinished", function(self) self:GetParent():SetAlpha(1.0) end)
 	
-	myppb:SetScript("OnEvent", PaladinPowerBar_OnEvent)
 	myppb:Hide()
-	PaladinPowerBar_OnLoad(myppb)
+	
+	-- 10ms update timer
+	myppb.timer = myppb:CreateAnimationGroup()
+	myppb.timer.a = myppb.timer:CreateAnimation("Animation")
+	myppb.timer.a:SetDuration(1 / db.ppbUps)
+	myppb.timer:SetLooping("REPEAT")
+	-- myppb.timer:SetScript("OnLoop", PPB_OnUpdate)
+	myppb.timer.a:SetScript("OnFinished", PPB_OnUpdate)
+	myppb.timer:Play()
 	
 	-- register for drag
 	myppb:SetMovable(true)

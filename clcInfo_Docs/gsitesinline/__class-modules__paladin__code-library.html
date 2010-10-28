@@ -1,0 +1,9 @@
+Display an aura when there are x seconds left on it.
+local visible, texture, start, duration, enable, reversed = IconAura("HELPFUL|PLAYER", "player", "Judgements of the Pure")
+if duration and (start + duration - GetTime()) <= 10 then
+  return visible, texture, start, duration, enable, reversed
+end
+
+Display a buff when it's not active on you.
+local name, _, icon = GetSpellInfo(89901)
+if not UnitBuff("player", name) then return true, icon end

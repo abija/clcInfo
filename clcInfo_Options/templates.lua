@@ -40,11 +40,11 @@ StaticPopupDialogs["CLCINFO_CONFIRM_DELETE_TEMPLATE"] = {
 	exclusive = 1,
 }
 
-local function SpecGet(info)
+local function GetSpec(info)
 	return clcInfo.cdb.templates[tonumber(info[2])].spec[info[5]]
 end
 
-local function SpecSet(info, val)
+local function SetSpec(info, val)
 	--local db = clcInfo.cdb.templates
 	clcInfo.cdb.templates[tonumber(info[2])].spec[info[5]] = val
 	clcInfo:OnTemplatesUpdate()
@@ -110,6 +110,14 @@ local function Set(info, val)
 	clcInfo.cdb.templates[tonumber(info[2])].options.udLabel = val
 end
 
+
+local function GetShowWhen(info)
+	return clcInfo.cdb.templates[tonumber(info[2])].showWhen[info[5]]
+end
+local function SetShowWhen(info, val)
+	clcInfo.cdb.templates[tonumber(info[2])].showWhen[info[5]] = val
+	clcInfo:OnTemplatesUpdate()
+end
 
 --------------------------------------------------------------------------------
 -- import / export
@@ -187,7 +195,7 @@ function mod:UpdateTemplateList()
 							args = {
 								primary = {
 									order = 1, type = "select", name = "", values = specTrees,
-									get = SpecGet, set = SpecSet,	
+									get = GetSpec, set = SetSpec,	
 								},
 							},
 						},
@@ -196,15 +204,35 @@ function mod:UpdateTemplateList()
 							args = {
 								tree = {
 									order = 1, type = "select", name = "Tree", values = specTrees,
-									get = SpecGet, set = SpecSet,	
+									get = GetSpec, set = SetSpec,	
 								},
 								talent = {
 									order = 2, type = "select", name = "Talent", values = GetTalentList,
-									get = SpecGet, set = SpecSet,		
+									get = GetSpec, set = SetSpec,		
 								},
 								rank = {
 									order = 3, type = "range", min = 1, max = 5, step = 1, name = "Rank",
-									get = SpecGet, set = SpecSet,		
+									get = GetSpec, set = SetSpec,		
+								},
+							},
+						},
+						showWhen = {
+							order = 4, type = "group", inline = true, name = "Active when",
+							args = {
+								solo = {
+									order = 1, type = "toggle", width = "half", name = "Solo", get = GetShowWhen, set = SetShowWhen,
+								},
+								party = {
+									order = 2, type = "toggle", width = "normal", name = "Party", get = GetShowWhen, set = SetShowWhen,
+								},
+								raid5 = {
+									order = 3, type = "toggle", width = "half", name = "Raid 5", get = GetShowWhen, set = SetShowWhen,
+								},
+								raid10 = {
+									order = 4, type = "toggle", width = "half", name = "Raid 10", get = GetShowWhen, set = SetShowWhen,
+								},
+								raid25 = {
+									order = 5, type = "toggle", width = "half", name = "Raid 25", get = GetShowWhen, set = SetShowWhen,
 								},
 							},
 						},

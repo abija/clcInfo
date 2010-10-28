@@ -1,5 +1,5 @@
 clcInfo = {}	-- the addon
-clcInfo.__version = 64
+clcInfo.__version = 68
 
 clcInfo.display = {}	-- display elements go here
 clcInfo.templates = {}	-- the templates
@@ -133,18 +133,21 @@ function clcInfo:OnInitialize()
 		end
 	end
 	
-	-- scan the talents
-	self:TalentCheck()
+	-- update the template
+	self:OnTemplatesUpdate()
+	
 	
 	-- register events
 	clcInfo.eventFrame:RegisterEvent("PLAYER_TALENT_UPDATE")  -- to monitor talent changes
 	clcInfo.eventFrame:RegisterEvent("UNIT_ENTERED_VEHICLE")  -- to hide while using vehicles
 	clcInfo.eventFrame:RegisterEvent("UNIT_EXITED_VEHICLE")
+	clcInfo.eventFrame:RegisterEvent("PARTY_MEMBERS_CHANGED") -- to track group changes
 end
 --------------------------------------------------------------------------------
 
 
 -- checks talents and updates the templates if there are changes
+--[[
 function clcInfo:TalentCheck()
 	-- get current spec as a string
 	local t = {}
@@ -166,14 +169,18 @@ function clcInfo:TalentCheck()
 		clcInfo:OnTemplatesUpdate()
 	end
 end
+--]]
 -- attach it to the event
-clcInfo.PLAYER_TALENT_UPDATE = clcInfo.TalentCheck
 
 
 -- looks for the first template that matches current talent build
 -- reinitializes the elements
 function clcInfo:OnTemplatesUpdate()
+	local oldActive = clcInfo.activeTemplateIndex
+	
 	clcInfo.templates:FindTemplate()  -- find first template if it exists
+	-- if nothing changes return
+	if clcInfo.activeTemplateIndex == oldActive then return end
 	
 	-- clear elements
 	for k in pairs(clcInfo.display) do
@@ -191,13 +198,13 @@ function clcInfo:OnTemplatesUpdate()
 	
 	self:ChangeShowWhen()	-- visibility option is template based
 	
+	-- call OnTemplatesUpdate on all class modules so they can change options if needed
+	for k, v in pairs(clcInfo.classModules) do
+		if v.OnTemplatesUpdate then v.OnTemplatesUpdate() end
+	end
+	
 	if clcInfo.activeTemplate then
-		-- call OnTemplatesUpdate on all class modules so they can change options if needed
-		for k, v in pairs(clcInfo.classModules) do
-			if v.OnTemplatesUpdate then v.OnTemplatesUpdate() end
-		end
-		
-		-- strata of mother frame
+-- strata of mother frame
 		clcInfo.mf:SetFrameStrata(clcInfo.activeTemplate.options.strata)
 		-- alpha
 		clcInfo.mf:SetAlpha(clcInfo.activeTemplate.options.alpha)
@@ -209,6 +216,12 @@ function clcInfo:OnTemplatesUpdate()
 	end
 	self:UpdateOptions()
 end
+
+-- check templates on talent change
+clcInfo.PLAYER_TALENT_UPDATE 		= clcInfo.OnTemplatesUpdate
+-- check templates on group settings change
+clcInfo.PARTY_MEMBERS_CHANGED 	= clcInfo.OnTemplatesUpdate
+
 
 
 -- defaults for the db

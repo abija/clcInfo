@@ -1,10 +1,16 @@
-- rething multi icons and bars to not update so much?
+- alpha per element?
 
-- track paladin shield from prot wog?
+-- ret module: exorcism duration
+-- better detection for how
+
+-- better template structure / external modules for templates 
+- fix strata for duplicate blizzard bars
+- rethink multi icons and bars to not update so much?
+
 - better use of animation and sounds
 - animation that doesnt override prev one
 
-- ret module: exorcism duration
+
 - lock/unlock - to 1 toggle
 
 

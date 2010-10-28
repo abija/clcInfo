@@ -59,22 +59,24 @@ local function OnUpdate(self, elapsed)
 		-- not visibile -> save info for the quick updates and hide elements
 		self.visible = visible
 		if not visible then
-			-- test for expiration alert
-			if self.hasAlerts == 1 and self.alerts.expiration then
-				local a = self.alerts.expiration
-				if self.mode == "normal" then
-					if a.last > a.timeLeft then
-						a.last = 0
-						modAlerts.Play(a.alertIndex, self.lastTexture, a.sound)
-					end
-				elseif self.mode == "reversed" then
-					if a.last < a.timeLeft then
-						a.last = 10000
-						modAlerts.Play(a.alertIndex, self.lastTexture, a.sound)
+			if self.elements:IsShown() then
+				-- test for expiration alert
+				if self.hasAlerts == 1 and self.alerts.expiration then
+					local a = self.alerts.expiration
+					if self.mode == "normal" then
+						if a.last > a.timeLeft then
+							a.last = 0
+							modAlerts.Play(a.alertIndex, self.lastTexture, a.sound)
+						end
+					elseif self.mode == "reversed" then
+						if a.last < a.timeLeft then
+							a.last = 10000
+							modAlerts.Play(a.alertIndex, self.lastTexture, a.sound)
+						end
 					end
 				end
+				self.elements:Hide()
 			end
-			self:FakeHide()
 			return 
 		end
 		
@@ -130,7 +132,10 @@ local function OnUpdate(self, elapsed)
 	else
 		-- on timer based bars, regardless if we update info or not, the bar still needs to progress
 		-- on custom bars, probably will just skip
-		if not self.visible then self:FakeHide() return end
+		if not self.visible then
+			if self.elements:IsShown() then self.elements:Hide() end
+			return
+		end
 		
 		-- mode is either "normal" or "reversed" which refer to elapsed based bars or unspecified
 		if self.mode == "normal" then
@@ -143,7 +148,7 @@ local function OnUpdate(self, elapsed)
 	end
 	
 	-- show the bar if we got there
-	self:FakeShow()
+	if not self.elements:IsShown() then self.elements:Show() end
 end
 
 

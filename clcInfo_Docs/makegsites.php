@@ -7,12 +7,12 @@ $f = str_replace(".", "class=\"", $f);
 $f = str_replace(" { ", "\"\r\nstyle=\"", $f);
 $f = str_replace(" }", "\"", $f);
 file_put_contents($sdir."css.inline.txt", $f);
-print("parsed css file\n");
+// print("parsed css file\n");
 
 // read it into an array to be used for replacements
 $inline_styles = file($sdir."css.inline.txt");
 $num_inline_styles = floor(count($inline_styles)/2);
-print("read inline styles, found ".$num_inline_styles." entries\n");
+// print("read inline styles, found ".$num_inline_styles." entries\n");
 
 foreach (glob($sdir."*.html") as $filename) {
 	$f = file_get_contents($filename);
@@ -22,6 +22,8 @@ foreach (glob($sdir."*.html") as $filename) {
 	}
 	$fn = $odir.basename($filename);
 	file_put_contents($fn, $f);
-	print("completed ".$fn."\n");
+	// print("completed ".$fn."\n");
 }
+
+print "done\n";
 ?>

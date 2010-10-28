@@ -3,13 +3,14 @@ local _, class = UnitClass("player")
 if class ~= "PRIEST" then return end
 
 local GetTime = GetTime
+local version = 1
 
 
 -- mod name in lower case
 local modName = "_shadow"
 
 local defaults = {
-	version = 1,
+	version = version,
 	priorityList = { "swp", "vt", "dp", "mb", "none" },
 }
 
