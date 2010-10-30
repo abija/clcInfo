@@ -1,3 +1,5 @@
+local ename = "icons"
+
 -- exposed vars
 local mod = clcInfo_Options
 local AceRegistry = mod.AceRegistry
@@ -120,16 +122,29 @@ end
 
 -- template code
 --------------------------------------------------------------------------------
-local execTemplateList = {}
-for k, v in pairs(clcInfo_Options.templates.icons) do
-	execTemplateList[k] = v.name
+local execTemplateCategories = {}
+for k, v in pairs(clcInfo_Options.templates[ename]) do
+	execTemplateCategories[k] = k
 end
-
+local stc = nil -- selectedTemplateCategory
+local function GetExecTemplateList()
+	local list = {}
+	if stc then
+		local cat = clcInfo_Options.templates[ename][stc]
+		if cat then
+			for k, v in pairs(cat) do
+				list[k] = v.name
+			end
+		end
+	end
+	return list
+end
+local function GetExecTemplateCategory(info) return stc end
+local function SetExecTemplateCategory(info, val) stc = val end
 local function SetExecTemplate(info, val)
 	local obj = modIcons.active[tonumber(info[3])]
-	obj.db.exec = clcInfo_Options.templates.icons[val].exec
+	obj.db.exec = clcInfo_Options.templates[ename][stc][val].exec
 	obj:UpdateExec()
-	clcInfo:UpdateOptions()
 end
 --------------------------------------------------------------------------------
 
@@ -342,7 +357,15 @@ function mod:UpdateIconList()
 									order = 1, type = "input", multiline = true, name = "", width = "full",
 									get = Get, set = SetExec,
 								},
-								err = { order = 10, type = "description", width = "full", name = GetErrExec },
+								err = { order = 2, type = "description", width = "full", name = GetErrExec },
+								templatesCategories = {
+									order = 3, type = "select", width = "double", name = "Categories", values = execTemplateCategories,
+									get = GetExecTemplateCategory, set = SetExecTemplateCategory,
+								},
+								templates = {
+									order = 4, type = "select", width = "double", name = "Templates", values = GetExecTemplateList,
+									set = SetExecTemplate,
+								},
 							},
 						},
 						ups = {
@@ -439,16 +462,6 @@ function mod:UpdateIconList()
 	  		}
 	  	}
 	  end
-  end
-  
-  -- add the templates
-  if #execTemplateList > 0 then
-  	for i =1, #db do
-  		optionsIcons.args[tostring(i)].args.tabBehavior.args.code.args.templates = {
-				order = 2, type = "select", width = "double", name = "Templates", values = execTemplateList,
-				set = SetExecTemplate,
-			}
-  	end
   end
 	
 	if mod.lastIconCount > #(db) then

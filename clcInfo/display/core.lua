@@ -30,8 +30,15 @@ function mod.UpdateExec(self)
   setfenv(self.exec, mod.env)
   
   -- cleanup if required
-  self.externalUpdate = false
   if self.ExecCleanup then
+  	self.ExecCleanup()
+  	self.ExecCleanup = nil
+  end
+end
+
+function mod.DisableExec(self)
+	self.exec = nil
+	if self.ExecCleanup then
   	self.ExecCleanup()
   	self.ExecCleanup = nil
   end

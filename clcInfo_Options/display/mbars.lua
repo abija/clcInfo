@@ -1,3 +1,5 @@
+local ename = "mbars"
+
 -- exposed vars
 local mod = clcInfo_Options
 local AceRegistry = mod.AceRegistry
@@ -117,16 +119,29 @@ end
 
 -- template code
 --------------------------------------------------------------------------------
-local execTemplateList = {}
-for k, v in pairs(clcInfo_Options.templates.mbars) do
-	execTemplateList[k] = v.name
+local execTemplateCategories = {}
+for k, v in pairs(clcInfo_Options.templates[ename]) do
+	execTemplateCategories[k] = k
 end
-
+local stc = nil -- selectedTemplateCategory
+local function GetExecTemplateList()
+	local list = {}
+	if stc then
+		local cat = clcInfo_Options.templates[ename][stc]
+		if cat then
+			for k, v in pairs(cat) do
+				list[k] = v.name
+			end
+		end
+	end
+	return list
+end
+local function GetExecTemplateCategory(info) return stc end
+local function SetExecTemplateCategory(info, val) stc = val end
 local function SetExecTemplate(info, val)
 	local obj = modMBars.active[tonumber(info[3])]
-	obj.db.exec = clcInfo_Options.templates.mbars[val].exec
+	obj.db.exec = clcInfo_Options.templates[ename][stc][val].exec
 	obj:UpdateExec()
-	clcInfo:UpdateOptions()
 end
 --------------------------------------------------------------------------------
 
@@ -734,6 +749,14 @@ function mod:UpdateMBarList()
 									get = Get, set = SetExec,
 								},
 								err = { order = 2, type = "description", name = GetErrExec },
+								templatesCategories = {
+									order = 3, type = "select", width = "double", name = "Categories", values = execTemplateCategories,
+									get = GetExecTemplateCategory, set = SetExecTemplateCategory,
+								},
+								templates = {
+									order = 4, type = "select", width = "double", name = "Templates", values = GetExecTemplateList,
+									set = SetExecTemplate,
+								},
 							},
 						},
 						ups = {
@@ -812,16 +835,6 @@ function mod:UpdateMBarList()
 			},
 		}
 	end
-	
-	-- add the templates
-  if #execTemplateList > 0 then
-  	for i =1, #db do
-  		optionsMBars.args[tostring(i)].args.tabBehavior.args.code.args.templates = {
-				order = 2, type = "select", width = "double", name = "Templates", values = execTemplateList,
-				set = SetExecTemplate,
-			}
-  	end
-  end
 	
 	if mod.lastMBarCount > #(db) then
 		-- nil the rest of the args

@@ -3,6 +3,7 @@ local _, class = UnitClass("player")
 if class ~= "PRIEST" then return end
 
 local mod = clcInfo_Options.templates
+local defs = mod.defs
 local format = string.format
 
 local spells = {
@@ -35,105 +36,87 @@ for k, v in pairs(spells) do
 	spells[k] = { id = v, name = name }
 end
 
+
+-- all
 --------------------------------------------------------------------------------
--- disc
---------------------------------------------------------------------------------
--- Prayer of Mending
-name = spells["Prayer of Mending"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
-return IconSingleTargetRaidBuff("%s")
-]], name)
-}
 -- Evangelism
 name = spells["Evangelism"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
+mod:Add("icons", defs.CLASS, name, format([[
 return IconAura("HELPFUL|PLAYER", "player", "%s")
-]], name)
-}
+]], name))
 -- Archangel
 name = spells["Archangel"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
+mod:Add("icons", defs.CLASS, name, format([[
 local visible, texture, start, duration, enable, reversed = IconAura("HELPFUL|PLAYER", "player", "%s")
 if not visible then return IconSpell("%s") end
 return visible, texture, start, duration, enable, reversed
-]], name, name)
-}
+]], name, name))
+-- Prayer of Mending
+name = spells["Prayer of Mending"].name
+mod:Add("icons", defs.CLASS, name, format([[
+return IconSingleTargetRaidBuff("%s")
+]], name))
+
+
+-- disc
+--------------------------------------------------------------------------------
 -- Power Infusion
 name = spells["Power Infusion"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
+mod:Add("icons", defs.CLASS_1, name, format([[
 return IconSpell("%s")
-]], name)
-}
+]], name))
 -- Pain Suppression
 name = spells["Pain Suppression"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
+mod:Add("icons", defs.CLASS_1, name, format([[
 local visible, texture, start, duration, enable, reversed, count = IconSingleTargetRaidBuff("%s")
 if not visible then return IconSpell("%s") end
 return visible, texture, start, duration, enable, reversed, count 
-]], name, name)
-}
+]], name, name))
 -- Penance
 name = spells["Penance"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
+mod:Add("icons", defs.CLASS_1, name, format([[
 return IconSpell("%s")
-]], name)
-}
---------------------------------------------------------------------------------
+]], name))
 
---------------------------------------------------------------------------------
+
 -- holy
 --------------------------------------------------------------------------------
 -- Circle of Healing
 name = spells["Circle of Healing"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
+mod:Add("icons", defs.CLASS_2, name, format([[
 return IconSpell("%s")
-]], name)
-}
+]], name))
 
 -- Guardian Spirit
 name = spells["Guardian Spirit"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
+mod:Add("icons", defs.CLASS_2, name, format([[
 return IconSpell("%s")
-]], name)
-}
+]], name))
 
 -- Holy Word: Chastise
 name = spells["Holy Word: Chastise"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
+mod:Add("icons", defs.CLASS_2, name, format([[
 return IconSpell("%s")
-]], name)
-}
+]], name))
 
 -- Chakra
 name = spells["Chakra"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
+mod:Add("icons", defs.CLASS_2, name, format([[
 local visible, texture, start, duration, enable, reversed = IconMAura("HELPFUL|PLAYER", "player", "%s: %s", "%s: %s", "%s: %s", "%s: %s")
 if not visible then return IconSpell("%s") end
 return visible, texture, start, duration, enable, reversed, nil, nil, true, 1, 1, 1, 1
-]], name, spells["Heal"].name, name, spells["Renew"].name, name, spells["Prayer of Healing"].name, name, spells["Smite"].name, name)
-}
+]], name, spells["Heal"].name, name, spells["Renew"].name, name, spells["Prayer of Healing"].name, name, spells["Smite"].name, name))
 
+
+-- shadow
 --------------------------------------------------------------------------------
-
 -- Shadow Word: Death
 name = spells["Shadow Word: Death"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
+mod:Add("icons", defs.CLASS_3, name, format([[
 if UnitExists("target") and UnitCanAttack("player", "target") and not UnitIsDead("target") then
   local c = floor(UnitHealth("target") / UnitHealthMax("target") * 100)
   if c <= 25 then
     return IconSpell("%s", true)
   end
 end
-]], name)
-}
+]], name))

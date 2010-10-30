@@ -238,7 +238,8 @@ function prototype:Init()
 	local skinFrame = CreateFrame("Frame", nil, self.elements)
 	skinFrame:SetFrameLevel(self.elements.cooldown:GetFrameLevel() + 1)
 	self.elements.texNormal = skinFrame:CreateTexture(nil, "ARTWORK")
-	self.elements.texGloss = skinFrame:CreateTexture(nil, "OVERLAY")
+	self.elements.texHighlight = skinFrame:CreateTexture(nil, "OVERLAY", nil, 6)
+	self.elements.texGloss = skinFrame:CreateTexture(nil, "OVERLAY", nil, 7)
 	
 	self.elements.count = skinFrame:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
 	self.elements.count:SetJustifyH("RIGHT")
@@ -284,13 +285,20 @@ end
 
 function prototype:UpdateEnabled()
 	if self.db.enabled then
+		clcInfo.UpdateExec(self)
 		clcInfo.UpdateExecEvent(self)	-- reenable event code
 		self:SetScript("OnUpdate", OnUpdate)
 	else
+		clcInfo.DisableExec(self)
 		self:UnregisterAllEvents()
 		self:SetScript("OnUpdate", nil)
 		self:FakeHide()
 	end
+end
+
+function prototype:Disable()
+	self.db.enabled = false
+	self:UpdateEnabled()
 end
 
 
@@ -335,7 +343,8 @@ local function ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
 	self.elements.texMain:SetTexCoord(unpack(skin.Icon.TexCoords or { 0, 1, 0, 1 }))
 	
 	-- normal, gloss textures
-	BFLayer(self.elements.texNormal, self.elements, skin.Normal, xScale, yScale) 
+	BFLayer(self.elements.texNormal, self.elements, skin.Normal, xScale, yScale)
+	BFLayer(self.elements.texHighlight, self.elements, skin.Highlight, xScale, yScale)
 	BFLayer(self.elements.texGloss, self.elements, skin.Gloss, xScale, yScale)
 	self.elements.texGloss:SetAlpha(bfGloss / 100)
 	
@@ -378,6 +387,12 @@ local function ApplyMySkin(self)
 	t:ClearAllPoints()
 	t:SetPoint("CENTER", self.elements, "CENTER", 0, 0)
 	t:Show()
+	
+	t = self.elements.texHighlight
+	t:SetTexture("Interface\\AddOns\\clcInfo\\textures\\IconHighlight")
+	t:SetSize(self.db.width, self.db.height)
+	t:ClearAllPoints()
+	t:SetPoint("CENTER", self.elements, "CENTER", 0, 0)
 	
 	t = self.elements.texGloss
 	t:Hide()
@@ -458,6 +473,9 @@ function prototype:UpdateLayout()
 		ApplyMySkin(self)
 	end
 	
+	-- hide the highlight to be sure
+	self.elements.texHighlight:Hide()
+	
 	-- change the text of the label
 	local udl = self.db.udLabel
 	if udl == "" then udl = "Icon" .. self.index end
@@ -479,6 +497,14 @@ function prototype:UpdateExec()
   self.lastAlpha = 1
   
   self:UpdateEnabled()
+end
+
+function prototype:Highlight(v)
+	if v then
+		self.elements.texHighlight:Show()
+	else
+		self.elements.texHighlight:Hide()
+	end
 end
 
 -- show/hide only elements

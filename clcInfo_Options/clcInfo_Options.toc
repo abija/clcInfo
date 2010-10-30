@@ -1,6 +1,6 @@
 ## Interface: 40000
 ## Title: clcInfo_Options
-## Notes: Configuration Window for clcInfo
+## Notes: Configuration window for clcInfo
 ## Author: Calcute
 ## Dependencies: clcInfo
 ## LoadOnDemand: 1
@@ -11,17 +11,7 @@ embeds.xml
 
 core.lua
 
-code_templates\deathknight.lua
-code_templates\druid.lua
-code_templates\hunter.lua
-code_templates\mage.lua
-code_templates\paladin.lua
-code_templates\priest.lua
-code_templates\rogue.lua
-code_templates\shaman.lua
-code_templates\warlock.lua
-code_templates\warrior.lua
-code_templates\global.lua
+code_templates\index.xml
 
 templates.lua
 activeTemplate.lua

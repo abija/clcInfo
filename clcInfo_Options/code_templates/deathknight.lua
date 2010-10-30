@@ -3,6 +3,7 @@ local _, class = UnitClass("player")
 if class ~= "DEATHKNIGHT" then return end
 
 local mod = clcInfo_Options.templates
+local defs = mod.defs
 local format = string.format
 
 local spells = {
@@ -19,34 +20,43 @@ for k, v in pairs(spells) do
 	spells[k] = { id = v, name = name }
 end
 
+-- all
+--------------------------------------------------------------------------------
 -- Frost Fever
 name = spells["Frost Fever"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
+mod:Add("icons", defs.CLASS, name, format([[
 return IconAura("HARMFUL|PLAYER", "target", "%s")
-]], name)
-}
+]], name))
 -- Blood Plague
 name = spells["Blood Plague"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
+mod:Add("icons", defs.CLASS, name, format([[
 return IconAura("HARMFUL|PLAYER", "target", "%s")
-]], name)
-}
+]], name))
 
+-- blood
+--------------------------------------------------------------------------------
+
+
+-- frost
+--------------------------------------------------------------------------------
+-- Frost Rotation Skill 1
+mod:Add("icons", defs.CLASS_2, "Frost Rotation Skill 1","return IconFrost1()")
+mod:Add("texts", defs.CLASS_2, "Frost Mode","return FrostMode()")
 -- Pillar of Frost
 name = spells["Pillar of Frost"].name
-mod.icons[#mod.icons+1] = {
-name = name, exec = format([[
+mod:Add("icons", defs.CLASS_2, name, format([[
 return IconSpell("%s", nil, "ready")
-]], name)
-}
+]], name))
 
-
--- Frost Rotation Skill 1
-mod.icons[#mod.icons+1] = { name = "Frost Rotation Skill 1", exec = "return IconFrost1()" }
-mod.texts[#mod.texts+1] = { name = "Frost Mode", exec = "return FrostMode()" }
-
+-- unholy
+--------------------------------------------------------------------------------
 -- Unholy Rotation Skill 1
-mod.icons[#mod.icons+1] = { name = "Unholy Rotation Skill 1", exec = "return IconUnholy1()" }
-mod.texts[#mod.texts+1] = { name = "Unholy Mode", exec = "return UnholyMode()" }
+mod:Add("icons", defs.CLASS_3, "Unholy Rotation Skill 1", "return IconUnholy1()")
+mod:Add("texts", defs.CLASS_3, "Unholy Mode", "return UnholyMode()")
+
+
+
+
+
+
+

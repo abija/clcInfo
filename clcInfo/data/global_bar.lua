@@ -16,22 +16,39 @@ expected return: visible, texture, minValue, maxValue, value, mode, t1, t2, t3
 --- Bar that shows cooldown for specified spell.
 -- @param spell Name of the spell.
 -- @param timeRight If true, remaining seconds are displayed on the right side.
-function mod.BarSpell(spell, timeRight)
-	local name, _, texture = GetSpellInfo(spell)
-	if not name then return end
-	
-	-- in case id was used
-	spell = name
-	
-	local start, duration, enable = GetSpellCooldown(spell)
-	
-	if duration and duration > 1.5 then -- avoid GCD
-		local v = duration + start - GetTime()
-		if timeRight then
-			timeRight = tostring(math.floor(v + 0.5))
-		end
+do
+	cache = {}
+	function mod.BarSpell(spell, timeRight)
+		local name, _, texture = GetSpellInfo(spell)
+		if not name then return end
 		
-		return true, texture, 0, duration, v, "normal", name, nil, timeRight
+		-- in case id was used
+		spell = name
+		
+		local start, duration, enable = GetSpellCooldown(spell)
+		
+		if not cache[spell] then cache[spell] = {} end
+		local sc = cache[spell]
+		if duration and duration > 1.5 then
+			sc.duration, sc.start, sc.enable = duration, start, enable
+			
+			local v = duration + start - GetTime()
+			if timeRight then
+				timeRight = tostring(math.floor(v + 0.5))
+			end
+			
+			return true, texture, 0, duration, v, "normal", name, nil, timeRight
+		elseif sc.duration then
+			local v = sc.duration + sc.start - GetTime()
+			if v > 0 then
+				if timeRight then
+					timeRight = tostring(math.floor(v + 0.5))
+				end
+				return true, texture, 0, sc.duration, v, "normal", name, nil, timeRight
+			else
+				sc.duration = false
+			end
+		end
 	end
 end
 

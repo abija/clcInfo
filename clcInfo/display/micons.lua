@@ -393,7 +393,7 @@ function prototype:Init()
 	self.label = self:CreateFontString(nil, "OVERLAY", "GameFontHighlightExtraSmall")
 	self.label:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 0, 1)
 	local fontFace, _, fontFlags = self.label:GetFont()
-	self.label:SetFont(fontFace, 6, fontFlags)
+	self.label:SetFont(fontFace, 8, fontFlags)
 	self.label:Hide()
 
 	self.elapsed = 0

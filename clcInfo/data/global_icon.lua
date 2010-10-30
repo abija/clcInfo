@@ -76,9 +76,6 @@ function mod.IconSpell(spell, checkRange, showWhen, mouseover)
 	local name, _, texture = GetSpellInfo(spell)
 	if not name then return end
 	
-	-- in case id was used
-	spell = name
-	
 	-- cooldown and showWhen checks
 	local start, duration, enable = GetSpellCooldown(spell)
 	if showWhen then
@@ -99,7 +96,7 @@ function mod.IconSpell(spell, checkRange, showWhen, mouseover)
 			local unit
 			if mouseover and UnitExists("mouseover") then unit = "mouseover" end
 			if UnitExists("target") then unit = "target" end
-			if checkRange == true then checkRange = spell end
+			if checkRange == true then checkRange = name end
 			if unit then
 				oor = IsSpellInRange(checkRange, unit)
 				oor = oor ~= nil and oor == 0
@@ -109,7 +106,7 @@ function mod.IconSpell(spell, checkRange, showWhen, mouseover)
 			end
 		end
 		
-		local isUsable, notEnoughMana = IsUsableSpell(spell)
+		local isUsable, notEnoughMana = IsUsableSpell(name)
 		if notEnoughMana then
 			return true, texture, start, duration, enable, nil, nil, nil, true, 0.1, 0.1, 0.8, 1
 		elseif not isUsable then
