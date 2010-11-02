@@ -11,7 +11,7 @@ prototype:Hide()
 
 
 mod.active = {}  -- active objects
-mod.cache = {}  -- cache of objects, to not make unnecesary frames
+mod.cache = {}  -- cache of objects, to not make unnecessary frames
 
 local db
 
@@ -73,7 +73,7 @@ local function OnUpdate(self, elapsed)
 		visible = false
 	end
 	
-	-- fix the nil vars that you don't want nill
+	-- fix the nil vars that you don't want nil
 	duration = duration or 0
 	
 	-- hide when not visible
@@ -318,8 +318,8 @@ local function BFLayer(t, tx, layer, xScale, yScale)
 	t:SetTexCoord(unpack(layer.TexCoords or { 0, 1, 0, 1 }))
 end
 -- apply a button facade skin
-local function ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
-	skin = (lbf:GetSkins())[bfSkin]
+local function ApplyButtonFacadeSkin(self, opt)
+	skin = (lbf:GetSkins())[opt.bfSkin]
 	if not skin then
 		-- try with blizzard
 		skin = lbf:GetSkins().Blizzard
@@ -346,7 +346,10 @@ local function ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
 	BFLayer(self.elements.texNormal, self.elements, skin.Normal, xScale, yScale)
 	BFLayer(self.elements.texHighlight, self.elements, skin.Highlight, xScale, yScale)
 	BFLayer(self.elements.texGloss, self.elements, skin.Gloss, xScale, yScale)
-	self.elements.texGloss:SetAlpha(bfGloss / 100)
+	self.elements.texGloss:SetAlpha(opt.bfGloss / 100)
+	self.elements.texNormal:SetVertexColor(unpack(opt.bfColorNormal))
+	self.elements.texHighlight:SetVertexColor(unpack(opt.bfColorHighlight))
+	self.elements.texGloss:SetVertexColor(unpack(opt.bfColorGloss))
 	
 	-- cooldown
 	self.elements.cooldown:SetSize(self.db.width * xScale, self.db.height * yScale)
@@ -386,6 +389,7 @@ local function ApplyMySkin(self)
 	t:SetSize(self.db.width, self.db.height)
 	t:ClearAllPoints()
 	t:SetPoint("CENTER", self.elements, "CENTER", 0, 0)
+	t:SetVertexColor(1, 1, 1, 1)
 	t:Show()
 	
 	t = self.elements.texHighlight
@@ -393,6 +397,7 @@ local function ApplyMySkin(self)
 	t:SetSize(self.db.width, self.db.height)
 	t:ClearAllPoints()
 	t:SetPoint("CENTER", self.elements, "CENTER", 0, 0)
+	t:SetVertexColor(1, 1, 1, 1)
 	
 	t = self.elements.texGloss
 	t:Hide()
@@ -453,7 +458,7 @@ function prototype:UpdateLayout()
 	self.label:SetPoint("BOTTOMLEFT", self.elements, "TOPLEFT", 0, 1)
 	
 	-- select the skin from template/grid/self
-	local skinType, bfSkin, bfGloss, g
+	local skinType, g
 	if onGrid and self.db.skinSource == "Grid" then
 		g = clcInfo.display.grids.active[self.db.gridId].db.skinOptions.icons
 	elseif self.db.skinSource == "Template" then
@@ -461,11 +466,11 @@ function prototype:UpdateLayout()
 	else
 		g = self.db.skin
 	end
-	skinType, bfSkin, bfGloss = g.skinType, g.bfSkin, g.bfGloss
+	skinType = g.skinType
 	
 	-- apply the skin
 	if skinType == "Button Facade" and lbf then
-		ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
+		ApplyButtonFacadeSkin(self, g)
 	elseif skinType == "BareBone" then
 		ApplyMySkin(self)
 		self.elements.texNormal:Hide()
@@ -592,6 +597,9 @@ function mod:GetDefaultSkin()
 		skinType = "Default",
 		bfSkin = "Blizzard",
 		bfGloss = 0,
+		bfColorNormal = { 1, 1, 1, 1 },
+		bfColorHighlight = { 1, 1, 1, 1 },
+		bfColorGloss = { 1, 1, 1 },
 	}
 end
 

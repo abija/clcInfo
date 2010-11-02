@@ -14,7 +14,7 @@ local function HasKey(t, key)
 	end
 	return false
 end
--- IMPOTANT: does not delete not found keys due to the way it's called
+-- IMPORTANT: does not delete not found keys due to the way it's called
 local function AdaptConfig(info, t1, t2)
 	if t1 == nil or type(t1) ~= "table" then return end
 	if t2 == nil or type(t2) ~= "table" then return end

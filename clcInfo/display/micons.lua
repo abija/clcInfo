@@ -84,10 +84,10 @@ local function BFLayer(t, tx, layer, scalex, scaley)
 	t:SetVertexColor(unpack(layer.Color or { 1, 1, 1, 1 }))
 	t:SetTexCoord(unpack(layer.TexCoords or { 0, 1, 0, 1 }))
 end
-function ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
+function ApplyButtonFacadeSkin(self, optSkin)
 	local opt = self.parent.db
 	
-	skin = (lbf:GetSkins())[bfSkin]
+	skin = (lbf:GetSkins())[optSkin.bfSkin]
 	if not skin then
 		-- try with blizzard
 		skin = lbf:GetSkins().Blizzard
@@ -113,7 +113,9 @@ function ApplyButtonFacadeSkin(self, bfSkin, bfGloss)
 	-- normal, gloss textures
 	BFLayer(self.texNormal, self, skin.Normal, xScale, yScale) 
 	BFLayer(self.texGloss, self, skin.Gloss, xScale, yScale)
-	self.texGloss:SetAlpha(bfGloss / 100)
+	self.texGloss:SetAlpha(optSkin.bfGloss / 100)
+	self.texNormal:SetVertexColor(unpack(optSkin.bfColorNormal))
+	self.texGloss:SetVertexColor(unpack(optSkin.bfColorGloss))
 	
 	-- cooldown
 	self.cooldown:SetSize(opt.width * xScale, opt.height * yScale)
@@ -154,6 +156,7 @@ function ApplyMySkin(self)
 	t:SetSize(opt.width, opt.height)
 	t:ClearAllPoints()
 	t:SetPoint("CENTER", self, "CENTER", 0, 0)
+	t:SetVertexColor(1, 1, 1, 1)
 	t:Show()
 	
 	t = self.texGloss
@@ -189,7 +192,7 @@ function iconPrototype:UpdateLayout(i, skin)
 	end
 
 	if skin.skinType == "Button Facade" and lbf then
-		ApplyButtonFacadeSkin(self, skin.bfSkin, skin.bfGloss)
+		ApplyButtonFacadeSkin(self, skin)
 	elseif skin.skinType == "BareBone" then
 		ApplyMySkin(self)
 		self.texNormal:Hide()

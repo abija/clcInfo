@@ -1,5 +1,5 @@
 clcInfo = {}	-- the addon
-clcInfo.__version = 68
+clcInfo.__version = 70
 
 clcInfo.display = {}	-- display elements go here
 clcInfo.templates = {}	-- the templates
@@ -17,6 +17,14 @@ clcInfo.lastBuild = nil	 -- string that has talent info, used to see if talents 
 clcInfo.mf = CreateFrame("Frame", "clcInfoMF", UIParent)  -- all elements parented to this frame, so it's easier to hide/show them
 
 clcInfo.mf.unit = "player" -- fix parent unit for when we have to parent bars here
+
+-- table with information that could be used by functions, like roster etc
+clcInfo.util = {
+	roster = {},
+	numRoster = 0,
+	numRosterPets = 0,
+	numRosterPetsBosses = 0,
+} 
 
 -- frame levels
 -- grid: mf + 1
@@ -37,6 +45,8 @@ StaticPopupDialogs["CLCINFO"] = {
 	button1 = OKAY,
 	timeout = 0,
 }
+
+format = string.format
 
 --------------------------------------------------------------------------------
 -- slash command and blizzard options
@@ -136,42 +146,18 @@ function clcInfo:OnInitialize()
 	-- update the template
 	self:OnTemplatesUpdate()
 	
+	-- update the rosters
+	clcInfo.util.UpdateRoster()
 	
 	-- register events
 	clcInfo.eventFrame:RegisterEvent("PLAYER_TALENT_UPDATE")  -- to monitor talent changes
 	clcInfo.eventFrame:RegisterEvent("UNIT_ENTERED_VEHICLE")  -- to hide while using vehicles
 	clcInfo.eventFrame:RegisterEvent("UNIT_EXITED_VEHICLE")
 	clcInfo.eventFrame:RegisterEvent("PARTY_MEMBERS_CHANGED") -- to track group changes
+	clcInfo.eventFrame:RegisterEvent("UNIT_PET")
+	
 end
 --------------------------------------------------------------------------------
-
-
--- checks talents and updates the templates if there are changes
---[[
-function clcInfo:TalentCheck()
-	-- get current spec as a string
-	local t = {}
-	local name, rank, j
-	for i = 1, 3 do
-		t[#t + 1] = "_"
-		j = 1
-		name, _, _, _, rank = GetTalentInfo(i, j)
-		while name do
-			t[#t + 1] = tostring(rank)
-			j = j + 1
-			name, _, _, _, rank = GetTalentInfo(i, j)
-		end
-	end
-	
-	local build = table.concat(t, "")
-	if build ~= self.lastBuild then
-		self.lastBuild = build
-		clcInfo:OnTemplatesUpdate()
-	end
-end
---]]
--- attach it to the event
-
 
 -- looks for the first template that matches current talent build
 -- reinitializes the elements
@@ -218,11 +204,18 @@ function clcInfo:OnTemplatesUpdate()
 end
 
 -- check templates on talent change
-clcInfo.PLAYER_TALENT_UPDATE 		= clcInfo.OnTemplatesUpdate
+clcInfo.PLAYER_TALENT_UPDATE = clcInfo.OnTemplatesUpdate
+
 -- check templates on group settings change
-clcInfo.PARTY_MEMBERS_CHANGED 	= clcInfo.OnTemplatesUpdate
+function clcInfo.PARTY_MEMBERS_CHANGED()
+	-- update roster
+	clcInfo.util.UpdateRoster()
+	-- check templates
+	clcInfo.OnTemplatesUpdate()
+end
 
-
+-- update roster when pets are spawned
+clcInfo.UNIT_PET = clcInfo.util.UpdateRoster
 
 -- defaults for the db
 function clcInfo:GetDefault()
@@ -331,7 +324,12 @@ function clcInfo.PLAYER_TARGET_CHANGED()
 	end
 end
 -- force target update on rezoning
-clcInfo.PLAYER_ENTERING_WORLD = clcInfo.PLAYER_TARGET_CHANGED
+function clcInfo.PLAYER_ENTERING_WORLD()
+	SetMapToCurrentZone()		
+
+	-- check for target since it's not fired the specific event
+	clcInfo.PLAYER_TARGET_CHANGED()
+end
 
 -- for when target goes from friendly to unfriendly
 function clcInfo.UNIT_FACTION(self, event, unit)
@@ -394,6 +392,80 @@ function clcInfo.SPD(s)
 	StaticPopup_Show("CLCINFO")
 end
 
+-- utils
+--------------------------------------------------------------------------------
+do
+	local party = { "party1", "party2", "party3", "party4" }
+	local partyPets = { "party1pet", "party2pet", "party3pet", "party4pet" }
+	local bosses = { "boss1", "boss2", "boss3", "boss4", "boss5" }
+	local raid, raidPets = {}, {}
+	for i = 1, 40 do
+		raid[i] = "raid" .. i
+		raidPets[i] = raid[i] .. "pet"
+	end
 
-
+	-- 3 different tables, since some functions might need to check different stuff
+	function clcInfo.util.UpdateRoster()
+		local num = 0
+		local roster = clcInfo.util.roster
+		
+		-- add the player
+		num = num + 1
+		roster[num] = "player"
+		
+		-- add party or raid members
+		local gnrm, gnpm = GetNumRaidMembers() - 1, GetNumPartyMembers()
+		
+		if gnrm > 0 then
+			-- add the raid units
+			for i = 1, gnrm do
+				num = num + 1
+				roster[num] = raid[i]
+			end
+		elseif gnpm > 0 then
+			for i = 1, gnpm do
+				num = num + 1
+				roster[num] = party[i]
+			end
+		end
+		
+		-- done with roster
+		clcInfo.util.numRoster = num
+		
+		-- player pet
+		if UnitExists("playerpet") then
+			num = num + 1
+			roster[num] = "playerpet"
+		end
+		
+		if gnrm > 0 then
+			-- add the raid units
+			for i = 1, gnrm do
+				if UnitExists(raidPets[i]) then
+					num = num + 1
+					roster[num] = raidPets[i]
+				end
+			end
+		elseif gnpm > 0 then
+			for i = 1, gnpm do
+				if UnitExists(partyPets[i]) then
+					num = num + 1
+					roster[num] = partyPets[i]
+				end
+			end
+		end
+		
+		-- done with rosterPets
+		clcInfo.util.numRosterPets = num
+		
+		-- add the 5 bosses
+		for i = 1, 5 do			
+			num = num + 1
+			roster[num] = bosses[i]
+		end
+		
+		-- done with roster
+		clcInfo.util.numRosterPetsBosses = num
+	end
+end
 

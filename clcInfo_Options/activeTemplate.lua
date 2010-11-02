@@ -1100,6 +1100,21 @@ function mod:LoadActiveTemplate()
   				order = 1, type = "range", name = "Gloss", step = 1, min = 0, max = 100,
   				get = GetSkin, set = SetSkin,
   			},
+  			_x1 = {
+					order =  3, type = "description", name = "",
+				},
+				bfColorNormal = {
+					order = 4, type = "color", hasAlpha = true, name = "Normal Color",
+					get = GetSkinColor, set = SetSkinColor,
+				},
+				bfColorHighlight = {
+					order = 5, type = "color", hasAlpha = true, name = "Highlight Color",
+					get = GetSkinColor, set = SetSkinColor,
+				},
+				bfColorGloss = {
+					order = 6, type = "color", hasAlpha = false, name = "Gloss Color",
+					get = GetSkinColor, set = SetSkinColor,
+				},
   		},
   	}
   	
@@ -1114,6 +1129,17 @@ function mod:LoadActiveTemplate()
   				order = 1, type = "range", name = "Gloss", step = 1, min = 0, max = 100,
   				get = GetSkin, set = SetSkin,
   			},
+  			_x1 = {
+					order =  3, type = "description", name = "",
+				},
+				bfColorNormal = {
+					order = 4, type = "color", hasAlpha = true, name = "Normal Color",
+					get = GetSkinColor, set = SetSkinColor,
+				},
+				bfColorGloss = {
+					order = 5, type = "color", hasAlpha = false, name = "Gloss Color",
+					get = GetSkinColor, set = SetSkinColor,
+				},
   		},
   	}
   end

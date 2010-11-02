@@ -443,35 +443,16 @@ known issues: can't see people in other zones (after portals and stuff)
 it's also probably resource intensive so don't do it too much
 --------------------------------------------------------------------------------
 --]]
-
--- build the list of units to be checked first
-do
-	local groupUnitList = { "player", "playerpet" }
-	-- add group
-	for i = 1, 4 do
-		groupUnitList[#groupUnitList + 1] = "party" .. i
-		groupUnitList[#groupUnitList + 1] = "partypet" .. i
-	end
-	-- add raid
-	for i = 1, 40 do
-		groupUnitList[#groupUnitList + 1] = "raid" .. i
-		groupUnitList[#groupUnitList + 1] = "raidpet" .. i
-	end
-	-- add bosses
-	for i = 1, 5 do
-		groupUnitList[#groupUnitList + 1] = "boss" .. i
-	end
-	function mod.IconSingleTargetRaidBuff(spell)
-		local name, rank, icon, count, dispelType, duration, expires, caster
-		for i = 1, #groupUnitList do
-			if UnitExists(groupUnitList[i]) then
-				name, rank, icon, count, _, duration, expires, caster = UnitBuff(groupUnitList[i], spell, nil, "PLAYER")
-				if name and caster == "player" then
-					-- found -> return required info				
-					if count <= 1 then count = nil end
-					return true, icon, expires - duration, duration, 1, true, count
-				end
-			end
+function mod.IconSingleTargetRaidBuff(spell, scope)
+	local name, rank, icon, count, dispelType, duration, expires, caster
+	local units = clcInfo.util.roster
+	local numUnits = clcInfo.util[scope] or clcInfo.util.numRoster
+	for i = 1, numUnits do
+		name, rank, icon, count, _, duration, expires, caster = UnitBuff(units[i], spell, nil, "PLAYER")
+		if name and caster == "player" then
+			-- found -> return required info				
+			if count <= 1 then count = nil end
+			return true, icon, expires - duration, duration, 1, true, count
 		end
 	end
 end

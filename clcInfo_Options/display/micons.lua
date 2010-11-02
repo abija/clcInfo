@@ -105,6 +105,15 @@ local function GetSkinTypeList()
 	return list
 end
 
+local function SetSkinColor(info, r, g, b, a)
+	local obj = modMIcons.active[tonumber(info[3])]
+	obj.db.skin[info[6]] = { r, g, b, a }
+	obj:UpdateLayout()
+end
+local function GetSkinColor(info)
+	return unpack(modMIcons.active[tonumber(info[3])].db.skin[info[6]])
+end
+
 -- sound donothing control
 local sound = "None"
 local function GetSound() return sound end
@@ -476,6 +485,17 @@ function mod:UpdateMIconList()
 	  			bfGloss = {
 	  				order = 1, type = "range", name = "Gloss", step = 1, min = 0, max = 100,
 	  				get = GetSkinMIcons, set = SetSkinMIcons,
+	  			},
+	  			_x1 = {
+	  			  order =  3, type = "description", name = "",
+	  			},
+	  			bfColorNormal = {
+						order = 4, type = "color", hasAlpha = true, name = "Normal Color",
+						get = GetSkinColor, set = SetSkinColor,
+	  			},
+	  			bfColorGloss = {
+	  			  order = 5, type = "color", hasAlpha = false, name = "Gloss Color",
+						get = GetSkinColor, set = SetSkinColor,
 	  			},
 	  		}
 	  	}
