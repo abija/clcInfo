@@ -572,6 +572,8 @@ end
 
 
 function prototype:UpdateLayout()
+	self:SetAlpha(self.db.alpha)
+
 	-- check if it's attached to some grid
 	local onGrid = TryGridPositioning(self)
 	
@@ -638,6 +640,7 @@ function prototype:New()
 	end
 	
 	bar.parent = self
+	bar:SetParent(self)
 	
 	self.___c[#self.___c + 1] = bar
 	
@@ -769,6 +772,7 @@ function mod:GetDefault()
 		gridY = 1,	-- row
 		sizeX = 1, 	-- size in cells
 		sizeY = 1, 	-- size in cells
+		alpha = 1,
 		
 		skinSource = "Template",	-- template, grid, self
 		ownColors	= false,

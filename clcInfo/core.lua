@@ -1,5 +1,5 @@
 clcInfo = {}	-- the addon
-clcInfo.__version = 70
+clcInfo.__version = 72
 
 clcInfo.display = {}	-- display elements go here
 clcInfo.templates = {}	-- the templates
@@ -211,7 +211,7 @@ function clcInfo.PARTY_MEMBERS_CHANGED()
 	-- update roster
 	clcInfo.util.UpdateRoster()
 	-- check templates
-	clcInfo.OnTemplatesUpdate()
+	clcInfo:OnTemplatesUpdate()
 end
 
 -- update roster when pets are spawned
@@ -397,7 +397,7 @@ end
 do
 	local party = { "party1", "party2", "party3", "party4" }
 	local partyPets = { "party1pet", "party2pet", "party3pet", "party4pet" }
-	local bosses = { "boss1", "boss2", "boss3", "boss4", "boss5" }
+	local bosses = { "boss1", "boss2", "boss3", "boss4" }
 	local raid, raidPets = {}, {}
 	for i = 1, 40 do
 		raid[i] = "raid" .. i

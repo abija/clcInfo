@@ -260,10 +260,9 @@ local eq = 0
 function RetRotation()
 	-- get gcd value
 	------------------------------------------------------------------------------
-	local cdStart, cdDuration
 	_ctime = GetTime()
-	cdStart, cdDuration = GetSpellCooldown(_gcdId)
-	_gcd = cdStart + cdDuration - _ctime
+	start, duration = GetSpellCooldown(_gcdId)
+	_gcd = start + duration - _ctime
 	if _gcd < 0 then _gcd = 0 end
 	
 	if waitforserver then
@@ -430,6 +429,7 @@ end
 --------------------------------------------------------------------------------
 -- event frame to track 
 ef = CreateFrame("Frame") 
+ef:Hide()
 ef:SetScript("OnEvent", function(self, event, unit, spell)
 	if unit == "player" and tracked[spell] then
 		if event == "UNIT_SPELLCAST_SENT"then

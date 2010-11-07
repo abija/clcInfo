@@ -56,7 +56,7 @@ local tracked = {
 	[_hwName] 			= true,
 	[_zealName] 		= true,
 }
-clcInfo.spew = tracked
+
 
 -- list of available actions for the priority list
 local actionsId = {

@@ -240,7 +240,7 @@ function mod:UpdateIconList()
 				  			},
 							},
 						},
-						grid = {
+						visibility = {
 							order = 11, type = "group", inline = true, name = "",
 							args = {
 								gridId = {
@@ -250,6 +250,10 @@ function mod:UpdateIconList()
 								skinSource = {
 									order = 2, type = "select", name = "Use skin from",
 									values = { Self = "Self", Template = "Template", Grid = "Grid" },
+									get = Get, set = Set, 
+								},
+								alpha = {
+									order = 3, type = "range", min = 0, max = 1, step = 0.01, name = "Alpha",
 									get = Get, set = Set, 
 								},
 							},

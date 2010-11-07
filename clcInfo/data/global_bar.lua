@@ -17,36 +17,55 @@ expected return: visible, texture, minValue, maxValue, value, mode, t1, t2, t3
 -- @param spell Name of the spell.
 -- @param timeRight If true, remaining seconds are displayed on the right side.
 do
-	cache = {}
+	local cache = {}
 	function mod.BarSpell(spell, timeRight)
 		local name, _, texture = GetSpellInfo(spell)
 		if not name then return end
 		
-		-- in case id was used
-		spell = name
-		
-		local start, duration, enable = GetSpellCooldown(spell)
-		
-		if not cache[spell] then cache[spell] = {} end
+		if not cache[spell] then cache[spell] = { start = 0, duration = 0 } end
 		local sc = cache[spell]
-		if duration and duration > 1.5 then
-			sc.duration, sc.start, sc.enable = duration, start, enable
-			
+		
+		local start, duration = GetSpellCooldown(spell)
+		
+		-- if duration == 0 update cache and hide the bar
+		duration = duration or 0 -- spell not found in spellbook -> nil return
+		if duration == 0 then
+			sc.start, sc.duration = 0, 0
+			return
+		end
+		
+		if duration > 1.5 then
+			-- all is cool, update cache and display
+			sc.start, sc.duration = start, duration
 			local v = duration + start - GetTime()
 			if timeRight then
 				timeRight = tostring(math.floor(v + 0.5))
 			end
-			
 			return true, texture, 0, duration, v, "normal", name, nil, timeRight
-		elseif sc.duration then
-			local v = sc.duration + sc.start - GetTime()
-			if v > 0 then
-				if timeRight then
-					timeRight = tostring(math.floor(v + 0.5))
+		end
+		
+		-- duration < 1.5
+		-- case1: duration < gcd, so the function returned gcd values
+		-- case2: cooldown just got reset and gcd is active
+		
+		-- get both current and cache value
+		local ct = GetTime()
+		local vcache = sc.duration + sc.start - ct
+		local vgsc = duration + start - ct
+		
+		-- current cooldown < 1.5 so gcd could kick in
+		if vgsc < 1.5 then
+			if vgsc >= vcache then
+				if vcache > 0 then
+					-- case1, we display the cache value
+					if timeRight then
+						timeRight = tostring(math.floor(vcache + 0.5))
+					end
+					return true, texture, 0, sc.duration, vcache, "normal", name, nil, timeRight
 				end
-				return true, texture, 0, sc.duration, v, "normal", name, nil, timeRight
 			else
-				sc.duration = false
+				-- case2, means cooldown was reset, reset cache too
+				sc.start, sc.duration = 0, 0
 			end
 		end
 	end
@@ -85,31 +104,25 @@ function mod.BarAura(filter, unitTarget, spell, unitCaster, showStack, timeRight
 	if not UnitExists(unitTarget) then return end
 	
 	-- look for the buff
-	local i = 1
-	local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID  = UnitAura(unitTarget, i, filter)
-	while name do
-		if name == spell or spellID == spell then
-			if duration and duration > 0 then
-				if (not unitCaster) or (caster == unitCaster) then												
-					-- found -> return required info				
-					if count > 1 and showStack then 
-						if showStack == "before" then
-							name = string.format("(%s) %s", count, name)
-						else
-							name = string.format("%s (%s)", name, count)
-						end
+	local name, rank, icon, count, dispelType, duration, expires, caster  = UnitAura(unitTarget, spell, nil, filter)
+	if name then
+		if duration and duration > 0 then
+			if (not unitCaster) or (caster == unitCaster) then
+				-- found -> return required info				
+				if count > 1 and showStack then 
+					if showStack == "before" then
+						name = string.format("(%s) %s", count, name)
+					else
+						name = string.format("%s (%s)", name, count)
 					end
-					local value = expires - GetTime()
-					if timeRight then
-						timeRight = tostring(math.floor(value + 0.5))
-					end
-					return true, icon, 0, duration, value, "normal", name, nil, timeRight
 				end
+				local value = expires - GetTime()
+				if timeRight then
+					timeRight = tostring(math.floor(value + 0.5))
+				end
+				return true, icon, 0, duration, value, "normal", name, nil, timeRight
 			end
 		end
-		
-		i = i + 1
-		name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID  = UnitAura(unitTarget, i, filter)
 	end
 	-- not found
 end

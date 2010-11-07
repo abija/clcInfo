@@ -522,6 +522,8 @@ end
 
 -- update the display settings
 function prototype:UpdateLayout()	
+	self:SetAlpha(self.db.alpha)
+
 	-- check if it's attached to some grid
 	local onGrid = TryGridPositioning(self)
 	
@@ -787,6 +789,7 @@ function mod.GetDefault()
 		gridY = 1,	-- row
 		sizeX = 1, 	-- size in cells
 		sizeY = 1, 	-- size in cells
+		alpha = 1,
 		
 		skinSource = "Template",	-- template, grid, self
 		ownColors	= false,

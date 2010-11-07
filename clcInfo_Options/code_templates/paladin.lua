@@ -94,7 +94,7 @@ mod:Add("icons", defs.CLASS_2, "Protection Rotation Skill 2", 'IconProtection2()
 -- retribution
 --------------------------------------------------------------------------------
 -- Retribution Rotation Skill 1 & 2
-mod:Add("icons", defs.CLASS_3, "Retribution Rotation Skill 1", 'return IconRet1(0.5)')
+mod:Add("icons", defs.CLASS_3, "Retribution Rotation Skill 1", 'return IconRet1()')
 mod:Add("icons", defs.CLASS_3, "Retribution Rotation Skill 2", 'IconRet2()')
 -- Zealotry
 name = spells["Zealotry"].name

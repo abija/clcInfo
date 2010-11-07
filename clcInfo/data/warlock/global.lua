@@ -159,3 +159,25 @@ function mod.CreateSB()
 	end)
 end
 --------------------------------------------------------------------------------
+
+-- get haste according to fear tooltip
+-- spellId: 5782
+--[[
+do
+	local strmatch = strmatch
+	local tooltip = CreateFrame("GameTooltip")
+	tooltip:Hide()
+	local tooltipL, tooltipR = {}, {}
+	-- 3 rows tooltip
+	for i = 1, 3 do
+		local left, right = tooltip:CreateFontString(), tooltip:CreateFontString()
+		tooltip:AddFontStrings(left, right)
+		tooltipL[i], tooltipR[i] = left, right
+	end
+	function emod.GetHaste()
+		tooltip:SetOwner(clcInfo.mf)
+		tooltip:SetSpellByID(5782)
+		return 2 / tonumber(strmatch(tooltipL[3]:GetText(), "(%d+.%d+)")	or "2")
+	end
+end
+--]]

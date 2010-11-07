@@ -1,3 +1,7 @@
+- check use of globals instead of self, etc,  .: again
+- bug at importing color settings
+- csboost from haste?
+
 - verify the raid scan functions and update docs
 - color for bf
 

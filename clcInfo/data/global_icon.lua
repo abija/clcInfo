@@ -28,28 +28,19 @@ expected return: visible, texture, start, duration, enable, reversed, count, alp
 function mod.IconAura(filter, unitTarget, spell, unitCaster)
 	-- check the unit
 	if not UnitExists(unitTarget) then return end
-	
-	-- look for the buff
-	local i = 1
-	local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID  = UnitAura(unitTarget, i, filter)
-	while name do
-		if name == spell or spellID == spell then
-			if unitCaster then												-- additional check
-				if caster == unitCaster then						-- found -> return required info
-					-- return count only if > 1
-					if count <= 1 then count = nil end
-					return true, icon, expires - duration, duration, 1, true, count
-				end
-			else																			-- found -> return required info
+	local name, rank, icon, count, dispelType, duration, expires, caster = UnitAura(unitTarget, spell, nil, filter)
+	if name then
+		if unitCaster then												-- additional check
+			if caster == unitCaster then						-- found -> return required info
+				-- return count only if > 1
 				if count <= 1 then count = nil end
 				return true, icon, expires - duration, duration, 1, true, count
 			end
+		else																			-- found -> return required info
+			if count <= 1 then count = nil end
+			return true, icon, expires - duration, duration, 1, true, count
 		end
-		
-		i = i + 1
-		name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID  = UnitAura(unitTarget, i, filter)
 	end
-	-- not found
 end
 
 

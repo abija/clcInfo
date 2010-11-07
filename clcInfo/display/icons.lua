@@ -440,7 +440,10 @@ local function TryGridPositioning(self)
 end
 
 -- adjust the elements according to the settings
-function prototype:UpdateLayout()	
+function prototype:UpdateLayout()
+	-- set the alpha
+	self:SetAlpha(self.db.alpha)
+	
 	-- check if it's attached to some grid
 	local onGrid = TryGridPositioning(self)
 	
@@ -628,6 +631,7 @@ function mod:GetDefault()
 		gridY = 1,	-- row
 		sizeX = 1, 	-- size in cells
 		sizeY = 1, 	-- size in cells
+		alpha = 1,
 		
 		skinSource = "Template",	-- template, grid, self
 		skin = mod:GetDefaultSkin(),
