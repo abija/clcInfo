@@ -41,7 +41,7 @@ local function OnUpdate(self, elapsed)
 		-- expose the object
 		clcInfo.env.___e = self
 		
-		local status, visible, texture, minValue, maxValue, value, mode, t1, t2, t3, alpha, svc, r, g, b, a = pcall(self.exec)
+		local status, visible, texture, minValue, maxValue, value, mode, t1, t2, t3 = pcall(self.exec)
 		if not status then
 			-- display the first error met into the behavior tab
 			-- also announce the user we got an error

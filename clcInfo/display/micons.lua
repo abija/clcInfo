@@ -162,11 +162,6 @@ function ApplyMySkin(self)
 	t = self.texGloss
 	t:Hide()
 	
-	local t = self.cooldown
-	t:SetSize(opt.width, opt.height)
-	t:ClearAllPoints()
-	t:SetPoint("CENTER", self, "CENTER", 0, 0)
-	
 	-- adjust the text size
 	local count = self.count
 	count:SetSize(40 * xScale, 10 * yScale)
@@ -190,6 +185,12 @@ function iconPrototype:UpdateLayout(i, skin)
 	else
 		self:SetPoint("TOPLEFT", self.parent, "TOPLEFT", 0, (1 - i) * (opt.height + opt.spacing))
 	end
+	
+	local t = self.cooldown
+	t:SetSize(opt.width, opt.height)
+	t:ClearAllPoints()
+	t:SetPoint("CENTER", self, "CENTER", 0, 0)
+	
 
 	if skin.skinType == "Button Facade" and lbf then
 		ApplyButtonFacadeSkin(self, skin)
@@ -241,8 +242,10 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 		icon = self.___c[self.___dc]
 	end
 	
-	-- fix the nil vars that you don't want nill
+	-- fix the nil vars that you don't want nil
 	duration = duration or 0
+	
+	icon:Show()
 	
 	-- texture
 	if icon.lastTexture ~= texture then
@@ -258,6 +261,7 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 		icon.lastReversed = reversed
 	end
 	
+	--[[
 	if duration > 0 then
 		if start ~= icon.lastStart or duration ~= icon.lastDuration then
 			e:StopAnimating()
@@ -265,6 +269,28 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 			icon.lastStart = start
 			icon.lastDuration = duration
 		end
+	end
+	--]]
+	if enable == 1 then
+		-- check if settings changed from last call
+		if start ~= icon.lastStart or duration ~= icon.lastDuration or enable ~= icon.lastEnable then
+			e:StopAnimating()
+			-- hide instead of seting 0, 0 to avoid omnicc extra pulse
+			if duration > 0 then
+				if not e:IsShown() then e:Show() end
+				CooldownFrame_SetTimer(e, start, duration, enable)
+			else
+				e:Hide()
+			end
+			icon.lastStart = start
+			icon.lastDuration = duration
+			icon.lastEnable = enable
+		end
+	elseif enable ~= icon.lastEnable then
+		-- last enable was 1, so call with 0, 0, 0
+		-- CooldownFrame_SetTimer(e, 0, 0, 0)
+		if e:IsShown() then e:Hide() end
+		icon.lastEnable = enable
 	end
 	
 	-- count
@@ -280,11 +306,8 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 	if svc then
 		icon.texMain:SetVertexColor(r, g, b, a)
 	else
-		if icon.lastSCV then
-			icon.texMain:SetVertexColor(1, 1, 1, 1)
-		end
+		icon.texMain:SetVertexColor(1, 1, 1, 1)
 	end
-	icon.lastSVC = svc
 	
 	-- alpha
 	if icon.lastAlpha ~= alpha then
@@ -317,8 +340,6 @@ function prototype:___AddIcon(id, texture, start, duration, enable, reversed, co
 			end
 		end
 	end
-	
-	icon:Show()
 end
 
 

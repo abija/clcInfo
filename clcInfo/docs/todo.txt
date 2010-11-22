@@ -1,3 +1,4 @@
+- cooldown for elemental mastery
 - check use of globals instead of self, etc,  .: again
 - bug at importing color settings
 - csboost from haste?

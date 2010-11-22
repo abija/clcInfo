@@ -2,7 +2,7 @@
 local _, class = UnitClass("player")
 if class ~= "PALADIN" then return end
 
-local version = 3
+local version = 4
 
 local defaults = {
 	movePPBar = false,
@@ -14,7 +14,6 @@ local defaults = {
   ppbRelativePoint = "CENTER",
 	ppbScale = 1,
 	ppbAlpha = 1,
-	ppbUps = 100,
 	
 	version = version,
 }
@@ -55,7 +54,6 @@ function mod.UpdatePPBar()
 		myppb:SetPoint("CENTER", UIParent, "CENTER", db.ppbX, db.ppbY)
 		
 		myppb:EnableMouse(not mod.locked)
-		myppb.timer.a:SetDuration(1 / db.ppbUps)
 		myppb:Show()
 	else
 		if myppb then
@@ -246,14 +244,7 @@ function mod.CreatePPB()
 	
 	myppb:Hide()
 	
-	-- 10ms update timer
-	myppb.timer = myppb:CreateAnimationGroup()
-	myppb.timer.a = myppb.timer:CreateAnimation("Animation")
-	myppb.timer.a:SetDuration(1 / db.ppbUps)
-	myppb.timer:SetLooping("REPEAT")
-	-- myppb.timer:SetScript("OnLoop", PPB_OnUpdate)
-	myppb.timer.a:SetScript("OnFinished", PPB_OnUpdate)
-	myppb.timer:Play()
+	myppb:SetScript("OnUpdate", PPB_OnUpdate)
 	
 	-- register for drag
 	myppb:SetMovable(true)

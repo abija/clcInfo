@@ -45,7 +45,7 @@ return IconSpell("%s", nil, "ready")
 ]], name))
 
 -- Judgements of the Pure
-mod:Add("bars", defs.CLASS, spells["Judgements of the Pure"].name, 'return BarAura("HELPFUL|PLAYER", "player", "%s", nil, false, true)')
+mod:Add("bars", defs.CLASS, spells["Judgements of the Pure"].name, format('return BarAura("HELPFUL|PLAYER", "player", "%s", nil, false, true)', spells["Judgements of the Pure"].name))
 
 -- Censure on multiple targets
 mod:Add("mbars", defs.CLASS, spells["Censure"].name, 'MBarSoV(1, 0.5, "before", true)')

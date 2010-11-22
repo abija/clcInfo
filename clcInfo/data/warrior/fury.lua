@@ -83,7 +83,7 @@ local mode = "single"
 -- this function, if it exists, will be called at init
 function mod.OnInitialize()
 	db = clcInfo:RegisterClassModuleDB(modName, defaults)
-	db.priorityList = { "bt", "rb", "bs", "sl" } 
+	db.priorityList = { "bt", "rb", "sl", "bs" } 
 	mod.UpdatePriorityList()
 end
 

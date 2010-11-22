@@ -61,9 +61,6 @@ local function LoadModuleActiveTemplate()
 							ppbAlpha = {
 								order = 15, type = "range", min = 0, max = 1, step = 0.01, name = "Alpha", get = GetPPB, set = SetPPB,
 							},
-							ppbUps = {
-								order = 16, type = "range", min = 1, max = 100, step = 1, name = "Updates per second", get = GetPPB, set = SetPPB,
-							},
 						},
 					},
 				},

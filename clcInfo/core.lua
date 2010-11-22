@@ -46,8 +46,6 @@ StaticPopupDialogs["CLCINFO"] = {
 	timeout = 0,
 }
 
-format = string.format
-
 --------------------------------------------------------------------------------
 -- slash command and blizzard options
 --------------------------------------------------------------------------------
@@ -214,9 +212,6 @@ function clcInfo.PARTY_MEMBERS_CHANGED()
 	clcInfo:OnTemplatesUpdate()
 end
 
--- update roster when pets are spawned
-clcInfo.UNIT_PET = clcInfo.util.UpdateRoster
-
 -- defaults for the db
 function clcInfo:GetDefault()
 	local data = {
@@ -361,7 +356,14 @@ end
 
 -- OnEvent dispatcher
 local function OnEvent(self, event, ...)
-	if clcInfo[event] then clcInfo[event](clcInfo, event, ...) end
+	clcInfo[event](clcInfo, event, ...)
+	--[[
+	if clcInfo[event] then
+		clcInfo[event](clcInfo, event, ...)
+	else
+		print(event, "event registered but not handled")
+	end
+	--]]
 end
 -- event frame
 clcInfo.eventFrame = CreateFrame("Frame")
@@ -468,4 +470,6 @@ do
 		clcInfo.util.numRosterPetsBosses = num
 	end
 end
+-- update roster when pets are spawned
+clcInfo.UNIT_PET = clcInfo.util.UpdateRoster
 

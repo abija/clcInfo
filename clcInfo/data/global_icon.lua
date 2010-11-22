@@ -80,7 +80,7 @@ function mod.IconSpell(spell, checkRange, showWhen, mouseover)
 	local timeLeft = start + duration - GetTime()
 	
 	-- modify vertex only when out of cooldow
-	if timeLeft < 1.5 then
+	if timeLeft < 1.5 or enable == 0 then
 		-- current vertex color priority: oor > usable > oom
 		local oor = nil
 		if checkRange then
@@ -408,7 +408,7 @@ function mod.IconAction(slot, checkRange, showWhen)
 	if count <= 1 then count = nil end
 	
 	-- modify vertex only when out of cooldow
-	if timeLeft < 1.5 then
+	if timeLeft < 1.5 or enable == 0 then
 		if checkRange and ActionHasRange(slot) and (IsActionInRange(slot) == 0) then
 			return true, texture, start, duration, enable, nil, count, nil, true, 0.8, 0.1, 0.1, 1
 		end
@@ -439,8 +439,8 @@ function mod.IconSingleTargetRaidBuff(spell, scope)
 	local units = clcInfo.util.roster
 	local numUnits = clcInfo.util[scope] or clcInfo.util.numRoster
 	for i = 1, numUnits do
-		name, rank, icon, count, _, duration, expires, caster = UnitBuff(units[i], spell, nil, "PLAYER")
-		if name and caster == "player" then
+		name, rank, icon, count, _, duration, expires = UnitBuff(units[i], spell, nil, "PLAYER")
+		if name then
 			-- found -> return required info				
 			if count <= 1 then count = nil end
 			return true, icon, expires - duration, duration, 1, true, count

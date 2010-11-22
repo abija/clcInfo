@@ -8,7 +8,7 @@ if class ~= "PALADIN" then return end
 
 
 local GetTime = GetTime
-local version = 3
+local version = 4
 
 -- default settings for this module
 --------------------------------------------------------------------------------
@@ -19,11 +19,11 @@ local defaults = {
 	fillers = { "how", "tv", "cs", "exo", "j", "hw" },
 	csBoost = 0.5,
 	wspeed = 3.5,
-	useInq = false,
 	preInq = 3,
+	minHPInq = 3,
 }
 
-local MAX_FILLERS = 8
+local MAX_FILLERS = 12
 
 -- create a module in the main addon
 local modName = "retribution"
@@ -95,6 +95,8 @@ local actionsId = {
 		hw 		= _hwId,
 		ds 		= _dsId,
 		cons 	= _consId,
+		inqr 	= _inqId,
+		inqa	= _inqId,
 }
 local actionsName = {
 		tv 		= _tvName,
@@ -105,6 +107,8 @@ local actionsName = {
 		hw 		= _hwName,
 		ds 		= _dsName,
 		cons 	= _consName,	
+		inqa 	= _inqName .. " Apply",
+		inqr 	= _inqName .. " Refresh",
 }
 -- expose for options
 mod.actionsName = actionsName
@@ -113,7 +117,7 @@ mod.actionsName = actionsName
 -- working priority queue, skill 1, skill 2
 local pq, s1, s2
 -- status vars
-local _ctime, _gcd, _hp, _zeal, _aw, _aow, _hol, _haste, _boost, _csHack, _cstvHack, _tvIndexHack
+local _ctime, _gcd, _hp, _zeal, _aw, _aow, _inq, _hol, _haste, _boost, _csHack, _cstvHack
 _cstvHack = 0
 -- useful vars
 local start, duration, cd
@@ -125,20 +129,34 @@ local start, duration, cd
 	spells: exo, hw, cons
 --]]
 local actions = {
-	-- @hack
-	tv = function(i)
-		_tvIndexHack = i
-		if _hp >= 3 or _hol > 0 then
+	tv = function()
+		if _hp >= 3 or (_hol > 0 and _hp > 0) then
 			return 0, 1.5
+		end
+		return 100, 1.5
+	end,
+	
+	inqa = function()
+		if _inq <= 0 then
+			if _hp >= db.minHPInq or (_hol > 0 and _hp > 0) then
+				return 0, 1.5
+			end
+		end
+		return 100, 1.5
+	end,
+	
+	inqr = function()
+		if _inq > 0 and _inq <= db.preInq then
+			if _hp >= 3 or (_hol > 0 and _hp > 0) then
+				return 0, 1.5
+			end
 		end
 		return 100, 1.5
 	end,
 	
 	cs = function()
 		start, duration = GetSpellCooldown(_csId)
-		-- @hack
-		_csHack = start + duration - _ctime
-		cd = _csHack  - _gcd - _boost
+		cd = start + duration - _ctime  - _gcd - _boost
 		if cd < 0 then cd = 0 end
 		_boost = 0
 		return cd, 1.5
@@ -194,14 +212,32 @@ local actions = {
 		return cd, 1.5 / _haste
 	end,
 }
-actions.ds = actions.tv -- ds should be the same as tv
+actions.ds = actions.cs -- ds should be the same as cs
 
 local actions2 = {
 	tv = function(xcd, xgcd)
-		if _hp >= 3 or _hol > xgcd then
+		if _hp >= 3 or (_hol > xgcd and _hp > 0) then
 			return 0
 		end
 		return 100
+	end,
+	
+	inqa = function(xcd, xgcd)
+		if _inq <= xgcd then
+			if _hp >= db.minHPInq or (_hol > xgcd and _hp > 0) then
+				return 0, 1.5
+			end
+		end
+		return 100, 1.5
+	end,
+	
+	inqr = function(xcd, xgcd)
+		if _inq > xgcd and _inq - xgcd <= db.preInq then
+			if _hp >= 3 or (_hol > xgcd and _hp > 0) then
+				return 0, 1.5
+			end
+		end
+		return 100, 1.5
 	end,
 	
 	cs = function(xcd, xgcd)
@@ -251,7 +287,7 @@ local actions2 = {
 		return cd
 	end,
 }
-actions2.ds = actions2.tv -- ds should be the same as tv
+actions2.ds = actions2.cs -- ds should be the same as cs
 
 --------------------------------------------------------------------------------
 local lastgcd = 0
@@ -288,25 +324,24 @@ function RetRotation()
 	
 	mod.GetBuffStatus()
 	
-	for i, v in ipairs(pq) do
-		v.cd = actions[v.alias](i)
-	end
-	
 	-- @hack
-	if (_hp == 2 or _zeal > 0) and _csHack > 2 and (_ctime - _cstvHack) < 1 then
-		pq[_tvIndexHack].cd = 0
-	end
-	
-	-- first sort
-	------------------------------------------------------------------------------
-	local sel = 1
-	
-	for i = 2, #pq do
-		if pq[i].cd < pq[sel].cd then
-			sel = i
+	start, duration = GetSpellCooldown(_csId)
+	_csHack = start + duration - _ctime
+	if _csHack > 2 and (_ctime - _cstvHack) < 1 then
+		if _zeal > 0 then
+			_hp = _hp + 3
+		else
+			_hp = _hp + 1
 		end
 	end
 	
+	local sel = 1
+	for i, v in ipairs(pq) do
+		v.cd = actions[v.alias](i)
+		if v.cd < pq[sel].cd then
+			sel = i
+		end
+	end
 	s1 = pq[sel].id
 	
 	------------------------------------------------------------------------------
@@ -316,6 +351,7 @@ function RetRotation()
 	-- boost was already made 0, so it should return a proper value
 	-- skill duration + skill gcd = predicted time
 	local x, xgcd = actions[pq[sel].alias]()
+	-- @test
 	xgcd = x + xgcd
 	
 	-- adjust for predicted values
@@ -332,13 +368,16 @@ function RetRotation()
 			-- last time when we got this situation
 			_cstvHack = _ctime
 		end
-	elseif (pq[sel].id == _tvId or pq[sel].id == _dsId) then
-	-- if tv or ds -> hol or hp get used
-		if _hol > 0 then
+	elseif pq[sel].id == _tvId or pq[sel].id == _inqId then
+	-- if tv -> hol or hp get used
+		if _hol > 0 and _hp > 0 then
 			_hol = 0
+			-- _hp = _hp - 1
 		else
 			_hp = 0
 		end
+		-- also adjust inq with some value 
+		if pq[sel].id == _inqId then _inq = 20 end
 	elseif pq[sel].id == _exoId then
 	-- exo first -> aow gets used
 		_aow = 0
@@ -364,28 +403,6 @@ function RetRotation()
 		end
 	end
 	s2 = pq[sel].id
-	
-	-- inquisition, if active and needed -> change first tv in s1 or s2 with inquisition
-	------------------------------------------------------------------------------
-	local preInq = db.preInq
-	
-	if db.useInq then
-		local inqLeft = 0
-		local _, _, _, _, _, _, expiration = UnitBuff("player", _buffInq, nil, "PLAYER")
-		if expiration then 
-			inqLeft = expiration - _ctime
-		end
-		
-		-- test time for 2nd skill
-		-- check for spell gcd?
-		if (inqLeft - 1.5) <= preInq then
-			if (s1 == _tvId or s1 == _dsId) and (inqLeft <= preInq) then
-				s1 = _inqId
-			elseif (s2 == _tvId or s2 == _dsId) and ((inqLeft - 1.5) <= preInq) then
-				s2 = _inqId
-			end
-		end
-	end
 end
 --------------------------------------------------------------------------------
 
@@ -475,6 +492,14 @@ function mod.GetBuffStatus()
 	else
 		_hol = 0
 	end
+	
+	_, _, _, _, _, _, expires = UnitBuff("player", _buffInq, nil, "PLAYER")
+	if expires then
+		_inq = expires - _ctime - _gcd
+		if _inq < 0 then _inq = 0 end
+	else
+		_inq = 0
+	end
 end
 
 function mod.UpdatePriorityQueue()
@@ -536,14 +561,14 @@ local function CmdRetOptions(args)
 		db.rangePerSkill = args[2] == "true" or false
 	elseif args[1] == "wspeed" then
 		db.wspeed = tonumber(args[2]) or defaults.wspeed
-	elseif args[1] == "useinq" then
-		db.useInq = args[2] == "true" or false
+	elseif args[1] == "minhpinq" then
+		db.minHPInq = tonumber(args[2]) or defaults.minHPInq
 	elseif args[1] == "preinq" then
 		db.preInq = tonumber(args[2]) or defaults.preInq
 	elseif args[1] == "csboost" then
 		db.csBoost = tonumber(args[2]) or defaults.csBoost
 	else
-		print("valid options: rangeperskill, csboost, wspeed, useinq, preinq")
+		print("valid options: rangeperskill, csboost, wspeed, minHPInq, preinq")
 	end
 	
 	clcInfo:UpdateOptions()

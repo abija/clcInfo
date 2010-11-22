@@ -34,16 +34,6 @@ local modAlerts = clcInfo.display.alerts
 local function OnUpdate(self, elapsed)
 	self.elapsed = self.elapsed + elapsed
 	
-	if self.waitForCooldownEffect then
-		if self.elapsed > 0.05 then
-			self.waitForCooldownEffect = false
-			self.elapsed = self.freq -- force update
-			CooldownFrame_SetTimer(self.elements.cooldown, self.lastStart, self.lastDuration, self.lastEnable)
-		else
-			return
-		end
-	end
-	
 	if self.elapsed < self.freq then return end
 	-- manual set updates per second for dev testing
 	-- if self.elapsed < 0.2 then return end
@@ -80,9 +70,7 @@ local function OnUpdate(self, elapsed)
 	if not visible then
 		if self.elements:IsShown() then
 			-- set lastDuration to 0
-			self.lastDuration = 0
-			self.lastStart = 0
-			CooldownFrame_SetTimer(self.elements.cooldown, 0, 0, self.lastEnable or 1)
+			self.lastEnable = 0
 			
 			-- check for alerts
 			if self.hasAlerts == 1 then
@@ -103,6 +91,7 @@ local function OnUpdate(self, elapsed)
 		end
 		return
 	end
+	if not self.elements:IsShown() then self.elements:Show() end
 	
 	-- texture
 	if self.lastTexture ~= texture then
@@ -121,22 +110,27 @@ local function OnUpdate(self, elapsed)
 	
 	-- TODO
 	-- check if this is working properly, don't want to miss timers
-	if duration > 0 then
-		if start ~= self.lastStart or duration ~= self.lastDuration then
-			-- e:StopAnimating()
-			if self.lastDuration > 2 then
-				self.waitForCooldownEffect = true
-			else
+	if enable == 1 then
+		-- check if settings changed from last call
+		if start ~= self.lastStart or duration ~= self.lastDuration or enable ~= self.lastEnable then
+			e:StopAnimating()
+			-- hide instead of seting 0, 0 to avoid omnicc extra pulse
+			if duration > 0 then
+				if not e:IsShown() then e:Show() end
 				CooldownFrame_SetTimer(e, start, duration, enable)
+			else
+				e:Hide()
 			end
 			self.lastStart = start
 			self.lastDuration = duration
 			self.lastEnable = enable
 		end
-	else
-		self.lastDuration = 0
+	elseif enable ~= self.lastEnable then
+		-- last enable was 1, so call with 0, 0, 0
+		-- CooldownFrame_SetTimer(e, 0, 0, 0)
+		if e:IsShown() then e:Hide() end
+		self.lastEnable = enable
 	end
-	
 	
 	-- count
 	e = self.elements.count
@@ -186,8 +180,6 @@ local function OnUpdate(self, elapsed)
 			a.last = v
 		end
 	end
-
-	if not self.elements:IsShown() then self.elements:Show() end
 end
 function prototype:DoUpdate()
 	OnUpdate(self, 100)
@@ -402,11 +394,6 @@ local function ApplyMySkin(self)
 	t = self.elements.texGloss
 	t:Hide()
 	
-	local t = self.elements.cooldown
-	t:SetSize(self.db.width, self.db.height)
-	t:ClearAllPoints()
-	t:SetPoint("CENTER", self.elements, "CENTER", 0, 0)
-	
 	-- adjust the text size
 	local count = self.elements.count
 	count:SetSize(40 * xScale, 10 * yScale)
@@ -460,6 +447,11 @@ function prototype:UpdateLayout()
 	self.label:ClearAllPoints()
 	self.label:SetPoint("BOTTOMLEFT", self.elements, "TOPLEFT", 0, 1)
 	
+	local t = self.elements.cooldown
+	t:SetSize(self.db.width, self.db.height)
+	t:ClearAllPoints()
+	t:SetPoint("CENTER", self.elements, "CENTER", 0, 0)
+	
 	-- select the skin from template/grid/self
 	local skinType, g
 	if onGrid and self.db.skinSource == "Grid" then
@@ -499,10 +491,9 @@ function prototype:UpdateExec()
   clcInfo.UpdateExecAlert(self)
   
   -- defaults
-  self.waitForCooldownEffect = false
-  self.lastDuration = 0
   self.elements:SetAlpha(1)
   self.lastAlpha = 1
+  self.lastSVC = true
   
   self:UpdateEnabled()
 end

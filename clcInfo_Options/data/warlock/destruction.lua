@@ -50,22 +50,42 @@ local function LoadModule()
 					igVarious = {
 						order = 1, type = "group", inline = true, name = "Prediction",
 						args = {
-							debuffClip = {
-								order = 1, type = "range", min = 0, max = 3, step = 0.01, name = "Debuff Clip",
+							clipImmolate = {
+								order = 1, type = "range", min = 0, max = 3, step = 0.01, name = "Immolate Clip",
 								get = Get, set = Set,
 							},
-							_debuffClip = {
-								order = 2, type = "description", width = "double", name = "Seconds left on debuffs before considering refreshing them.",
+							_clipImmolate = {
+								order = 2, type = "description", width = "double", name = "Seconds left on debuffs before considering refreshing debuff.",
 							},
 							_x1 = {
 								order = 3, type = "description", name = "",
 							},
+							clipCorruption = {
+								order = 4, type = "range", min = 0, max = 3, step = 0.01, name = "Corruption Clip",
+								get = Get, set = Set,
+							},
+							_clipCorruption = {
+								order = 5, type = "description", width = "double", name = "Seconds left on debuffs before considering refreshing debuff.",
+							},
+							_x2 = {
+								order = 6, type = "description", name = "",
+							},
+							clipBaneOfDoom = {
+								order = 7, type = "range", min = 0, max = 3, step = 0.01, name = "Bane Of Doom Clip",
+								get = Get, set = Set,
+							},
+							_clipBaneOfDoom = {
+								order = 8, type = "description", width = "double", name = "Seconds left on debuffs before considering refreshing debuff.",
+							},
+							_x3 = {
+								order = 9, type = "description", name = "",
+							},
 							debuffDelay = {
-								order = 4, type = "range", min = 0, max = 2, step = 0.01, name = "Debuff application delay",
+								order = 10, type = "range", min = 0, max = 2, step = 0.01, name = "Debuff application delay",
 								get = Get, set = Set,
 							},
 							_debuffDelay = {
-								order = 5, type = "description", width = "double", name = "Time needed in seconds for debuff to show on your target.",
+								order = 11, type = "description", width = "double", name = "Time needed in seconds for debuff to show on your target.",
 							},
 						},
 					},

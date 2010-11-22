@@ -3,14 +3,16 @@ local _, class = UnitClass("player")
 if class ~= "WARLOCK" then return end
 
 local GetTime = GetTime
-local version = 1
+local version = 2
 
 local MAX_PRIORITY = 12
 
 local defaults = {
 	-- temp db stuff
 	priority = { "isf", "imm", "con", "bd", "sf", "cor", "cb", "sbsf", "eisf", "inc" },
-	debuffClip = 0,
+	clipImmolate = 0,
+	clipCorruption = 0,
+	clipBaneOfDoom = 0,
 	debuffDelay = 0.5,
 
 	version = version,
@@ -142,7 +144,7 @@ local actions = {
 		local _, _, _, _, _, _, expiration = UnitDebuff("target", n_immolate, nil, "PLAYER")
 		if expiration then
 			expiration = expiration - _ctime - _gcd
-			if expiration <= db.debuffClip then
+			if expiration <= db.clipImmolate then
 				return 0
 			else
 				return 100
@@ -185,7 +187,7 @@ local actions = {
 		local _, _, _, _, _, _, expiration = UnitDebuff("target", n_baneofdoom, nil, "PLAYER")
 		if expiration then
 			expiration = expiration - _ctime - _gcd
-			if expiration <= db.debuffClip then
+			if expiration <= db.clipBaneOfDoom then
 				return 0
 			end
 			return 100
@@ -213,7 +215,7 @@ local actions = {
 		local _, _, _, _, _, _, expiration = UnitDebuff("target", n_corruption, nil, "PLAYER")
 		if expiration then
 			expiration = expiration - _ctime - _gcd
-			if expiration <= db.debuffClip then
+			if expiration <= db.clipCorruption then
 				return 0
 			end
 			return 100
@@ -339,6 +341,12 @@ end
 
 function mod.OnInitialize()
 	db = clcInfo:RegisterClassModuleDB(modName, defaults)
+	
+	if db.version < version then
+		clcInfo.AdaptConfigAndClean(modName .. "DB", db, defaults)
+		db.version = version
+	end
+	
 	mod.UpdatePriorityQueue()
 end
 
@@ -392,12 +400,16 @@ local function CmdDestructionOptions(args)
 		return
 	end
 	
-	if args[1] == "debuffclip" then
-		db.debuffClip = tonumber(args[2]) or defaults.debuffClip
+	if args[1] == "clipimmolate" then
+		db.clipImmolate = tonumber(args[2]) or defaults.clipImmolate
+	elseif args[1] == "clipcorruption" then
+		db.clipCorruption = tonumber(args[2]) or defaults.clipCorruption
+	elseif args[1] == "clipbaneofdoom" then
+		db.clipBaneOfDoom = tonumber(args[2]) or defaults.clipBaneOfDoom
 	elseif args[1] == "debuffdelay" then
 		db.debuffDelay = tonumber(args[2]) or defaults.debuffDelay
 	else
-		print("valid options: debuffclip, debuffdelay")
+		print("valid options: debuffdelay, clipimmolate, clipcorruption, clipbaneofdoom")
 	end
 	
 	clcInfo:UpdateOptions()

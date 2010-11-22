@@ -15,7 +15,7 @@ local baseDB = clcInfo.cdb.classModules[modName]
 clcInfo.spew = baseMod
 
 -- some lazy staic numbers
-local MAX_FILLERS = 8
+local MAX_FILLERS = 12
 
 --[[
 classModules
@@ -88,19 +88,19 @@ local function LoadModule()
 					igInq = {
 						order = 3, type = "group", inline = true, name = "Inquisition (don't enable until you trained it).",
 						args = {
-							useInq = {
-								order = 1, type = "toggle", name = "Enabled",
+							minHPInq = {
+								order = 1, type = "range", min = 1, max = 3, step = 1, name = "Min HP",
 								get = Get, set = Set,
 							},
 							_x1 = {
-								order = 2, type = "description", name = "",
+								order = 2, type = "description", width = "double", name = "Minimum amount of HP before applying Inquisition",
 							},
 							preInq = {
 								order = 3, type = "range", min = 0, max = 15, step = 0.1, name = "Clip",
 								get = Get, set = Set,
 							},
 							_preInq = {
-								order = 4, type = "description", width = "double", name = "Seconds to refresh before buff expires.",
+								order = 4, type = "description", width = "double", name = "Seconds before trying to refresh Inquisition.",
 							},
 						},
 					},
