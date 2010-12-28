@@ -146,7 +146,7 @@ local function OnUpdate(self, elapsed)
 	if svc then
 		self.elements.texMain:SetVertexColor(r, g, b, a)
 	else
-		if self.lastSCV then	-- not changing vertex but call before was used, so reset to 1
+		if self.lastSVC then	-- not changing vertex but call before was used, so reset to 1
 			self.elements.texMain:SetVertexColor(1, 1, 1, 1)
 		end
 	end

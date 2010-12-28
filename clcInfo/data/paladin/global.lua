@@ -140,6 +140,19 @@ do
 	end
 end
 
+-- inquisition
+function emod.IconInq(e)
+	local _, _, _, _, _, dur, exp = UnitBuff("player", "Inquisition", nil, "PLAYER")
+	if exp then 
+	  if (exp - GetTime()) <= e then
+	    return true, "Interface\\Icons\\spell_paladin_inquisition", (exp - dur), dur, 1, nil, nil, 0.5
+	  end
+	else
+		return true, "Interface\\Icons\\spell_paladin_inquisition"
+	end
+end
+
+
 --------------------------------------------------------------------------------
 -- create a hp bar similar to blizzard's xml code
 --------------------------------------------------------------------------------

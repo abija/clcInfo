@@ -191,7 +191,7 @@ function mod.BarSingleTargetRaidBuff(spell, showStack, timeRight, scope)
 	local numUnits = clcInfo.util[scope] or clcInfo.util.numRoster
 	for i = 1, numUnits do
 		name, rank, icon, count, _, duration, expires = UnitBuff(units[i], spell, nil, "PLAYER")
-		if name then
+		if name and duration and duration > 0 then
 			-- found -> return required info				
 			if count > 1 and showStack then 
 				if showStack == "before" then

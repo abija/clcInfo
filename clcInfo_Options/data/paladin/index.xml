@@ -6,4 +6,5 @@
 <Script file="protection.lua"/>
 <Script file="holy.lua"/>
 
+<Script file="retribution_experiment.lua"/>
 </Ui>

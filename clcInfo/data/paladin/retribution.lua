@@ -130,7 +130,7 @@ local start, duration, cd
 --]]
 local actions = {
 	tv = function()
-		if _hp >= 3 or (_hol > 0 and _hp > 0) then
+		if _hp >= 3 or _hol > 0 then
 			return 0, 1.5
 		end
 		return 100, 1.5
@@ -138,7 +138,7 @@ local actions = {
 	
 	inqa = function()
 		if _inq <= 0 then
-			if _hp >= db.minHPInq or (_hol > 0 and _hp > 0) then
+			if _hp >= db.minHPInq or _hol > 0 then
 				return 0, 1.5
 			end
 		end
@@ -147,7 +147,7 @@ local actions = {
 	
 	inqr = function()
 		if _inq > 0 and _inq <= db.preInq then
-			if _hp >= 3 or (_hol > 0 and _hp > 0) then
+			if _hp >= 3 or _hol > 0 then
 				return 0, 1.5
 			end
 		end
@@ -216,7 +216,7 @@ actions.ds = actions.cs -- ds should be the same as cs
 
 local actions2 = {
 	tv = function(xcd, xgcd)
-		if _hp >= 3 or (_hol > xgcd and _hp > 0) then
+		if _hp >= 3 or _hol > xgcd then
 			return 0
 		end
 		return 100
@@ -224,7 +224,7 @@ local actions2 = {
 	
 	inqa = function(xcd, xgcd)
 		if _inq <= xgcd then
-			if _hp >= db.minHPInq or (_hol > xgcd and _hp > 0) then
+			if _hp >= db.minHPInq or _hol > xgcd then
 				return 0, 1.5
 			end
 		end
@@ -233,7 +233,7 @@ local actions2 = {
 	
 	inqr = function(xcd, xgcd)
 		if _inq > xgcd and _inq - xgcd <= db.preInq then
-			if _hp >= 3 or (_hol > xgcd and _hp > 0) then
+			if _hp >= 3 or _hol > xgcd then
 				return 0, 1.5
 			end
 		end
@@ -370,9 +370,8 @@ function RetRotation()
 		end
 	elseif pq[sel].id == _tvId or pq[sel].id == _inqId then
 	-- if tv -> hol or hp get used
-		if _hol > 0 and _hp > 0 then
+		if _hol > 0 then
 			_hol = 0
-			-- _hp = _hp - 1
 		else
 			_hp = 0
 		end

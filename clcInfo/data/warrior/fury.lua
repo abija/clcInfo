@@ -33,6 +33,7 @@ local spellSL			= 1464	-- Slam
 local spellBS			= 6673	-- Battle Shout
 local spellBR			= 18499	-- Berserker Rage
 local spellEX			= 5308	-- Execute
+local spellCS			= 86346	-- Colossus Smash
 -- buff
 local buffSurge		= GetSpellInfo(46915)		-- Bloodsurge
 local buffEnrage	= GetSpellInfo(13046)		-- Enrage
@@ -45,6 +46,8 @@ local buffBerserk = GetSpellInfo(spellBR)	-- Enrage
 local actions = {}
 -- when an action is selected, return is spell with the id from this table
 local listActionId = {
+	cs 		= spellCS,
+	ex 		= spellEX,
 	bt 		= spellBT,
 	rb		= spellRB,
 	bs		= spellBS,
@@ -55,6 +58,8 @@ local listActionId = {
 }
 -- names to display in option screen
 local listActionName = {
+	cs 		= GetSpellInfo(spellCS),
+	ex 		= GetSpellInfo(spellEX),
 	bt 		= GetSpellInfo(spellBT),
 	rb		= GetSpellInfo(spellRB),
 	bs		= GetSpellInfo(spellBS),
@@ -83,7 +88,7 @@ local mode = "single"
 -- this function, if it exists, will be called at init
 function mod.OnInitialize()
 	db = clcInfo:RegisterClassModuleDB(modName, defaults)
-	db.priorityList = { "bt", "rb", "sl", "bs" } 
+	db.priorityList = { "cs", "ex", "bt", "rb", "sl" } 
 	mod.UpdatePriorityList()
 end
 
@@ -144,6 +149,20 @@ function actions.hs()
 	_hs = cd
 	return cd
 end
+
+function actions.cs()
+	local start, duration = GetSpellCooldown(spellCS)
+	local cd = start + duration - _ctime - _gcd
+	if cd < 0 then cd = 0 end
+	return cd
+end
+
+function actions.ex()
+	if IsUsableSpell(spellEX) then
+		return 0
+	end
+	return 100
+end
 --------------------------------------------------------------------------------
 
 mod.Rotation = {}
@@ -176,38 +195,26 @@ function mod.Rotation.single(ragehs, ragesl)
 		if expires then _enrage = expires - _ctime - _gcd else _enrage = 0 end
 	end
 	
-	if IsUsableSpell(spellEX) then
-		dq1 = spellEX
-		
-		dq2 = 0
-		if _rage >= (_ragehs - 20) and actions.hs() == 0 then
-			dq2 = spellHS
-		elseif _enrage <= 0 and _br == 0 then
-			dq2 = spellBR
+	
+	for i, v in ipairs(pq) do
+		v.cd = actions[v.alias]()
+	end
+	
+	local sel = 1
+	local cd = pq[1].cd
+	
+	for i = 2, #pq do
+		if pq[i].cd < pq[sel].cd then
+			sel = i
+			cd = pq[i].cd
 		end
-	else
-		for i, v in ipairs(pq) do
-			v.cd = actions[v.alias]()
-		end
-		
-		local sel = 1
-		local cd = pq[1].cd
-		
-		for i = 2, #pq do
-			if pq[i].cd < pq[sel].cd then
-				sel = i
-				cd = pq[i].cd
-			end
-		end
-		
-		dq1 = pq[sel].id
-		
-		dq2 = 0
-		if _rage >= _ragehs and _hs == 0 then
-			dq2 = spellHS
-		elseif _enrage <= 0 and _br == 0 then
-			dq2 = spellBR
-		end
+	end
+	
+	dq1 = pq[sel].id
+	
+	dq2 = 0
+	if _rage >= _ragehs and _hs == 0 then
+		dq2 = spellHS
 	end
 		
 	return true

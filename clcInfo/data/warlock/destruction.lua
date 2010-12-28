@@ -335,8 +335,6 @@ function mod.UpdatePriorityQueue()
 			end
 		end
 	end
-	
-	clcInfo.spew = pq
 end
 
 function mod.OnInitialize()

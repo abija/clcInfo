@@ -149,8 +149,8 @@ function clcInfo:OnInitialize()
 	
 	-- register events
 	clcInfo.eventFrame:RegisterEvent("PLAYER_TALENT_UPDATE")  -- to monitor talent changes
-	clcInfo.eventFrame:RegisterEvent("UNIT_ENTERED_VEHICLE")  -- to hide while using vehicles
-	clcInfo.eventFrame:RegisterEvent("UNIT_EXITED_VEHICLE")
+	-- clcInfo.eventFrame:RegisterEvent("UNIT_ENTERED_VEHICLE")  -- to hide while using vehicles
+	-- clcInfo.eventFrame:RegisterEvent("UNIT_EXITED_VEHICLE")
 	clcInfo.eventFrame:RegisterEvent("PARTY_MEMBERS_CHANGED") -- to track group changes
 	clcInfo.eventFrame:RegisterEvent("UNIT_PET")
 	

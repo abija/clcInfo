@@ -12,8 +12,6 @@ local modName = "retribution"
 local baseMod = clcInfo.classModules[modName]
 local baseDB = clcInfo.cdb.classModules[modName]
 
-clcInfo.spew = baseMod
-
 -- some lazy staic numbers
 local MAX_FILLERS = 12
 

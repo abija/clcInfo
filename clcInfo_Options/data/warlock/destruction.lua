@@ -12,8 +12,6 @@ local modName = "_destruction"
 local baseMod = clcInfo.classModules[modName]
 local baseDB = clcInfo.cdb.classModules[modName]
 
-clcInfo.spew = baseMod
-
 -- some lazy staic numbers
 local MAX_PRIORITY = 12
 

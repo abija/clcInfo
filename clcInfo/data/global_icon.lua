@@ -440,7 +440,7 @@ function mod.IconSingleTargetRaidBuff(spell, scope)
 	local numUnits = clcInfo.util[scope] or clcInfo.util.numRoster
 	for i = 1, numUnits do
 		name, rank, icon, count, _, duration, expires = UnitBuff(units[i], spell, nil, "PLAYER")
-		if name then
+		if name and duration and duration > 0 then
 			-- found -> return required info				
 			if count <= 1 then count = nil end
 			return true, icon, expires - duration, duration, 1, true, count
