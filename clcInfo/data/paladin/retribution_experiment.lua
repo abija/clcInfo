@@ -24,7 +24,7 @@ local defaults = {
 	rangePerSkill = false,
 	useInq = true,
 	preInq = 5,
-	tolerance = 0.1,
+	tolerance = 0,
 	jClash = 0.5,
 	hw = true,
 	hwClash = 0.5,
@@ -303,6 +303,7 @@ local function RetRotation()
 	haste = mod.GetHaste()
 	
 	-- adjust hp with + 1 after a cs
+	--[[
 	if ctime - justCS < db.hpDelay then
 		if justCSHP == hp then
 			if zeal >= db.tolerance then
@@ -314,6 +315,7 @@ local function RetRotation()
 			justCS = 0
 		end
 	end
+	--]]
 	
 	-- undead or demon -> different exorcism behavior
 	targetType = UnitCreatureType("target")

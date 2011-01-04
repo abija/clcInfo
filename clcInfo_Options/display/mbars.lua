@@ -119,9 +119,12 @@ end
 
 -- template code
 --------------------------------------------------------------------------------
-local execTemplateCategories = {}
-for k, v in pairs(clcInfo_Options.templates[ename]) do
-	execTemplateCategories[k] = k
+local function execTemplateCategories()
+	local t = {}
+	for k, v in pairs(clcInfo_Options.templates[ename]) do
+		t[k] = k
+	end
+	return t	
 end
 local stc = nil -- selectedTemplateCategory
 local function GetExecTemplateList()
