@@ -264,6 +264,10 @@ function mod:UpdateMIconList()
 									order = 3, type = "range", min = 0, max = 1, step = 0.01, name = "Alpha",
 									get = Get, set = Set, 
 								},
+								frameLevel = {
+									order = 4, type = "range", min = 0, max = 1000, step = 1, name = "Frame Level",
+									get = Get, set = Set, 
+								},
 							},
 						},
 						children = {

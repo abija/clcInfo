@@ -40,3 +40,47 @@ do
 		end
 	end
 end
+
+
+
+
+
+
+
+
+
+IGNITE:
+-- icon:
+local name, _, icon, _, _, duration, expires = UnitDebuff("target", "Ignite", nil, "PLAYER")
+if name then
+	local start = expires - duration
+	local count
+	local ctime = GetTime()
+	local guid = UnitGUID("target")
+	if ___e.___storage[guid] then
+		local info = ___e.___storage[guid]
+		if (ctime - info.ctime) < 3 then
+			count = info.value
+		end
+	end
+	return true, icon, start, duration, 1, false, count
+end
+
+-- event:
+local pguid = UnitGUID("player")
+local function cleu(storage, event, timestamp, combatEvent, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed)
+	if sourceGUID == pguid and spellName == "Ignite" then
+		if combatEvent == "SPELL_PERIODIC_DAMAGE" then
+			if not storage[destGUID] then storage[destGUID] = {} end
+			local info = storage[destGUID]
+			info.ctime = GetTime()
+			info.value = floor((amount or 0 + overkill or 0 + resisted or 0 + absorbed or 0) / 100 + 0.5) / 10
+		elseif combatEvent == "SPELL_AURA_REMOVED" then
+			local info = storage[destGUID]
+			if not info then return end
+			info.ctime = GetTime()
+			info.value = nil
+		end
+	end
+end
+AddEventListener(cleu, "COMBAT_LOG_EVENT_UNFILTERED")

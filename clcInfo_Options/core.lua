@@ -29,6 +29,8 @@ local function Init()
 	mod:LoadTemplates()
 	-- info: class modules are loaded together with active template because of the data that might be template stored
 	mod:LoadActiveTemplate()
+	
+	mod:LoadDebug()
 end
 
 function mod:LoadClassModules()

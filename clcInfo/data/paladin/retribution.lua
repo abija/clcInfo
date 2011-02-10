@@ -2,434 +2,488 @@
 local _, class = UnitClass("player")
 if class ~= "PALADIN" then return end
 
-
--- @todo:
--- test _boost in actions2
-
-
 local GetTime = GetTime
-local version = 4
+local debug = clcInfo.debug
 
--- default settings for this module
---------------------------------------------------------------------------------
+local version = 4000605
+
+local modName = "__retribution"
+local mod = clcInfo:RegisterClassModule(modName)
+local emod = clcInfo.env
+local db -- template based
+
+local ef = CreateFrame("Frame") 
+ef:Hide()
+
 local defaults = {
 	version = version,
 	
+	prio = "inqa inqrhp tvhp cs inqrdp tvdp exoud how exo j hw cons",
 	rangePerSkill = false,
-	fillers = { "how", "tv", "cs", "exo", "j", "hw" },
-	csBoost = 0.5,
-	wspeed = 3.5,
-	preInq = 3,
-	minHPInq = 3,
+	inqRefresh = 5,
+	inqApplyMin = 3,
+	inqRefreshMin = 3,
+	undead = "Undead",
+	demon = "Demon",
+	jClash = 0,
+	hwClash = 1,
+	consClash = 1,
+	consMana = 20000,
+	hpDelay = 0.9,
+	predictCS = false,
 }
-
-local MAX_FILLERS = 12
-
--- create a module in the main addon
-local modName = "retribution"
-local mod = clcInfo:RegisterClassModule(modName)
-local db
-
--- functions visible to exec should be attached to this
-local emod = clcInfo.env
-
--- used for "pluging in"
-local mainSkill, secondarySkill, ef
 
 -- @defines
 --------------------------------------------------------------------------------
-local _gcdId 				= 85256 -- tv for gcd
+local gcdId 				= 85256 -- tv for gcd
 -- list of spellId
-local _howId 				=	24275	-- hammer of wrath
-local _csId 				= 35395	-- crusader strike
-local _tvId					= 85256	-- templar's verdict
-local _inqId				= 84963	-- inquisition
-local _dsId					= 53385	-- divine storm
-local _jId					= 20271	-- judgement
-local _consId				= 26573	-- consecration
-local _exoId				= 879		-- exorcism
-local _hwId					= 2812 	-- holy wrath
-local _zealId				= 85696 -- zealotry
-local _inqId				= 84963
--- list of spellName
-local _howName		= GetSpellInfo(_howId)
-local _csName			= GetSpellInfo(_csId)
-local _tvName			= GetSpellInfo(_tvId)
-local _inqName		= GetSpellInfo(_inqId)
-local _dsName			= GetSpellInfo(_dsId)
-local _jName			= GetSpellInfo(_jId)
-local _consName		= GetSpellInfo(_consId)
-local _exoName		= GetSpellInfo(_exoId)
-local _hwName			= GetSpellInfo(_hwId)
-local _zealName 	= GetSpellInfo(_zealId)
-local _inqName		= GetSpellInfo(_inqId)
+local howId 				=	24275	-- hammer of wrath
+local csId 					= 35395	-- crusader strike
+local tvId					= 85256	-- templar's verdict
+local inqId					= 84963	-- inquisition
+local dsId					= 53385	-- divine storm
+local jId						= 20271	-- judgement
+local consId				= 26573	-- consecration
+local exoId					= 879		-- exorcism
+local hwId					= 2812 	-- holy wrath
+local zealId				= 85696 -- zealotry
+local inqId					= 84963 -- inquisition
+-- csName to pass as argument for melee range checks
+local csName			= GetSpellInfo(csId)
 -- buffs
-local _buffZeal = _zealName									-- zealotry
-local _buffAW 	= GetSpellInfo(31884)				-- avenging wrath
-local _buffHoL	= GetSpellInfo(90174)				-- hand of light
-local _buffAoW	= GetSpellInfo(59578)				-- the art of war
-local _buffInq 	= _inqName									-- inquisition
+local buffZeal 	= GetSpellInfo(zealId)	-- zealotry
+local buffDP		= GetSpellInfo(90174)		-- divine purpose
+local buffAoW		= GetSpellInfo(59578)		-- the art of war
+local buffInq 	= GetSpellInfo(inqId)		-- inquisition
 
--- list of spells to be tracked with OnSpellCast
-local tracked = {
-	[_howName] 			= true,
-	[_csName] 			= true,
-	[_tvName] 			= true,
-	[_inqName] 			= true,
-	[_dsName] 			= true,
-	[_jName] 				= true,
-	[_consName] 		= true,
-	[_exoName] 			= true,
-	[_hwName] 			= true,
-	[_zealName] 		= true,
-	[_inqName]			= true,
-}
-
--- list of available actions for the priority list
-local actionsId = {
-		tv 		= _tvId,
-		cs 		= _csId,
-		j			= _jId,
-		exo 	= _exoId,
-		how 	= _howId,
-		hw 		= _hwId,
-		ds 		= _dsId,
-		cons 	= _consId,
-		inqr 	= _inqId,
-		inqa	= _inqId,
-}
-local actionsName = {
-		tv 		= _tvName,
-		cs 		= _csName,
-		j			= _jName,
-		exo 	= _exoName,
-		how 	= _howName,
-		hw 		= _hwName,
-		ds 		= _dsName,
-		cons 	= _consName,	
-		inqa 	= _inqName .. " Apply",
-		inqr 	= _inqName .. " Refresh",
-}
--- expose for options
-mod.actionsName = actionsName
---------------------------------------------------------------------------------
-
--- working priority queue, skill 1, skill 2
-local pq, s1, s2
--- status vars
-local _ctime, _gcd, _hp, _zeal, _aw, _aow, _inq, _hol, _haste, _boost, _csHack, _cstvHack
-_cstvHack = 0
--- useful vars
-local start, duration, cd
-
--- this is where the logic for the actions available to priority list goes
--- @info
---[[
-	2 returns, first is cooldown, second is gcd of the action since the spells have lower gcd
-	spells: exo, hw, cons
---]]
-local actions = {
-	tv = function()
-		if _hp >= 3 or _hol > 0 then
-			return 0, 1.5
-		end
-		return 100, 1.5
-	end,
-	
-	inqa = function()
-		if _inq <= 0 then
-			if _hp >= db.minHPInq or _hol > 0 then
-				return 0, 1.5
-			end
-		end
-		return 100, 1.5
-	end,
-	
-	inqr = function()
-		if _inq > 0 and _inq <= db.preInq then
-			if _hp >= 3 or _hol > 0 then
-				return 0, 1.5
-			end
-		end
-		return 100, 1.5
-	end,
-	
-	cs = function()
-		start, duration = GetSpellCooldown(_csId)
-		cd = start + duration - _ctime  - _gcd - _boost
-		if cd < 0 then cd = 0 end
-		_boost = 0
-		return cd, 1.5
-	end,
-	
-	j = function()
-		start, duration = GetSpellCooldown(_jId)
-		cd = start + duration - _ctime - _gcd - _boost
-		if cd < 0 then cd = 0 end
-		_boost = 0
-		return cd, 1.5
-	end,
-	
-	exo = function()
-		if _aow > 0 then
-			return 0, 1.5 / _haste
-		end
-		return 100, 1.5 / _haste
-	end,
-	
-	how = function()
-		-- need target
-		if not (UnitExists("target") and UnitCanAttack("player", "target") and not UnitIsDead("target")) then
-			return 100, 1.5
+function mod:OnTemplatesUpdate()
+	db = clcInfo:RegisterClassModuleTDB(modName, defaults)
+	if db then
+		if not db.version or db.version < version then
+			-- fix stuff
+			clcInfo.AdaptConfigAndClean(modName, db, defaults)
+			db.version = version
 		end
 		
-		-- health > 20% and not aw
-		local hperc = UnitHealth("target") / UnitHealthMax("target")
-		if hperc > 0.2 and _aw == 0 then
-			return 100, 1.5
-		end
-		
-		start, duration = GetSpellCooldown(_howId)
-		cd = start + duration - _ctime - _gcd - _boost
-		if cd < 0 then cd = 0 end
-		_boost = 0
-		return cd, 1.5
-	end,
+		mod:UpdateQueue()
+	end
 	
-	hw = function()
-		start, duration = GetSpellCooldown(_hwId)
-		cd = start + duration - _ctime - _gcd - _boost
-		if cd < 0 then cd = 0 end
-		_boost = 0
-		return cd, 1.5 / _haste
-	end,
-	
-	cons = function()
-		start, duration = GetSpellCooldown(_consId)
-		cd = start + duration - _ctime - _gcd - _boost
-		if cd < 0 then cd = 0 end
-		_boost = 0
-		return cd, 1.5 / _haste
-	end,
-}
-actions.ds = actions.cs -- ds should be the same as cs
-
-local actions2 = {
-	tv = function(xcd, xgcd)
-		if _hp >= 3 or _hol > xgcd then
-			return 0
-		end
-		return 100
-	end,
-	
-	inqa = function(xcd, xgcd)
-		if _inq <= xgcd then
-			if _hp >= db.minHPInq or _hol > xgcd then
-				return 0, 1.5
+	ef:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	ef:SetScript("OnEvent", function(self, event, unit, spell)
+		if db.predictCS and spell == csName and unit == "player" then
+			justCSHP = UnitPower("player", SPELL_POWER_HOLY_POWER)
+			if justCSHP < 3 then
+				justCS = GetTime()
 			end
 		end
-		return 100, 1.5
-	end,
-	
-	inqr = function(xcd, xgcd)
-		if _inq > xgcd and _inq - xgcd <= db.preInq then
-			if _hp >= 3 or _hol > xgcd then
-				return 0, 1.5
-			end
-		end
-		return 100, 1.5
-	end,
-	
-	cs = function(xcd, xgcd)
-		cd = xcd - xgcd - _boost
-		_boost = 0
-		if cd < 0 then cd = 0 end
-		return cd
-	end,
-	
-	j = function(xcd, xgcd)
-		cd = xcd - xgcd - _boost
-		if cd < 0 then cd = 0 end
-		return cd
-	end,
-	
-	exo = function(xcd, xgcd)
-		if _aow > xgcd then return 0 end
-		return 100
-	end,
-	
-	how = function(xcd, xgcd)
-		-- need target
-		if not (UnitExists("target") and UnitCanAttack("player", "target") and not UnitIsDead("target")) then
-			return 100
-		end
-		
-		-- health > 20% and not aw
-		local hperc = UnitHealth("target") / UnitHealthMax("target")
-		if hperc > 0.2 and _aw <= xgcd then
-			return 100
-		end
-		
-		cd = xcd - xgcd - _boost
-		if cd < 0 then cd = 0 end
-		return cd
-	end,
-	
-	hw = function(xcd, xgcd)
-		cd = xcd - xgcd - _boost
-		if cd < 0 then cd = 0 end
-		return cd
-	end,
-	
-	cons = function(xcd, xgcd)
-		cd = xcd - xgcd - _boost
-		if cd < 0 then cd = 0 end
-		return cd
-	end,
-}
-actions2.ds = actions2.cs -- ds should be the same as cs
-
---------------------------------------------------------------------------------
-local lastgcd = 0
-local waitforserver = false
-local eq = 0
-function RetRotation()
-	-- get gcd value
-	------------------------------------------------------------------------------
-	_ctime = GetTime()
-	start, duration = GetSpellCooldown(_gcdId)
-	_gcd = start + duration - _ctime
-	if _gcd < 0 then _gcd = 0 end
-	
-	if waitforserver then
-		if _gcd == 0 or _gcd < 0.7 then
-			waitforserver = false
-			mainSkill:Highlight(false)
-		end
-		return
-	end
-	
-	if _gcd > lastgcd and eq > 0 then
-		mainSkill:Highlight(true)
-		lastgcd = _gcd
-		waitforserver = true
-	end
-	lastgcd = _gcd
-	
-	-- get status
-	------------------------------------------------------------------------------
-	_boost = db.csBoost or 0
-	_haste = db.wspeed / UnitAttackSpeed("player")
-	_hp = UnitPower("player", SPELL_POWER_HOLY_POWER)
-	
-	mod.GetBuffStatus()
-	
-	-- @hack
-	start, duration = GetSpellCooldown(_csId)
-	_csHack = start + duration - _ctime
-	if _csHack > 2 and (_ctime - _cstvHack) < 1 then
-		if _zeal > 0 then
-			_hp = _hp + 3
-		else
-			_hp = _hp + 1
-		end
-	end
-	
-	local sel = 1
-	for i, v in ipairs(pq) do
-		v.cd = actions[v.alias](i)
-		if v.cd < pq[sel].cd then
-			sel = i
-		end
-	end
-	s1 = pq[sel].id
-	
-	------------------------------------------------------------------------------
-	
-	-- adjust for second sort
-	------------------------------------------------------------------------------
-	-- boost was already made 0, so it should return a proper value
-	-- skill duration + skill gcd = predicted time
-	local x, xgcd = actions[pq[sel].alias]()
-	-- @test
-	xgcd = x + xgcd
-	
-	-- adjust for predicted values
-	if pq[sel].id == _csId then
-	-- cs means you get guaranteed extra hp
-		if _zeal > 0 then
-			_hp = _hp + 3
-		else
-			_hp = _hp + 1
-		end
-		-- @hack
-		-- avoid the temporary skill change until hp is generated
-		if _hp >= 3 and _csHack < 2 then
-			-- last time when we got this situation
-			_cstvHack = _ctime
-		end
-	elseif pq[sel].id == _tvId or pq[sel].id == _inqId then
-	-- if tv -> hol or hp get used
-		if _hol > 0 then
-			_hol = 0
-		else
-			_hp = 0
-		end
-		-- also adjust inq with some value 
-		if pq[sel].id == _inqId then _inq = 20 end
-	elseif pq[sel].id == _exoId then
-	-- exo first -> aow gets used
-		_aow = 0
-	end
-	
-	-- put first skill at end of queue
-	pq[sel].cd = 110
-	
-	-- second sort
-	------------------------------------------------------------------------------
-	-- get cooldowns again
-	for i, v in ipairs(pq) do
-		v.cd = actions2[v.alias](v.cd, xgcd)
-	end
-	
-	-- sort again
-	
-	sel = 1
-	
-	for i = 2, #pq do
-		if pq[i].cd < pq[sel].cd then
-			sel = i
-		end
-	end
-	s2 = pq[sel].id
+	end)
 end
+
+-- status vars
+local s1, s2
+local s_ctime, s_otime, s_gcd, s_hp, s_inq, s_zeal, s_aow, s_dp, s_haste, s_targetType
+local justCS, justCSHP = 0, 0
+
+-- the queue
+local q = {}
+
+local function GetCooldown(id)
+	local start, duration = GetSpellCooldown(id)
+	local cd = start + duration - s_ctime - s_gcd
+	if cd < 0 then return 0 end
+	return cd
+end
+
+-- actions ---------------------------------------------------------------------
+local actions = {
+	-- inquisition, apply, 3 hp
+	inqa = {
+		id = inqId,
+		GetCD = function()
+			if s_inq <= 0 and (s_hp >= db.inqApplyMin or s_dp > 0) then
+				return 0
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5 / s_haste
+			s_inq = 100	-- make sure it's not shown for next skill
+			if s_dp > 0 then s_dp = 0 else s_hp = 0 end -- adjust hp/dp
+		end,
+		info = "apply Inquisition",
+	},
+	inqahp = {
+		id = inqId,
+		GetCD = function()
+			if s_inq <= 0 and s_hp >= db.inqApplyMin then
+				return 0
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5 / s_haste
+			s_inq = 100	-- make sure it's not shown for next skill
+			if s_dp > 0 then s_dp = 0 else s_hp = 0 end -- adjust hp/dp
+		end,
+		info = "apply Inquisition at x HP",
+	},
+	inqadp = {
+		id = inqId,
+		GetCD = function()
+			if s_inq <= 0 and s_dp > 0 then
+				return 0
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5 / s_haste
+			s_inq = 100	-- make sure it's not shown for next skill
+			if s_dp > 0 then s_dp = 0 else s_hp = 0 end -- adjust hp/dp
+		end,
+		info = "apply Inquisition at DP",
+	},
+	inqr = {
+		id = inqId,
+		GetCD = function()
+			if s_inq <= db.inqRefresh and (s_hp >= db.inqRefreshMin or s_dp > 0) then
+				return 0
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5 / s_haste
+			s_inq = 100	-- make sure it's not shown for next skill
+			if s_dp > 0 then s_dp = 0 else s_hp = 0 end -- adjust hp/dp
+		end,
+		info = "refresh Inquisition",
+	},
+	inqrhp = {
+		id = inqId,
+		GetCD = function()
+			if s_inq <= db.inqRefresh and s_hp >= db.inqRefreshMin then
+				return 0
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5 / s_haste
+			s_inq = 100	-- make sure it's not shown for next skill
+			if s_dp > 0 then s_dp = 0 else s_hp = 0 end -- adjust hp/dp
+		end,
+		info = "refresh Inquisition at x HP",
+	},
+	inqrdp = {
+		id = inqId,
+		GetCD = function()
+			if s_inq <= db.inqRefresh and s_dp > 0 then
+				return 0
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5 / s_haste
+			s_inq = 100	-- make sure it's not shown for next skill
+			if s_dp > 0 then s_dp = 0 else s_hp = 0 end -- adjust hp/dp
+		end,
+		info = "refresh Inquisition at DP",
+	},
+	exoud = {
+		id = exoId,
+		GetCD = function()
+			if (targetType == db.undead or targetType == db.demon) and s_aow > 0 then
+				return 0
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5 / s_haste
+			s_aow = 0 -- make sure it's not shown for next skill
+		end,
+		info = "Exorcism with guaranteed crit",
+	},
+	exo = {
+		id = exoId,
+		GetCD = function()
+			if targetType ~= db.undead and targetType ~= db.demon and s_aow > 0 then
+				return 0
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5 / s_haste
+			s_aow = 0 -- make sure it's not shown for next skill
+		end,
+		info = "Exorcism",
+	},
+	how = {
+		id = howId,
+		GetCD = function()
+			if IsUsableSpell(howId) and s1 ~= howId then
+				return GetCooldown(howId)
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5 / s_haste
+		end,
+		info = "Hammer of Wrath",
+	},
+	tv = {
+		id = tvId,
+		GetCD = function()
+			if s_hp >= 3 or s_dp > 0 then
+				return 0
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5
+			if s_dp > 0 then s_dp = 0 else s_hp = 0 end -- adjust hp/dp
+		end,
+		info = "Templar's Verdict",
+	},
+	tvhp = {
+		id = tvId,
+		GetCD = function()
+			if s_hp >= 3 then
+				return 0
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5
+			if s_dp > 0 then s_dp = 0 else s_hp = 0 end -- adjust hp/dp
+		end,
+		info = "Templar's Verdict at 3 HP",
+	},
+	tvdp = {
+		id = tvId,
+		GetCD = function()
+			if s_dp > 0 then
+				return 0
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5
+			if s_dp > 0 then s_dp = 0 else s_hp = 0 end -- adjust hp/dp
+		end,
+		info = "Templar's Verdict at DP",
+	},
+	cs = {
+		id = csId,
+		GetCD = function()
+			if s1 == csId then
+				return (4.5 / s_haste - 1.5)
+			else
+				return GetCooldown(csId)
+			end
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5
+			if db.predictCS then
+				if s_zeal > 0 then
+					s_hp = 3
+				else
+					s_hp = s_hp + 1
+				end
+			end
+		end,
+		info = "Crusader Strike",
+	},
+	j = {
+		id = jId,
+		GetCD = function()
+			if s1 ~= jId then
+				return GetCooldown(jId) + db.jClash
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5
+		end,
+		info = "Judgement",
+	},
+	hw = {
+		id = hwId,
+		GetCD = function()
+			if s1 ~= hwId then
+				return GetCooldown(hwId) + db.hwClash
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5 / s_haste
+		end,
+		info = "Holy Wrath",
+	},
+	cons = {
+		id = consId,
+		GetCD = function()
+			if s1 ~= consId and UnitPower("player") > db.consMana then
+				return GetCooldown(consId) + db.consClash
+			end
+			return 100
+		end,
+		UpdateStatus = function()
+			s_ctime = s_ctime + s_gcd + 1.5 / s_haste
+		end,
+		info = "Consecration",
+	},
+}
+mod.actions = actions
 --------------------------------------------------------------------------------
+
+function mod:UpdateQueue()
+	q = {}
+	for v in string.gmatch(db.prio, "[^ ]+") do
+		if actions[v] then
+			table.insert(q, v)
+		else
+			print("clcInfo", modName, "invalid action:", v)
+		end
+	end
+	db.prio = table.concat(q, " ")
+end
+
+local function GetBuff(buff)
+	local left
+	_, _, _, _, _, _, expires = UnitBuff("player", buff, nil, "PLAYER")
+	if expires then
+		left = expires - s_ctime - s_gcd
+		if left < 0 then left = 0 end
+	else
+		left = 0
+	end
+	return left
+end
+
+-- reads all the interesting data
+local function GetStatus()
+	-- current time
+	s_ctime = GetTime()
+	
+	-- gcd value
+	local start, duration = GetSpellCooldown(gcdId)
+	s_gcd = start + duration - s_ctime
+	if s_gcd < 0 then s_gcd = 0 end
+	
+	-- the buffs
+	s_dp = GetBuff(buffDP)
+	s_aow = GetBuff(buffAoW)
+	s_zeal = GetBuff(buffZeal)
+	s_inq = GetBuff(buffInq)
+	
+	-- client hp and haste
+	s_hp = UnitPower("player", SPELL_POWER_HOLY_POWER)
+	s_haste = 1 + UnitSpellHaste("player") / 100
+	
+	-- adjust hp with + 1 after a cs
+	---[[
+	if s_ctime - justCS < db.hpDelay then
+		if justCSHP == s_hp then
+			if s_zeal > 0 then
+				s_hp = 3
+			else
+				s_hp = s_hp + 1
+			end
+		else
+			justCS = 0
+		end
+	end
+	--]]
+	
+	-- undead/demon -> different exorcism
+	s_targetType = UnitCreatureType("target")
+end
+
+local function GetNextAction()
+	local n = #q
+	
+	-- parse once, get cooldowns, return first 0
+	for i = 1, n do
+		local action = actions[q[i]]
+		local cd = action.GetCD()
+		if debug.enabled then
+			debug:AddBoth(q[i], cd)
+		end
+		if cd == 0 then
+			return action.id, q[i]
+		end
+		action.cd = cd
+	end
+	
+	-- parse again, return min cooldown
+	local minQ = 1
+	local minCd = actions[q[1]].cd
+	for i = 2, n do
+		local action = actions[q[i]]
+		if minCd > action.cd then
+			minCd = action.cd
+			minQ = i
+		end
+	end
+	return actions[q[minQ]].id, q[minQ]
+end
+
+local function RetRotation()
+	s1 = nil
+	GetStatus()
+	if debug.enabled then
+		debug:Clear()
+		debug:AddBoth("ctime", s_ctime)
+		debug:AddBoth("gcd", s_gcd)
+		debug:AddBoth("hp", s_hp)
+		debug:AddBoth("zeal", s_zeal)
+		debug:AddBoth("aow", s_aow)
+		debug:AddBoth("inq", s_inq)
+		debug:AddBoth("dp", s_dp)
+		debug:AddBoth("haste", s_haste)
+	end
+	local action
+	s1, action = GetNextAction()
+	if debug.enabled then
+		debug:AddBoth("s1", action)
+	end
+	-- 
+	s_otime = s_ctime -- save it so we adjust buffs for next
+	actions[action].UpdateStatus()
+	
+	-- adjust buffs
+	s_otime = s_ctime - s_otime
+	s_dp = max(0, s_dp - s_otime)
+	s_aow = max(0, s_aow - s_otime)
+	s_zeal = max(0, s_zeal - s_otime)
+	s_inq = max(0, s_inq - s_otime)
+	
+	if debug.enabled then
+		debug:AddBoth("ctime", s_ctime)
+		debug:AddBoth("otime", s_otime)
+		debug:AddBoth("gcd", s_gcd)
+		debug:AddBoth("hp", s_hp)
+		debug:AddBoth("zeal", s_zeal)
+		debug:AddBoth("aow", s_aow)
+		debug:AddBoth("inq", s_inq)
+		debug:AddBoth("dp", s_dp)
+		debug:AddBoth("haste", s_haste)
+	end
+	s2, action = GetNextAction()
+	if debug.enabled then
+		debug:AddBoth("s2", action)
+	end
+end
 
 
 -- plug in
 --------------------------------------------------------------------------------
-local notinit = true
-local function ExecCleanup()
-	ef:UnregisterAllEvents()
-	mainSkill = nil
-	notinit = true
-end
-local function DoInit()
-	mainSkill = emod.___e
-	mainSkill.ExecCleanup = ExecCleanup
-	ef:RegisterEvent("UNIT_SPELLCAST_SENT")
-	ef:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-	notinit = false
-end
+local secondarySkill
 function emod.IconRet1(...)
-	if notinit then DoInit() end
 	RetRotation(...)
 	if secondarySkill then secondarySkill:DoUpdate() end
-	return emod.IconSpell(s1, db.rangePerSkill or _csName)
+	return emod.IconSpell(s1, db.rangePerSkill or csName)
 end
-
 local function SecondaryExec()
-	return emod.IconSpell(s2, db.rangePerSkill or _csName)
+	return emod.IconSpell(s2, db.rangePerSkill or csName)
 end
 local function ExecCleanup2()
 	secondarySkill = nil
@@ -441,165 +495,10 @@ function emod.IconRet2(...)
 	secondarySkill.ExecCleanup = ExecCleanup2
 end
 
--- utility and console commands
---------------------------------------------------------------------------------
--- event frame to track 
-ef = CreateFrame("Frame") 
-ef:Hide()
-ef:SetScript("OnEvent", function(self, event, unit, spell)
-	if unit == "player" and tracked[spell] then
-		if event == "UNIT_SPELLCAST_SENT"then
-			eq = eq + 1
-		else -- UNIT_SPELLCAST_SUCCEEDED
-			eq = 0
-			waitforserver = false
-			mainSkill:Highlight(false)
-		end
-	end
-end)
-
-function mod.GetBuffStatus()
-	local expires
-	_, _, _, _, _, _, expires = UnitBuff("player", _buffAoW, nil, "PLAYER")
-	if expires then
-		_aow = expires - _ctime - _gcd
-		if _aow < 0 then _aow = 0 end
-	else
-		_aow = 0
-	end
-	
-	_, _, _, _, _, _, expires = UnitBuff("player", _buffZeal, nil, "PLAYER")
-	if expires then
-		_zeal = expires - _ctime - _gcd
-		if _zeal < 0 then _zeal = 0 end
-	else
-		_zeal = 0
-	end
-	
-	_, _, _, _, _, _, expires = UnitBuff("player", _buffAW, nil, "PLAYER")
-	if expires then
-		_aw = expires - _ctime - _gcd
-		if _aw < 0 then _aw = 0 end			
-	else
-		_aw = 0
-	end
-	
-	_, _, _, _, _, _, expires = UnitBuff("player", _buffHoL, nil, "PLAYER")
-	if expires then
-		_hol = expires - _ctime - _gcd
-		if _hol < 0 then _hol = 0 end
-	else
-		_hol = 0
-	end
-	
-	_, _, _, _, _, _, expires = UnitBuff("player", _buffInq, nil, "PLAYER")
-	if expires then
-		_inq = expires - _ctime - _gcd
-		if _inq < 0 then _inq = 0 end
-	else
-		_inq = 0
-	end
-end
-
-function mod.UpdatePriorityQueue()
-	pq = {}
-	local check = {} -- used to check for duplicates
-	for k, v in ipairs(db.fillers) do
-		if not check[v] then
-			if v ~= "none" and actionsId[v] then
-				pq[#pq + 1] = { alias = v, id = actionsId[v] }
-				check[v] = true
-			end
-		end
-	end
-end
-
--- pass filler order from command line
--- intended to be used in macros
-local function CmdRetFillers(args)
-	-- add args to options
-	local num = 0
-	for i, arg in ipairs(args) do
-		if actionsName[arg] then
-			if num < MAX_FILLERS then
-				num = num + 1
-				db.fillers[num] = arg
-			else
-				print("too many fillers specified, max is " .. MAX_FILLERS)
-			end
-		else
-			-- inform on wrong arguments
-			print(arg .. " not found")
-		end
-	end
-	
-	-- none on the rest
-	if num < MAX_FILLERS then
-		for i = num + 1, MAX_FILLERS do
-			db.fillers[i] = "none"
-		end
-	end
-	
-	-- redo queue
-	mod.UpdatePriorityQueue()
-	
-	-- update the options window
+-- giving queue as command line
+local function CmdRet(args)
+	db.prio = table.concat(args, " ")
+	mod:UpdateQueue()
 	clcInfo:UpdateOptions()
 end
--- register for slashcmd
-clcInfo.cmdList["ret_fillers"] = CmdRetFillers
-
--- edit options from command line
-local function CmdRetOptions(args)
-	if not args[1] or not args[2] then
-		print("format: /clcInfo ret_opt option value")
-		return
-	end
-	
-	if args[1] == "rangeperskill" then
-		db.rangePerSkill = args[2] == "true" or false
-	elseif args[1] == "wspeed" then
-		db.wspeed = tonumber(args[2]) or defaults.wspeed
-	elseif args[1] == "minhpinq" then
-		db.minHPInq = tonumber(args[2]) or defaults.minHPInq
-	elseif args[1] == "preinq" then
-		db.preInq = tonumber(args[2]) or defaults.preInq
-	elseif args[1] == "csboost" then
-		db.csBoost = tonumber(args[2]) or defaults.csBoost
-	else
-		print("valid options: rangeperskill, csboost, wspeed, minHPInq, preinq")
-	end
-	
-	clcInfo:UpdateOptions()
-end
-clcInfo.cmdList["ret_opt"] = CmdRetOptions
-
--- this function, if it exists, will be called at init
---------------------------------------------------------------------------------
-function mod.OnInitialize()
-	db = clcInfo:RegisterClassModuleDB(modName, defaults)
-	
-	-- @todo: clear this sometime
-	-- version check
-	if not db.version then
-		clcInfo.cdb.classModules[modName] = defaults
-		db = clcInfo.cdb.classModules[modName]
-		print("clcInfo/ClassModules/Retribution:", "Settings have been reset to clear 3.x data. Sorry for the inconvenience.")
-	end
-	
-	if db.version < 2 then
-		clcInfo.SPD("CS and TV are again included into the rotation. Make sure to adjust your settings.")
-		db.fillers = { "how", "tv", "cs", "exo", "j", "hw" }
-	end
-	
-	if db.version < 3 then
-		clcInfo.SPD("New settings and console commands were added to Retribution module.")
-	end
-	
-	if db.version < version then
-		clcInfo.AdaptConfigAndClean(modName .. "DB", db, defaults)
-		db.version = version
-	end
-	
-	mod.UpdatePriorityQueue()
-end
+clcInfo.cmdList["retprio"] = CmdRet

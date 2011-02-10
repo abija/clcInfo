@@ -5,6 +5,4 @@
 <Script file="holy.lua"/>
 <Script file="protection.lua"/>
 <Script file="retribution.lua"/>
-
-<Script file="retribution_experiment.lua"/>
 </Ui>

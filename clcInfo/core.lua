@@ -1,5 +1,5 @@
 clcInfo = {}	-- the addon
-clcInfo.__version = 72
+clcInfo.__version = 77
 
 clcInfo.display = {}	-- display elements go here
 clcInfo.templates = {}	-- the templates
@@ -154,6 +154,8 @@ function clcInfo:OnInitialize()
 	clcInfo.eventFrame:RegisterEvent("PARTY_MEMBERS_CHANGED") -- to track group changes
 	clcInfo.eventFrame:RegisterEvent("UNIT_PET")
 	
+	clcInfo.debug:OnInitialize()
+	
 end
 --------------------------------------------------------------------------------
 
@@ -221,6 +223,11 @@ function clcInfo:GetDefault()
 		},
 		classModules = {},
 		templates = {},
+		debug = {
+			enabled = false,
+			x = 10,
+			y = 10,
+		},
 	}
 	return data
 end

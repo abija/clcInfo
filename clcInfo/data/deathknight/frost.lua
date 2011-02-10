@@ -82,8 +82,17 @@ local function CmdFrostMode(args)
 	end
 end
 
+local function CmdFrostModeSwitch()
+	if mode == "single" then
+		mode = "aoe"
+	else
+		mode = "single"
+	end
+end
+
 -- register for slashcmd
 clcInfo.cmdList["frost_mode"] = CmdFrostMode
+clcInfo.cmdList["frost_mode_switch"] = CmdFrostModeSwitch
 
 --------------------------------------------------------------------------------
 
@@ -94,7 +103,7 @@ clcInfo.cmdList["frost_mode"] = CmdFrostMode
 -- Diseases
 -- Ob if both Frost/Unholy pairs and/or both Death runes are up, or if KM is procced
 -- BS if both Blood Runes are up
--- FS
+-- FS if RP capped
 -- Rime
 -- Ob
 -- BS
@@ -161,26 +170,26 @@ function mod.FrostRotation.single()
 	end
 	
 	-- check if we can obliterate
-	local ob = (readyUF > 0) or (readyRunes[4] == 2) or (readyRunes[2] > 0 and readyRunes[4] > 0) or (readyRunes[3] > 0 and readyRunes[4] > 0)
+	local ob = (readyUF > 0) or (readyRunes[4] >= 2) or (readyRunes[2] > 0 and readyRunes[4] > 0) or (readyRunes[3] > 0 and readyRunes[4] > 0)
 	
 	-- [2] Ob if both Frost/Unholy pairs and/or both Death runes are up, or if KM is procced
 	------------------------------------------------------------------------------
 	local KM = UnitBuff("player", buffKM, nil, "PLAYER")
-	if (KM and ob) or (readyUF == 2) or (readyRunes[4] == 2) then
+	if (KM and ob) or (readyUF >= 2) or (readyRunes[4] >= 2) then
 		dq1 = spellOB
 		return true
 	end
 	
 	-- [3] BS if both Blood Runes are up
 	------------------------------------------------------------------------------
-	if readyRunes[1] == 2 then
+	if readyRunes[1] >= 2 then
 		dq1 = spellBS
 		return true
 	end
 	
 	-- [4] FS
 	------------------------------------------------------------------------------
-	if IsUsableSpell(spellFS) then
+	if UnitPower("player") == UnitPowerMax("player") then
 		dq1 = spellFS
 		return true
 	end
@@ -263,13 +272,13 @@ function mod.FrostRotation.aoe()
 	end
 	
 	-- [1] HB if both Frost runes and/or both Death runes are up
-	if (readyRunes[3] == 2) or (readyRunes[4] == 2) then
+	if (readyRunes[3] >= 2) or (readyRunes[4] >= 2) then
 		dq1 = spellHB
 		return true
 	end
 	
 	-- [2] DnD/PS if both Unholy Runes are up
-	if readyRunes[2] == 2 then
+	if readyRunes[2] >= 2 then
 		cdStart, cdDuration = GetSpellCooldown(spellDnD)
 		if cdStart > 0 then
 			cd = cdStart + cdDuration - ctime - gcd
@@ -287,7 +296,7 @@ function mod.FrostRotation.aoe()
 	end
 	
 	-- [3] FS
-	if IsUsableSpell(spellFS) then
+	if UnitPower("player") == UnitPowerMax("player") then
 		dq1 = spellFS
 		return true
 	end

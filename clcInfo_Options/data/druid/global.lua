@@ -38,7 +38,7 @@ local function LoadModuleActiveTemplate()
 			tabGeneral = {
 				order = 1, type = "group", name = "General", args = {
 					moveEB = {
-						order = 1, type = "group", inline = true, name = "Custom Rune Bar",
+						order = 1, type = "group", inline = true, name = "Custom Eclipse Bar",
 						args = {
 							moveEB = {
 								order = 1, type = "toggle", name = "Use own bar", get = Get, set = Set,

@@ -15,6 +15,7 @@ code_templates\index.xml
 
 templates.lua
 activeTemplate.lua
+debug.lua
 
 display\grids.lua
 display\icons.lua

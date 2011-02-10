@@ -522,6 +522,9 @@ end
 
 -- update the display settings
 function prototype:UpdateLayout()	
+	-- frame level
+	self:SetFrameLevel(clcInfo.frameLevel + 2 + self.db.frameLevel)
+
 	self:SetAlpha(self.db.alpha)
 
 	-- check if it's attached to some grid
@@ -629,7 +632,6 @@ function mod:New(index)
 		setmetatable(bar, { __index = prototype })
 		bar.index = index
 		bar.db = db[index]
-		bar:SetFrameLevel(clcInfo.frameLevel + 2)
 		bar:Init()
 	end
 	self.active[index] = bar
@@ -790,6 +792,8 @@ function mod.GetDefault()
 		sizeX = 1, 	-- size in cells
 		sizeY = 1, 	-- size in cells
 		alpha = 1,
+		
+		frameLevel = 0,	-- used for display order
 		
 		skinSource = "Template",	-- template, grid, self
 		ownColors	= false,
