@@ -1,8 +1,7 @@
 
-http://username.github.com/archive.html
-http://username.github.com/index.html
-http://username.github.com/categories.html
-http://username.github.com/atom.xml
-http://username.github.com/pages.html
-http://username.github.com/tags.html
-http://username.github.com/sitemap.txt
+http://abija.github.com//archive.html
+http://abija.github.com//index.html
+http://abija.github.com//categories.html
+http://abija.github.com//pages.html
+http://abija.github.com//tags.html
+http://abija.github.com//sitemap.txt
