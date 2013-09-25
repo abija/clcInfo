@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Uite css nu e css
-tagline: Supporting tagline
+tagline: fuck the tagline
 ---
 {% include JB/setup %}
 
